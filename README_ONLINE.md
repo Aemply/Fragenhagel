@@ -161,6 +161,6 @@ Wenn der Host bei einem gebuzzerten Spieler **Richtig** auswählt, wird nach dem
 Beim Klick auf **Richtig** wird nach dem Senden der Punkte die vorhandene `reveal()`-Funktion direkt aufgerufen. Damit wird exakt dieselbe Funktion verwendet wie beim manuellen „Lösung anzeigen“-Button.
 
 
-### v26 – Face Morph Dateiname anzeigen
+### v27 – Face Morph Speichern + Dateiname
 
-Im Face-Morph-Editor wird nach der Dateiauswahl nun der tatsächliche Dateiname neben dem Datei-Auswahlfeld angezeigt. Vor der Auswahl steht weiterhin „Keine ausgewählt“. Das Speichern der Bilder bleibt unverändert.
+v27 basiert wieder auf der funktionierenden v25. Die vorhandene Datei-Speicher-/Upload-Logik des Face-Morph-Editors bleibt unangetastet. Der Dateiname wird ausschließlich über einen zusätzlichen `change`-Listener für die Anzeige aktualisiert, sodass das Speichern der ausgewählten Bilder nicht mehr beeinträchtigt wird.
