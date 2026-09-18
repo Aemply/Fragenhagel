@@ -342,21 +342,18 @@ load();createOrJoin();
 
 
 
-<script>
+<script id="face-morph-filename-v29">
 (function(){
-  function updateSelectedFileName(input){
+  function updateFileName(input){
     if(!input || !input.files) return;
     const name = input.files.length ? input.files[0].name : 'Keine ausgewählt';
     const parent = input.parentElement;
     if(!parent) return;
-    const labels = parent.querySelectorAll('.file-name,.file-label,[data-file-name-label]');
-    labels.forEach(el => el.textContent = name);
+    let label = parent.querySelector('.file-name, .file-label, [data-file-name-label]');
+    if(label) label.textContent = name;
   }
-  document.addEventListener('change', function(ev){
-    const el=ev.target;
-    if(el && el.tagName==='INPUT' && el.type==='file'){
-      updateSelectedFileName(el);
-    }
+  document.addEventListener('change', function(e){
+    if(e.target && e.target.matches('input[type="file"]')) updateFileName(e.target);
   }, true);
 })();
 </script>
