@@ -130,8 +130,31 @@ function newLobby(){
 const cats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const img=u=>u?u+'?v='+Date.now():'';
-socket.on('state',s=>{stateSounds(s);state=s||{};renderScores();renderBuzz();renderHostBuzz();renderLobby();});
-socket.on('buzzAccepted', ({player})=>{ if(!player)return; state.buzzedBy=player; renderBuzz(); renderHostBuzz(); });
+socket.on('state',s=>{
+  stateSounds(s);
+  state=s||{};
+  renderScores();
+  renderBuzz();
+  renderHostBuzz();
+  renderLobby();
+
+  // The judgement buttons are driven by the current server-side buzzer.
+  // They appear immediately when buzzedBy is set and disappear when it is cleared.
+  const j=document.getElementById('judge');
+  if(active){
+    if(state.buzzedBy) renderJudge(Number(active.punkte)||100);
+    else if(j) j.innerHTML='';
+  }else if(j){
+    j.innerHTML='';
+  }
+});
+socket.on('buzzAccepted', ({player})=>{
+  if(!player)return;
+  state.buzzedBy=player;
+  renderBuzz();
+  renderHostBuzz();
+  if(active) renderJudge(Number(active.punkte)||100);
+});
 socket.on('gameCreated',g=>{
   gameCode=g.code;
   hostToken=g.hostToken;
