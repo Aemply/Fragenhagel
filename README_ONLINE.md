@@ -166,6 +166,14 @@ Beim Klick auf **Richtig** wird nach dem Senden der Punkte die vorhandene `revea
 v27 basiert wieder auf der funktionierenden v25. Die vorhandene Datei-Speicher-/Upload-Logik des Face-Morph-Editors bleibt unangetastet. Der Dateiname wird ausschließlich über einen zusätzlichen `change`-Listener für die Anzeige aktualisiert, sodass das Speichern der ausgewählten Bilder nicht mehr beeinträchtigt wird.
 
 
-### v31 – Dateiname direkt neben Datei auswählen
+### v30 – Face Morph final
 
-Die Face-Morph-Dateinamen werden direkt neben dem jeweiligen Datei-Auswahlfeld angezeigt, an der Stelle von „Keine ausgewählt“. Die bestehende Upload-/Speicherlogik bleibt unverändert.
+- Der Editor speichert jetzt zusätzlich den **Original-Dateinamen** (`bildName`, `original1Name`, `original2Name`) auf dem Server.
+- Die Dateinamen bleiben deshalb auch nach `renderAll()` sichtbar und gehen beim Neuladen nicht verloren.
+- Die vorhandene Upload-/Speicherfunktion bleibt erhalten.
+- In der Show wird die Lösung als **Originalbild 1 | Morph-Bild | Originalbild 2** dargestellt.
+
+
+### v31 – Dateiname direkt neben „Datei auswählen“
+
+Die drei Face-Morph-Dateiauswahlen zeigen den Dateinamen jetzt direkt neben dem jeweiligen Datei-Auswahlfeld, also an genau der Stelle, an der vorher „Keine ausgewählt“ stand. Die vorhandene Upload-/Speicherlogik bleibt unverändert.

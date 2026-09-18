@@ -101,7 +101,7 @@ app.post('/api/special-image', (req, res) => {
   try {
     const game = hostAuthorized(req);
     if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
-    const { section, index, field, data } = req.body || {};
+    const { section, index, field, data, filename } = req.body || {};
     if (!['Face Morph', 'Wo zum Henker ist das?'].includes(section)) throw new Error('Ungültige Sonderrunde');
     const allowed = section === 'Face Morph' ? ['bild', 'original1', 'original2'] : ['bild'];
     if (!allowed.includes(field)) throw new Error('Ungültiges Bildfeld');
@@ -112,7 +112,9 @@ app.post('/api/special-image', (req, res) => {
     const ext = m[1].toLowerCase() === 'jpeg' ? 'jpg' : m[1].toLowerCase();
     const name = `special_${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
     fs.writeFileSync(path.join(MEDIA, name), Buffer.from(m[2], 'base64'));
-    q.Sonderrunden[section][i][field] = '/media/' + name; writeQ(q);
+    q.Sonderrunden[section][i][field] = '/media/' + name;
+    if (section === 'Face Morph') q.Sonderrunden[section][i][field + 'Name'] = String(filename || '');
+    writeQ(q);
     io.to(`game:${game.code}`).emit('questionsUpdated', q);
     res.json({ ok: true, url: '/media/' + name, item: q.Sonderrunden[section][i] });
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
