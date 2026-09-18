@@ -1,0 +1,22 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fragenhagel Buzzer</title><link rel="stylesheet" href="/style.css"><style>
+body{display:grid;place-items:center;min-height:100vh}.p{width:min(560px,92vw);text-align:center}.big{width:100%;height:260px;border-radius:50%;font-size:46px;font-weight:900;background:radial-gradient(circle,#ff70d6,#9b2f9d 70%);color:white;border:8px solid #ffffff22;box-shadow:0 0 50px #ff4fc366}.big:disabled{filter:grayscale(.8);opacity:.45}.join{display:grid;gap:12px;text-align:left}.join input{font-size:22px;padding:14px;border-radius:12px;border:1px solid #ffffff33;background:#111126;color:white}.join button{font-size:20px}.hidden{display:none!important}</style></head><body>
+<button id="soundToggle" onclick="toggleSound()" title="Sound an/aus" style="position:fixed;right:12px;bottom:12px;z-index:99;border:1px solid #ffffff33;background:#111126;color:white;border-radius:999px;padding:8px 11px;cursor:pointer">🔊</button>
+<div class="p">
+  <div id="join" class="panel join"><h1 class="neon">⚡ FRAGENHAGEL</h1><label>Spielcode<input id="code" maxlength="5" autocomplete="off" placeholder="z. B. K7XM2"></label><label>Dein Name<input id="playerName" maxlength="24" autocomplete="nickname" placeholder="z. B. Max"></label><button class="btn cyan" onclick="joinGame()">🎮 Beitreten</button><div id="joinStatus" class="small"></div></div>
+  <div id="game" class="hidden"><h1 id="name" class="neon"></h1><div class="small" id="gameCode"></div><button id="b" class="big" disabled>BUZZ!</button><p id="s" class="buzz">Warten …</p></div>
+</div>
+<script src="/socket.io/socket.io.js"></script><script>
+let soundOn=localStorage.getItem('fragenhagelSound')!=='off',audioCtx=null;
+function ac(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}
+function tone(freq,dur=.12,type='sine',vol=.08,delay=0){if(!soundOn)return;try{const c=ac(),o=c.createOscillator(),g=c.createGain(),now=c.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,now);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(vol,now+.01);g.gain.exponentialRampToValueAtTime(.0001,now+dur);o.connect(g);g.connect(c.destination);o.start(now);o.stop(now+dur+.03)}catch(e){}}
+function sBuzz(){tone(180,.09,'square',.10);tone(120,.16,'square',.08,.08)}function sOpen(){tone(520,.09,'sine',.07);tone(760,.13,'sine',.07,.09)}
+function toggleSound(){soundOn=!soundOn;localStorage.setItem('fragenhagelSound',soundOn?'on':'off');document.getElementById('soundToggle').textContent=soundOn?'🔊':'🔇';if(soundOn)sOpen()}
+document.addEventListener('pointerdown',()=>{if(soundOn)ac()},{once:true});
+const socket=io();let code=new URLSearchParams(location.search).get('code')||localStorage.getItem('fragenhagelPlayerCode')||'';let name=new URLSearchParams(location.search).get('name')||localStorage.getItem('fragenhagelPlayerName')||'';let prev={buzzerOpen:false,buzzedBy:null};
+if(code)document.getElementById('code').value=code;if(name)document.getElementById('playerName').value=name;
+function joinGame(){code=document.getElementById('code').value.trim().toUpperCase();name=document.getElementById('playerName').value.trim();if(!code||!name)return document.getElementById('joinStatus').textContent='Bitte Spielcode und Namen eingeben.';socket.emit('joinGame',{code,name})}
+socket.on('joined',x=>{code=x.code;name=x.name;localStorage.setItem('fragenhagelPlayerCode',code);localStorage.setItem('fragenhagelPlayerName',name);document.getElementById('join').classList.add('hidden');document.getElementById('game').classList.remove('hidden');document.getElementById('name').textContent=name;document.getElementById('gameCode').textContent='Spielcode: '+code});
+socket.on('joinError',m=>document.getElementById('joinStatus').textContent=m);
+socket.on('state',x=>{if(!name)return;if(x.buzzerOpen&&!prev.buzzerOpen)sOpen();if(x.buzzedBy&&x.buzzedBy!==prev.buzzedBy)sBuzz();prev={buzzerOpen:!!x.buzzerOpen,buzzedBy:x.buzzedBy||null};let mine=x.buzzedBy===name;let open=x.buzzerOpen&&!x.buzzedBy;document.getElementById('b').disabled=!open;document.getElementById('s').textContent=mine?'⚡ DU WARST SCHNELLSTER!':x.buzzedBy?x.buzzedBy+' hat gebuzzert':open?'🟢 Buzzer offen':'🔴 Buzzer geschlossen'});
+document.getElementById('b').onclick=()=>socket.emit('buzz');
+</script></body></html>

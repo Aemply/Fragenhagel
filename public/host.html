@@ -1,0 +1,284 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Fragenhagel Host</title><link rel="stylesheet" href="/style.css"></head><body><button id="soundToggle" onclick="toggleSound()" title="Sound an/aus" style="position:fixed;right:12px;bottom:12px;z-index:99;border:1px solid #ffffff33;background:#111126;color:white;border-radius:999px;padding:8px 11px;cursor:pointer">🔊</button>
+<div class="wrap">
+<div class="top"><h1 class="neon">⚡ FRAGENHAGEL – HOST</h1><span id="gameInfo" class="buzz open">Spiel wird erstellt …</span><button class="btn cyan" onclick="openShow()">📺 Show öffnen</button><button class="btn" onclick="copyPlayerLink()">🔗 Spieler-Link kopieren</button><button class="btn accent" onclick="newLobby()">🆕 Neue Lobby</button></div>
+
+<div class="panel"><h2>Spieler & Lobby</h2><div id="lobby" class="row"></div><div class="small" id="joinHint"></div><div class="row" id="scores"><div class="row" style="margin-top:10px"><button class="btn good" onclick="openBuzzer()">🔔 Buzzer freigeben</button><button class="btn" onclick="closeBuzzer()">Buzzer schließen</button><button class="btn bad" onclick="resetScores()">Punkte auf 0</button><span id="buzz" class="buzz">Buzzer geschlossen</span></div></div>
+
+<div class="panel"><div class="row"><h2 style="flex:1">Fragentafel</h2><button class="btn" onclick="resetUsed()">♻️ Felder zurücksetzen</button></div><div id="board" class="grid"></div></div>
+
+<div class="panel"><h2>Sonderrunden</h2><div class="row">
+<button class="btn accent" onclick="pickSpecial('Face Morph')">🧑‍🤝‍🧑 Face Morph</button>
+<button class="btn accent" onclick="pickSpecial('Wo zum Henker ist das?')">🌍 Geo</button>
+<button class="btn accent" onclick="pickSpecial('Fragenhagel')">🌩️ Fragenhagel</button>
+<button class="btn accent" onclick="pickSpecial('Musik')">🎵 Musik</button>
+</div></div>
+
+<div class="panel"><h2>Editor</h2>
+<div class="tabs">
+<button class="btn" onclick="tab('main')">Hauptbrett</button>
+<button class="btn" onclick="tab('face')">Face Morph</button>
+<button class="btn" onclick="tab('geo')">Geo</button>
+<button class="btn" onclick="tab('fh')">Fragenhagel</button>
+<button class="btn" onclick="tab('music')">Musik</button>
+</div>
+<div id="main" class="tabbody active"></div><div id="face" class="tabbody"></div><div id="geo" class="tabbody"></div><div id="fh" class="tabbody"></div><div id="music" class="tabbody"></div>
+<div style="margin-top:12px"><button class="btn good" onclick="saveAll()">💾 Alles speichern</button><span id="saveStatus" class="small"></span></div></div>
+</div>
+
+<div id="play" class="modal"><div class="stage">
+<div class="row" style="justify-content:center"><button class="btn" onclick="toBoard()">← Zur Tafel</button><button class="btn good" onclick="openBuzzer()">🔔 Buzzer freigeben</button><button class="btn accent" onclick="reveal()">👁 Lösung anzeigen</button></div>
+<div id="hostBuzzed" class="buzz" style="display:none;max-width:900px;margin:22px auto;font-size:42px;text-align:center;font-weight:900;padding:18px 24px"></div>
+<div id="playContent"></div><div id="judge" class="row" style="justify-content:center;margin-top:20px"></div>
+</div></div>
+
+
+<div id="hostBuzzPanel" class="panel host-buzz-panel">
+  <div class="panel-title">⚡ BUZZER</div>
+  <div id="hostBuzzName" class="host-buzz-name waiting">Noch niemand gebuzzert</div>
+  <div id="hostBuzzMeta" class="host-buzz-meta"></div>
+</div>
+
+<style>
+.host-buzz-panel{
+  margin:12px 0;
+  padding:16px 20px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:14px;
+}
+.host-buzz-name{
+  font-size:clamp(24px,4vw,42px);
+  font-weight:800;
+  line-height:1.1;
+  margin-top:6px;
+}
+.host-buzz-name.waiting{opacity:.55}
+.host-buzz-name.active{animation:hostBuzzPulse .7s ease-in-out infinite alternate}
+.host-buzz-meta{margin-top:6px;opacity:.7}
+@keyframes hostBuzzPulse{
+  from{transform:scale(1)}
+  to{transform:scale(1.025)}
+}
+</style>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+let soundOn=localStorage.getItem('fragenhagelSound')!=='off';
+let audioCtx=null;
+function ac(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}
+function tone(freq,dur=.12,type='sine',vol=.08,delay=0){if(!soundOn)return;try{const c=ac(),o=c.createOscillator(),g=c.createGain(),now=c.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,now);g.gain.setValueAtTime(0.0001,now);g.gain.exponentialRampToValueAtTime(vol,now+.01);g.gain.exponentialRampToValueAtTime(0.0001,now+dur);o.connect(g);g.connect(c.destination);o.start(now);o.stop(now+dur+.03)}catch(e){}}
+function sBuzz(){tone(180,.09,'square',.10);tone(120,.16,'square',.08,.08)}
+function sOpen(){tone(520,.09,'sine',.07);tone(760,.13,'sine',.07,.09)}
+function sReveal(){tone(440,.10,'triangle',.07);tone(660,.10,'triangle',.07,.10);tone(880,.18,'triangle',.08,.20)}
+function sCorrect(){tone(523,.10,'sine',.07);tone(659,.10,'sine',.07,.10);tone(784,.22,'sine',.08,.20)}
+function sWrong(){tone(220,.15,'sawtooth',.06);tone(165,.25,'sawtooth',.06,.13)}
+function toggleSound(){soundOn=!soundOn;localStorage.setItem('fragenhagelSound',soundOn?'on':'off');const b=document.getElementById('soundToggle');if(b)b.textContent=soundOn?'🔊':'🔇';if(soundOn)sOpen()}
+document.addEventListener('pointerdown',()=>{if(soundOn)ac()},{once:true});
+setTimeout(()=>{const b=document.getElementById('soundToggle');if(b)b.textContent=soundOn?'🔊':'🔇'},0);
+let prevSoundState={buzzerOpen:false,buzzedBy:null,mode:null,revealed:false};
+function stateSounds(x){
+ if(!x)return;
+ if(x.buzzedBy && x.buzzedBy!==prevSoundState.buzzedBy)sBuzz();
+ else if(x.buzzerOpen && !prevSoundState.buzzerOpen)sOpen();
+ const revealed=(x.mode==='question'?x.question?.revealed:x.mode==='special'?x.special?.revealed:false);
+ if(revealed&&!prevSoundState.revealed)sReveal();
+ prevSoundState={buzzerOpen:!!x.buzzerOpen,buzzedBy:x.buzzedBy||null,mode:x.mode,revealed:!!revealed};
+}
+
+const socket=io(); let Q={}; let state={}; let active=null; const urlCode=new URLSearchParams(location.search).get('code')||'';
+const storedGameCode=localStorage.getItem('fragenhagelGameCode')||'';
+let gameCode=urlCode||storedGameCode;
+let hostToken=(urlCode&&urlCode!==storedGameCode)?'':(localStorage.getItem('fragenhagelHostToken')||'');
+let creatingNewLobby=false;
+const gameHeaders=()=>({'Content-Type':'application/json','x-game-code':gameCode,'x-host-token':hostToken});
+function openShow(){if(!gameCode)return alert('Spiel wird noch erstellt.');window.open('/show.html?code='+encodeURIComponent(gameCode),'show')}
+function playerLink(){return location.origin+'/player.html?code='+encodeURIComponent(gameCode)}
+async function copyPlayerLink(){if(!gameCode)return;try{await navigator.clipboard.writeText(playerLink());document.getElementById('joinHint').textContent='Spieler-Link kopiert: '+playerLink()}catch(e){prompt('Spieler-Link',playerLink())}}
+function createOrJoin(){
+  if(gameCode&&hostToken){
+    socket.emit('hostJoin',{code:gameCode,hostToken});
+    return;
+  }
+  socket.emit('createGame');
+}
+
+function setHostUrl(code){
+  const url=new URL(location.href);
+  if(code) url.searchParams.set('code',code);
+  else url.searchParams.delete('code');
+  history.replaceState(null,'',url.pathname+(url.search?url.search:''));
+}
+
+function newLobby(){
+  if(!confirm('Neue Lobby erstellen? Die aktuelle Lobby bleibt für bereits verbundene Spieler bestehen, aber dieser Host wechselt in eine neue Lobby.')) return;
+  creatingNewLobby=true;
+  gameCode='';
+  hostToken='';
+  state={};
+  hostFirstBuzz=null;
+  hostRoundKey=null;
+  active=null;
+  localStorage.removeItem('fragenhagelGameCode');
+  localStorage.removeItem('fragenhagelHostToken');
+  setHostUrl('');
+  const info=document.getElementById('gameInfo');
+  if(info) info.textContent='Neue Lobby wird erstellt …';
+  const hint=document.getElementById('joinHint');
+  if(hint) hint.textContent='';
+  socket.emit('createGame');
+}
+
+const cats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const img=u=>u?u+'?v='+Date.now():'';
+let hostFirstBuzz=null;
+let hostRoundKey=null;
+
+function makeRoundKey(x){
+  if(!x) return null;
+  if(x.mode==='question' && x.question){
+    return 'question|'+String(x.question.kategorie||'')+'|'+String(x.question.punkte||'')+'|'+String(x.question.frage||'');
+  }
+  if(x.mode==='special' && x.special){
+    return 'special|'+String(x.special.type||'')+'|'+String(x.special.index??'');
+  }
+  return null;
+}
+
+socket.on('state',s=>{
+  const next=s||{};
+  const key=makeRoundKey(next);
+
+  // The server clears buzzedBy after a correct/wrong decision. The host
+  // deliberately keeps the first accepted buzzer for the current question.
+  if(key && hostRoundKey===null) hostRoundKey=key;
+  if(key && hostRoundKey!==key){
+    hostRoundKey=key;
+    hostFirstBuzz=null;
+  }
+  if(!key && next.mode==='board'){
+    hostRoundKey=null;
+    hostFirstBuzz=null;
+  }
+  if(next.buzzedBy && !hostFirstBuzz){
+    hostFirstBuzz=next.buzzedBy;
+  }
+
+  stateSounds(next);
+  state=next;
+  renderScores();
+  renderBuzz();
+  renderLobby();
+});
+socket.on('gameCreated',g=>{
+  gameCode=g.code;
+  hostToken=g.hostToken;
+  setHostUrl(gameCode);
+  creatingNewLobby=false;
+  localStorage.setItem('fragenhagelGameCode',gameCode);
+  localStorage.setItem('fragenhagelHostToken',hostToken);
+  state={code:gameCode,players:[],mode:'board',question:null,special:null,buzzerOpen:false,buzzedBy:null,lockedPlayers:[]};
+  updateGameInfo();
+  renderScores();
+  renderBuzz();
+  renderLobby();
+  renderAll();
+});
+socket.on('errorMessage',m=>{
+  if(creatingNewLobby) return;
+  localStorage.removeItem('fragenhagelGameCode');
+  localStorage.removeItem('fragenhagelHostToken');
+  gameCode='';
+  hostToken='';
+  alert(m);
+  createOrJoin();
+});
+function updateGameInfo(){const el=document.getElementById('gameInfo');if(el)el.textContent=gameCode?'SPIELCODE: '+gameCode:'Spiel wird erstellt …';const h=document.getElementById('joinHint');if(h&&gameCode)h.textContent='Freunde öffnen '+playerLink()+' und geben den Spielcode '+gameCode+' ein.'}
+function renderLobby(){const el=document.getElementById('lobby');if(!el)return;const ps=state.players||[];el.innerHTML=ps.length?ps.map(p=>`<span class="score"><strong>${esc(p.name)}</strong> ${p.connected?'🟢':'⚪'}</span>`).join(''):'<span class="small">Noch niemand beigetreten.</span>';updateGameInfo()}
+
+socket.on('questionsUpdated',q=>{Q=q;renderAll();});
+async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());renderAll();updateGameInfo();}
+
+function renderHostBuzz(){
+  const nameEl=document.getElementById('hostBuzzName');
+  const metaEl=document.getElementById('hostBuzzMeta');
+  if(!nameEl || !metaEl) return;
+  const winner=hostFirstBuzz;
+
+  if(winner){
+    nameEl.textContent='🔔 '+winner;
+    nameEl.className='host-buzz-name active';
+    metaEl.textContent=state.mode==='special'
+      ? 'Hat bei dieser Runde zuerst gebuzzert'
+      : 'Hat bei dieser Frage zuerst gebuzzert';
+  }else{
+    nameEl.textContent='Noch niemand gebuzzert';
+    nameEl.className='host-buzz-name waiting';
+    metaEl.textContent=state.buzzerOpen ? 'Buzzer ist geöffnet' : 'Buzzer ist geschlossen';
+  }
+}
+
+function renderBuzz(){
+  const b=document.getElementById('buzz');
+  const hb=document.getElementById('hostBuzzed');
+  const winner=hostFirstBuzz;
+
+  if(winner){
+    const text='⚡ '+winner+' HAT GEBUZZERT!';
+    if(b){b.textContent=text;b.className='buzz';}
+    if(hb){hb.style.display='block';hb.textContent=text;hb.className='buzz';}
+  }else if(state.buzzerOpen){
+    if(b){b.textContent='🟢 BUZZER OFFEN';b.className='buzz open';}
+    if(hb){hb.style.display='block';hb.textContent='🟢 BUZZER OFFEN';hb.className='buzz open';}
+  }else{
+    if(b){b.textContent='🔴 Buzzer geschlossen';b.className='buzz';}
+    if(hb){hb.style.display='none';hb.textContent='';}
+  }
+  renderHostBuzz();
+}
+function renderScores(){const el=document.getElementById('scores');const ps=state.players||[];el.innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong><div><button class="btn" onclick="pts(${JSON.stringify(p.name)},100)">+100</button><button class="btn" onclick="pts(${JSON.stringify(p.name)},-100)">-100</button></div></div>`).join('')}
+function renderBuzz(){
+ const b=document.getElementById('buzz');
+ const hb=document.getElementById('hostBuzzed');
+ if(state.buzzedBy){
+   b.textContent='⚡ '+state.buzzedBy+' HAT GEBUZZERT!';
+   b.className='buzz';
+   if(hb){hb.style.display='block';hb.textContent='⚡ '+state.buzzedBy+' HAT GEBUZZERT!';hb.className='buzz';}
+ }else if(state.buzzerOpen){
+   b.textContent='🟢 BUZZER OFFEN';b.className='buzz open';
+   if(hb){hb.style.display='block';hb.textContent='🟢 BUZZER OFFEN';hb.className='buzz open';}
+ }else{
+   b.textContent='🔴 Buzzer geschlossen';b.className='buzz';
+   if(hb){hb.style.display='none';hb.textContent='';}
+ }
+}
+function pts(p,a){socket.emit('addPoints',{player:p,amount:a})}function resetScores(){socket.emit('resetScores')}function openBuzzer(){socket.emit('openBuzzer')}function closeBuzzer(){socket.emit('closeBuzzer')}
+function renderAll(){  renderHostBuzz();
+renderBoard();renderMainEditor();renderFace();renderGeo();renderFH();renderMusic()}
+async function resetUsed(){if(!confirm('Alle benutzten Felder wieder freigeben?'))return;await fetch('/api/reset-used',{method:'POST',headers:gameHeaders()});await load()}
+function renderBoard(){document.getElementById('board').innerHTML=cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map((x,i)=>`<button class="tile ${x.used?'used':''}" onclick="startQuestion('${c.replaceAll("'","\\'")}',${i})">${x.used?'✓':esc(x.punkte)}</button>`).join('')}</div>`).join('')}
+async function startQuestion(c,i){hostFirstBuzz=null;hostRoundKey=null;const x=Q[c][i];if(x.used)return;x.used=true;renderBoard();fetch('/api/question-used',{method:'POST',headers:gameHeaders(),body:JSON.stringify({category:c,index:i,used:true})}).catch(()=>{});active={kind:'question',category:c,index:i,...x,revealed:false};socket.emit('showQuestion',{kategorie:c,punkte:x.punkte,frage:x.frage,antwort:x.antwort});showPlay()}
+function showPlay(){document.getElementById('play').classList.add('open');renderPlay()}
+function toBoard(){hostFirstBuzz=null;hostRoundKey=null;document.getElementById('play').classList.remove('open');active=null;socket.emit('showBoard')}
+function renderPlay(){if(!active)return;let html='';let points=Number(active.punkte)||0;
+ if(active.kind==='question')html=`<div class="small">${esc(active.category)} · ${points} Punkte</div><div class="question">${esc(active.frage)}</div>${active.revealed?`<div class="answer">${esc(active.antwort)}</div>`:''}`;
+ else if(active.type==='Face Morph')html=`<h2>Face Morph ${active.index+1}</h2>${active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Morphbild hinterlegt</div>'}${active.revealed?`<div class="answer">${esc(active.person1)} + ${esc(active.person2)}</div><div class="originals">${active.original1?`<figure><img src="${img(active.original1)}"><figcaption>${esc(active.person1)}</figcaption></figure>`:''}${active.original2?`<figure><img src="${img(active.original2)}"><figcaption>${esc(active.person2)}</figcaption></figure>`:''}</div>`:''}`;
+ else if(active.type==='Wo zum Henker ist das?')html=`<h2>Geo ${active.index+1}</h2>${active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Bild hinterlegt</div>'}${active.revealed?`<div class="answer">📍 ${esc(active.antwort)}</div>`:''}`;
+ else if(active.type==='Fragenhagel')html=`<h2>Fragenhagel ${active.index+1}</h2><div class="question">${esc(active.frage||'Noch keine Frage')}</div>${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`;
+ else if(active.type==='Musik'){const id=yt(active.youtube);html=`<h2>Musik ${active.index+1}</h2><div class="question">Welches Lied ist das?</div>${id?`<iframe width="760" height="428" style="max-width:90vw;border:0;border-radius:15px" src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`:'<div class="small">Kein gültiger YouTube-Link</div>'}${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`}
+ document.getElementById('playContent').innerHTML=html; renderJudge(points);
+}
+function renderJudge(points){const j=document.getElementById('judge');const ps=state.players||[];if(active?.type==='Face Morph'){j.innerHTML=ps.map(p=>`<button class="btn good" onclick="award(${JSON.stringify(p.name)},100)">👤 ${esc(p.name)} +100</button><button class="btn good" onclick="award(${JSON.stringify(p.name)},300)">👥 ${esc(p.name)} +300</button>`).join('')}else{j.innerHTML=ps.map(p=>`<button class="btn good" onclick="correct(${JSON.stringify(p.name)},${points||100})">✅ ${esc(p.name)}</button><button class="btn bad" onclick="wrong(${JSON.stringify(p.name)},${points||100})">❌ ${esc(p.name)}</button>`).join('')}}
+function correct(p,v){sCorrect();socket.emit('correct',{player:p,points:v})}function wrong(p,v){sWrong();socket.emit('wrong',{player:p,points:v})}function award(p,v){sCorrect();socket.emit('correct',{player:p,points:v})}
+async function reveal(){if(!active)return;active.revealed=true;if(active.kind==='question')socket.emit('revealQuestion');else{const list=Q.Sonderrunden?.[active.type]||[];const saved=list[active.index]||active;active={...saved,type:active.type,index:active.index,revealed:true};const pub=active.type==='Musik'?{...active,youtube:''}:active;socket.emit('revealSpecial',pub)}renderPlay()}
+function pickSpecial(type){hostFirstBuzz=null;hostRoundKey=null;const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=type==='Musik'?{...active,youtube:''}:active;socket.emit('showSpecial',pub);showPlay()}
+function tab(id){document.querySelectorAll('.tabbody').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function renderMainEditor(){document.getElementById('main').innerHTML=cats.map(c=>`<h3>${esc(c)}</h3><div class="editorgrid">${(Q[c]||[]).map((x,i)=>`<div class="card"><b>${x.punkte} Punkte</b><textarea data-main="${esc(c)}" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-main="${esc(c)}" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" style="width:100%;margin-top:6px"></div>`).join('')}</div>`).join('')}
+function renderFace(){let a=Q.Sonderrunden?.['Face Morph']||[];document.getElementById('face').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Face Morph ${i+1}</h3><input data-sp="Face Morph" data-i="${i}" data-f="person1" value="${esc(x.person1||'')}" placeholder="Person 1"><input data-sp="Face Morph" data-i="${i}" data-f="person2" value="${esc(x.person2||'')}" placeholder="Person 2"><div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div><label>Morphbild <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'bild',this)"></label><label>Original 1 <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original1',this)"></label><label>Original 2 <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original2',this)"></label></div>`).join('')+'</div>'}
+function renderGeo(){let a=Q.Sonderrunden?.['Wo zum Henker ist das?']||[];document.getElementById('geo').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Geo ${i+1}</h3><input data-sp="Wo zum Henker ist das?" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Ort"><input type="number" data-sp="Wo zum Henker ist das?" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"><div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div><input type="file" accept="image/*" onchange="uploadImg('Wo zum Henker ist das?',${i},'bild',this)"></div>`).join('')+'</div>'}
+function renderFH(){let a=Q.Sonderrunden?.Fragenhagel||[];document.getElementById('fh').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Frage ${i+1}</h3><textarea data-sp="Fragenhagel" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-sp="Fragenhagel" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Antwort" style="width:100%"><input type="number" data-sp="Fragenhagel" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||100}"></div>`).join('')+'</div>'}
+function renderMusic(){let a=Q.Sonderrunden?.Musik||[];document.getElementById('music').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Song ${i+1}</h3><input data-sp="Musik" data-i="${i}" data-f="youtube" value="${esc(x.youtube||'')}" placeholder="YouTube-Link" style="width:100%"><input data-sp="Musik" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Lied / Interpret" style="width:100%"><input type="number" data-sp="Musik" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"></div>`).join('')+'</div>'}
+async function saveAll(){document.querySelectorAll('[data-main]').forEach(el=>{let c=el.dataset.main,i=+el.dataset.i,f=el.dataset.f;Q[c][i][f]=el.value});document.querySelectorAll('[data-sp]').forEach(el=>{let t=el.dataset.sp,i=+el.dataset.i,f=el.dataset.f;Q.Sonderrunden[t][i][f]=el.type==='number'?Number(el.value)||0:el.value});let r=await fetch('/api/questions',{method:'PUT',headers:gameHeaders(),body:JSON.stringify(Q)});document.getElementById('saveStatus').textContent=r.ok?' ✅ Gespeichert':' ❌ Fehler';if(r.ok)load()}
+async function uploadImg(section,index,field,input){const file=input.files?.[0];if(!file)return;const data=await new Promise((ok,no)=>{let r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(file)});let resp=await fetch('/api/special-image',{method:'POST',headers:gameHeaders(),body:JSON.stringify({section,index,field,data})});let j=await resp.json();if(!resp.ok)return alert(j.error||'Upload fehlgeschlagen');Q.Sonderrunden[section][index][field]=j.url;renderAll();alert('Bild gespeichert ✅')}
+function yt(url){let s=String(url||'');let m=s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/);return m?m[1]:''}
+load();createOrJoin();
+</script></body></html>
