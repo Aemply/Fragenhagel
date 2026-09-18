@@ -130,8 +130,16 @@ function newLobby(){
 const cats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const img=u=>u?u+'?v='+Date.now():'';
-socket.on('state',s=>{stateSounds(s);state=s||{};renderScores();renderBuzz();renderHostBuzz();renderLobby();});
-socket.on('buzzAccepted', ({player})=>{ if(!player)return; state.buzzedBy=player; renderBuzz(); renderHostBuzz(); });
+socket.on('state',s=>{
+ stateSounds(s);
+ state=s||{};
+ renderScores();
+ renderBuzz();
+ renderHostBuzz();
+ renderLobby();
+ if(active)renderJudge(Number(active.punkte)||100);
+});
+socket.on('buzzAccepted',, ({player})=>{ if(!player)return; state.buzzedBy=player; renderBuzz(); renderHostBuzz(); });
 socket.on('gameCreated',g=>{
   gameCode=g.code;
   hostToken=g.hostToken;
@@ -200,13 +208,30 @@ function renderBuzz(){
    if(hb){hb.style.display='none';hb.textContent='';}
  }
 }
-function pts(p,a){socket.emit('addPoints',{player:p,amount:a})}function resetScores(){socket.emit('resetScores')}function openBuzzer(){socket.emit('openBuzzer')}function closeBuzzer(){socket.emit('closeBuzzer')}
+function pts(p,a){socket.emit('addPoints',{player:p,amount:a})}function resetScores(){socket.emit('resetScores')}function openBuzzer(){
+ state.buzzedBy=null;
+ renderBuzz();
+ renderHostBuzz();
+ renderJudge(Number(active?.punkte)||100);
+ socket.emit('openBuzzer');
+}
+function closeBuzzer(){
+ state.buzzerOpen=false;
+ state.buzzedBy=null;
+ renderBuzz();
+ renderHostBuzz();
+ renderJudge(Number(active?.punkte)||100);
+ socket.emit('closeBuzzer');
+}
 function renderAll(){  renderHostBuzz();
 renderBoard();renderMainEditor();renderFace();renderGeo();renderFH();renderMusic()}
 async function resetUsed(){if(!confirm('Alle benutzten Felder wieder freigeben?'))return;await fetch('/api/reset-used',{method:'POST',headers:gameHeaders()});await load()}
 function renderBoard(){document.getElementById('board').innerHTML=cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map((x,i)=>`<button class="tile ${x.used?'used':''}" onclick="startQuestion('${c.replaceAll("'","\\'")}',${i})">${x.used?'✓':esc(x.punkte)}</button>`).join('')}</div>`).join('')}
 async function startQuestion(c,i){
  judgedPlayers={};
+ state.buzzedBy=null;
+ state.buzzerOpen=false;
+ renderJudge(Number(Q[c][i]?.punkte)||100);
  const x=Q[c][i];if(x.used)return;x.used=true;renderBoard();fetch('/api/question-used',{method:'POST',headers:gameHeaders(),body:JSON.stringify({category:c,index:i,used:true})}).catch(()=>{});active={kind:'question',category:c,index:i,...x,revealed:false};socket.emit('showQuestion',{kategorie:c,punkte:x.punkte,frage:x.frage,antwort:x.antwort});showPlay()}
 function showPlay(){document.getElementById('play').classList.add('open');renderPlay()}
 function toBoard(){
@@ -223,37 +248,36 @@ function renderPlay(){if(!active)return;let html='';let points=Number(active.pun
 function renderJudge(points){
  const j=document.getElementById('judge');
  if(!j)return;
- const ps=state.players||[];
- const val=Number(points)||100;
- const currentBuzz=state?.buzzedBy || null;
  j.innerHTML='';
 
- const addBtn=(label, cls, fn, playerName)=>{
+ // IMPORTANT: before anyone buzzes, there are NO judgement buttons.
+ const currentBuzz=state && state.buzzedBy ? String(state.buzzedBy) : '';
+ if(!currentBuzz)return;
+
+ const ps=state.players||[];
+ const p=ps.find(x=>String(x.name)===currentBuzz);
+ if(!p)return;
+
+ const val=Number(points)||100;
+ const key=String(p.name);
+
+ const addBtn=(label, cls, fn)=>{
    const b=document.createElement('button');
    b.className='btn '+cls;
    b.type='button';
    b.textContent=label;
-   b.dataset.player=String(playerName);
-   // Only the player who currently buzzed gets his/her judgement buttons locked
-   // after that player's first decision.
-   b.disabled = !!judgedPlayers[String(playerName)];
-   b.addEventListener('click',()=>{
-     if(b.disabled)return;
-     fn();
-   });
+   b.dataset.player=key;
+   b.disabled=!!judgedPlayers[key];
+   b.addEventListener('click',()=>{ if(!b.disabled) fn(); });
    j.appendChild(b);
  };
 
  if(active?.type==='Face Morph'){
-   ps.forEach(p=>{
-     addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100),p.name);
-     addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300),p.name);
-   });
+   addBtn('👤 '+key+' +100','good',()=>award(key,100));
+   addBtn('👥 '+key+' +300','good',()=>award(key,300));
  }else{
-   ps.forEach(p=>{
-     addBtn('✅ '+String(p.name),'good',()=>correct(p.name,val),p.name);
-     addBtn('❌ '+String(p.name),'bad',()=>wrong(p.name,val),p.name);
-   });
+   addBtn('✅ Richtig – '+key,'good',()=>correct(key,val));
+   addBtn('❌ Falsch – '+key,'bad',()=>wrong(key,val));
  }
 }
 function lockPlayerButtons(p){
@@ -270,12 +294,21 @@ function lockPlayerButtons(p){
 function correct(p,v){
  if(judgedPlayers[String(p)])return;
  lockPlayerButtons(p);
+ state.buzzedBy=null;
+ state.buzzerOpen=false;
+ renderBuzz();
+ renderHostBuzz();
+ renderJudge(Number(active?.punkte)||100);
  try{sCorrect()}catch(e){}
  socket.emit('correct',{player:String(p),points:Number(v)||100});
 }
 function wrong(p,v){
  if(judgedPlayers[String(p)])return;
  lockPlayerButtons(p);
+ state.buzzedBy=null;
+ renderBuzz();
+ renderHostBuzz();
+ renderJudge(Number(active?.punkte)||100);
  try{sWrong()}catch(e){}
  socket.emit('wrong',{player:String(p),points:Number(v)||100});
 }
