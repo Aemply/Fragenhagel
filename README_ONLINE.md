@@ -129,3 +129,13 @@ Auf der Hostseite werden **Richtig** und **Falsch** jetzt ausschließlich für d
 ### v20 – Bewertungsbuttons korrekt an den aktuellen Buzzer koppeln
 
 Die Hostseite aktualisiert die Bewertungsbuttons jetzt bei jedem Server-State-Update. Dadurch erscheinen die Buttons unmittelbar beim aktuell gebuzzerten Spieler und verschwinden wieder, sobald dessen Buzzer bewertet wurde. Es werden ausschließlich **Richtig** und **Falsch** für den aktuell gebuzzerten Spieler angezeigt.
+
+
+### v21 – Richtig/Falsch nur für den aktuellen Buzzer
+
+Die Bewertungsbuttons sind jetzt direkt an `state.buzzedBy` gekoppelt:
+1. Frage ausgewählt → keine Buttons.
+2. Buzzer freigegeben → keine Buttons.
+3. Spieler A buzzert → nur A bekommt **Richtig/Falsch**.
+4. Falsch → A's Buttons verschwinden und der Buzzer öffnet für die anderen.
+5. Spieler B buzzert → nur B bekommt **Richtig/Falsch**.
