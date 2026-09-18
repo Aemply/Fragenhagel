@@ -85,7 +85,8 @@ function stateSounds(x){
 }
 
 const socket=io(); let Q={}; let state={};
-let judgingLocked=false; let active=null; const urlCode=new URLSearchParams(location.search).get('code')||'';
+let judgedPlayers={};
+ let active=null; const urlCode=new URLSearchParams(location.search).get('code')||'';
 const storedGameCode=localStorage.getItem('fragenhagelGameCode')||'';
 let gameCode=urlCode||storedGameCode;
 let hostToken=(urlCode&&urlCode!==storedGameCode)?'':(localStorage.getItem('fragenhagelHostToken')||'');
@@ -205,9 +206,11 @@ renderBoard();renderMainEditor();renderFace();renderGeo();renderFH();renderMusic
 async function resetUsed(){if(!confirm('Alle benutzten Felder wieder freigeben?'))return;await fetch('/api/reset-used',{method:'POST',headers:gameHeaders()});await load()}
 function renderBoard(){document.getElementById('board').innerHTML=cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map((x,i)=>`<button class="tile ${x.used?'used':''}" onclick="startQuestion('${c.replaceAll("'","\\'")}',${i})">${x.used?'✓':esc(x.punkte)}</button>`).join('')}</div>`).join('')}
 async function startQuestion(c,i){
- judgingLocked=false;const x=Q[c][i];if(x.used)return;x.used=true;renderBoard();fetch('/api/question-used',{method:'POST',headers:gameHeaders(),body:JSON.stringify({category:c,index:i,used:true})}).catch(()=>{});active={kind:'question',category:c,index:i,...x,revealed:false};socket.emit('showQuestion',{kategorie:c,punkte:x.punkte,frage:x.frage,antwort:x.antwort});showPlay()}
+ judgedPlayers={};
+ const x=Q[c][i];if(x.used)return;x.used=true;renderBoard();fetch('/api/question-used',{method:'POST',headers:gameHeaders(),body:JSON.stringify({category:c,index:i,used:true})}).catch(()=>{});active={kind:'question',category:c,index:i,...x,revealed:false};socket.emit('showQuestion',{kategorie:c,punkte:x.punkte,frage:x.frage,antwort:x.antwort});showPlay()}
 function showPlay(){document.getElementById('play').classList.add('open');renderPlay()}
 function toBoard(){
+ judgedPlayers={};
  judgingLocked=false;document.getElementById('play').classList.remove('open');active=null;socket.emit('showBoard')}
 function renderPlay(){if(!active)return;let html='';let points=Number(active.punkte)||0;
  if(active.kind==='question')html=`<div class="small">${esc(active.category)} · ${points} Punkte</div><div class="question">${esc(active.frage)}</div>${active.revealed?`<div class="answer">${esc(active.antwort)}</div>`:''}`;
@@ -222,17 +225,20 @@ function renderJudge(points){
  if(!j)return;
  const ps=state.players||[];
  const val=Number(points)||100;
+ const currentBuzz=state?.buzzedBy || null;
  j.innerHTML='';
 
- const addBtn=(label, cls, fn)=>{
+ const addBtn=(label, cls, fn, playerName)=>{
    const b=document.createElement('button');
    b.className='btn '+cls;
    b.type='button';
    b.textContent=label;
-   b.disabled=judgingLocked;
+   b.dataset.player=String(playerName);
+   // Only the player who currently buzzed gets his/her judgement buttons locked
+   // after that player's first decision.
+   b.disabled = !!judgedPlayers[String(playerName)];
    b.addEventListener('click',()=>{
-     if(judgingLocked)return;
-     // correct()/wrong()/award() set the lock and emit the server event.
+     if(b.disabled)return;
      fn();
    });
    j.appendChild(b);
@@ -240,42 +246,48 @@ function renderJudge(points){
 
  if(active?.type==='Face Morph'){
    ps.forEach(p=>{
-     addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100));
-     addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
+     addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100),p.name);
+     addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300),p.name);
    });
  }else{
    ps.forEach(p=>{
-     addBtn('✅ '+String(p.name),'good',()=>correct(p.name,val));
-     addBtn('❌ '+String(p.name),'bad',()=>wrong(p.name,val));
+     addBtn('✅ '+String(p.name),'good',()=>correct(p.name,val),p.name);
+     addBtn('❌ '+String(p.name),'bad',()=>wrong(p.name,val),p.name);
    });
  }
 }
-function correct(p,v){
- if(judgingLocked)return;
- judgingLocked=true;
+function lockPlayerButtons(p){
+ const key=String(p);
+ judgedPlayers[key]=true;
  const j=document.getElementById('judge');
- if(j)j.querySelectorAll('button').forEach(x=>x.disabled=true);
+ if(!j)return;
+ // Disable only the two judgement buttons belonging to this player.
+ // Other players remain fully clickable after a wrong answer.
+ const buttons=[...j.querySelectorAll('button')];
+ buttons.filter(b=>b.dataset.player===key).forEach(b=>b.disabled=true);
+}
+
+function correct(p,v){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
  try{sCorrect()}catch(e){}
  socket.emit('correct',{player:String(p),points:Number(v)||100});
 }
 function wrong(p,v){
- if(judgingLocked)return;
- judgingLocked=true;
- const j=document.getElementById('judge');
- if(j)j.querySelectorAll('button').forEach(x=>x.disabled=true);
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
  try{sWrong()}catch(e){}
  socket.emit('wrong',{player:String(p),points:Number(v)||100});
 }
 function award(p,v){
- if(judgingLocked)return;
- judgingLocked=true;
- const j=document.getElementById('judge');
- if(j)j.querySelectorAll('button').forEach(x=>x.disabled=true);
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
  try{sCorrect()}catch(e){}
  socket.emit('correct',{player:String(p),points:Number(v)||100});
 }
 async function reveal(){if(!active)return;active.revealed=true;if(active.kind==='question')socket.emit('revealQuestion');else{const list=Q.Sonderrunden?.[active.type]||[];const saved=list[active.index]||active;active={...saved,type:active.type,index:active.index,revealed:true};const pub=active.type==='Musik'?{...active,youtube:''}:active;socket.emit('revealSpecial',pub)}renderPlay()}
 function pickSpecial(type){
+ judgedPlayers={};
  judgingLocked=false;const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=type==='Musik'?{...active,youtube:''}:active;socket.emit('showSpecial',pub);showPlay()}
 function tab(id){document.querySelectorAll('.tabbody').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
 function renderMainEditor(){document.getElementById('main').innerHTML=cats.map(c=>`<h3>${esc(c)}</h3><div class="editorgrid">${(Q[c]||[]).map((x,i)=>`<div class="card"><b>${x.punkte} Punkte</b><textarea data-main="${esc(c)}" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-main="${esc(c)}" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" style="width:100%;margin-top:6px"></div>`).join('')}</div>`).join('')}

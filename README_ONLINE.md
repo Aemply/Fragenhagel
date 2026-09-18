@@ -114,3 +114,8 @@ Sobald der Host bei einer Frage einmal **Richtig** oder **Falsch** auswählt, we
 ### v17 – Fix für Bewertungsbuttons
 
 v16 hatte einen Logikfehler: Der Click-Listener setzte die Sperre vor dem Aufruf von `correct()`/`wrong()`, worauf diese Funktionen wegen der Sperre sofort zurückkehrten. In v17 wird die Sperre ausschließlich in den Bewertungsfunktionen gesetzt. Dadurch wird der Serverbefehl wieder gesendet und die Buttons bleiben danach gesperrt.
+
+
+### v18 – Bewertung pro Spieler
+
+Die Bewertungsbuttons werden jetzt **pro Spieler** gesperrt. Wenn Spieler A falsch liegt, werden nur die Richtig-/Falsch-Buttons von Spieler A gesperrt. Die Buttons der anderen Spieler bleiben aktiv, sodass der Host nach einem falschen Buzzer den nächsten Spieler bewerten kann. Beim ersten Klick auf einen Spieler wird dessen Button-Paar sofort gesperrt. Beim Start einer neuen Frage werden alle Sperren zurückgesetzt.
