@@ -119,3 +119,8 @@ v16 hatte einen Logikfehler: Der Click-Listener setzte die Sperre vor dem Aufruf
 ### v18 – Bewertung pro Spieler
 
 Die Bewertungsbuttons werden jetzt **pro Spieler** gesperrt. Wenn Spieler A falsch liegt, werden nur die Richtig-/Falsch-Buttons von Spieler A gesperrt. Die Buttons der anderen Spieler bleiben aktiv, sodass der Host nach einem falschen Buzzer den nächsten Spieler bewerten kann. Beim ersten Klick auf einen Spieler wird dessen Button-Paar sofort gesperrt. Beim Start einer neuen Frage werden alle Sperren zurückgesetzt.
+
+
+### v19 – Bewertungsbuttons nur für den aktuellen Buzzer
+
+Auf der Hostseite werden **Richtig** und **Falsch** jetzt ausschließlich für den Spieler angezeigt, der aktuell gebuzzert hat. Solange niemand gebuzzert hat, werden keine Bewertungsbuttons angezeigt. Nach einem falschen Buzzer verschwinden die Buttons zusammen mit der Buzzeranzeige; sobald der nächste Spieler buzzert, erscheinen nur für diesen Spieler wieder Richtig/Falsch.
