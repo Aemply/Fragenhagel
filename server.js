@@ -165,35 +165,47 @@ io.on('connection', socket => {
   socket.on('showSpecial', x => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.mode='special'; game.state.special={...x,revealed:false}; game.state.question=null; resetBuzz(game); emit(game); });
   socket.on('revealSpecial', payload => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; if(game.state.mode==='special'&&game.state.special){if(payload&&typeof payload==='object')game.state.special={...game.state.special,...payload};game.state.special.revealed=true;emit(game);} });
   socket.on('openBuzzer', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.buzzerOpen=true;game.state.buzzedBy=null;emit(game); });
-  socket.on('closeBuzzer', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.buzzerOpen=false;emit(game); });
+  socket.on('closeBuzzer', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.buzzerOpen=false;game.state.revealed=false;emit(game); });
   socket.on('buzz', () => { const game=games.get(socket.data.code); if(!game||!socket.data.playerId)return; const p=game.players.find(x=>x.id===socket.data.playerId); if(!p||!p.connected||!game.state.buzzerOpen||game.state.buzzedBy||game.state.lockedPlayers.includes(p.id))return; game.state.buzzedBy=p.name; if(!game.state.firstBuzzedBy) game.state.firstBuzzedBy=p.name; game.state.buzzerOpen=false; emit(game); io.to(`game:${game.code}`).emit('buzzAccepted', { player: p.name }); });
   socket.on('wrong', ({ player, points }) => {
     const game=games.get(socket.data.code);
     if(!game||!socket.data.host)return;
+
+    // The same buzzer cannot be judged twice.
+    if(!game.state.buzzedBy || game.state.buzzedBy !== player) return;
+
     const p=game.players.find(x=>x.name===player);
     if(!p)return;
-    const n=Number(points)||0;
-    p.score-=n;
 
-    // The player who had the first buzzer is locked out for the rest of this question.
+    const n=Number(points)||0;
+    p.score -= n;
+
+    // Lock this player for the rest of the question.
     if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
 
-    // Hide the current buzzer indication and reopen the buzzer for everyone else.
-    // firstBuzzedBy stays untouched so the original first buzzer remains excluded.
-    game.state.buzzedBy=null;
-    game.state.buzzerOpen=true;
+    // Hide the current buzzer and reopen it for everyone except locked players.
+    game.state.buzzedBy = null;
+    game.state.buzzerOpen = true;
     emit(game);
   });
   socket.on('correct', ({ player, points }) => {
     const game=games.get(socket.data.code);
     if(!game||!socket.data.host)return;
+
+    // A correct answer can only be judged once: there must still be an active buzzer.
+    if(!game.state.buzzedBy || game.state.buzzedBy !== player) return;
+
     const p=game.players.find(x=>x.name===player);
     if(!p)return;
-    p.score+=Number(points)||0;
 
-    // End the buzzer for this question and hide the indication.
-    // The first-buzzer marker is no longer needed because the question is over.
-    resetBuzz(game, true);
+    p.score += Number(points)||0;
+
+    // Correct answer: reveal automatically, close the buzzer and remove the
+    // current buzzer so the host cannot judge the same player again.
+    game.state.revealed = true;
+    game.state.buzzerOpen = false;
+    game.state.buzzedBy = null;
+    game.state.lockedPlayers = [];
     emit(game);
   });
   socket.on('addPoints', ({ player, amount }) => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; const p=game.players.find(x=>x.name===player); if(!p)return;p.score+=Number(amount)||0;emit(game); });
