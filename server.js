@@ -170,43 +170,27 @@ io.on('connection', socket => {
   socket.on('wrong', ({ player, points }) => {
     const game=games.get(socket.data.code);
     if(!game||!socket.data.host)return;
-
-    // The same buzzer cannot be judged twice.
-    if(!game.state.buzzedBy || game.state.buzzedBy !== player) return;
-
+    if(!game.state.buzzedBy || game.state.buzzedBy !== player)return;
     const p=game.players.find(x=>x.name===player);
     if(!p)return;
-
-    const n=Number(points)||0;
-    p.score -= n;
-
-    // Lock this player for the rest of the question.
-    if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
-
-    // Hide the current buzzer and reopen it for everyone except locked players.
-    game.state.buzzedBy = null;
-    game.state.buzzerOpen = true;
+    p.score -= Number(points)||0;
+    if(!game.state.lockedPlayers.includes(p.id))game.state.lockedPlayers.push(p.id);
+    game.state.buzzedBy=null;
+    game.state.buzzerOpen=true;
     emit(game);
   });
   socket.on('correct', ({ player, points }) => {
     const game=games.get(socket.data.code);
     if(!game||!socket.data.host)return;
-
-    // A correct answer can only be judged once: there must still be an active buzzer.
-    if(!game.state.buzzedBy || game.state.buzzedBy !== player) return;
-
+    if(!game.state.buzzedBy || game.state.buzzedBy !== player)return;
     const p=game.players.find(x=>x.name===player);
     if(!p)return;
-
     p.score += Number(points)||0;
-
-    // Correct answer: reveal automatically, close the buzzer and remove the
-    // current buzzer so the host cannot judge the same player again.
-    game.state.revealed = true;
-    game.state.answerRevealed = true;
-    game.state.buzzerOpen = false;
-    game.state.buzzedBy = null;
-    game.state.lockedPlayers = [];
+    game.state.revealed=true;
+    game.state.answerRevealed=true;
+    game.state.buzzerOpen=false;
+    game.state.buzzedBy=null;
+    game.state.lockedPlayers=[];
     emit(game);
   });
   socket.on('addPoints', ({ player, amount }) => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; const p=game.players.find(x=>x.name===player); if(!p)return;p.score+=Number(amount)||0;emit(game); });

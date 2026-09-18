@@ -118,3 +118,7 @@ Die Hostseite verwendet für **Richtig/Falsch** jetzt keine Inline-`onclick`-Att
 ### v17 – Lösung nach Richtig automatisch anzeigen
 
 Nach einem erfolgreichen **Richtig**-Klick setzt der Server den Reveal-Status und sendet den neuen Spielzustand. Die Hostseite rendert daraufhin automatisch die Antwort direkt unter der Frage.
+
+
+### v18 – Lösung automatisch + gesperrte Buttons
+Nach **Richtig** wird die Lösung direkt aus `state.question.antwort` angezeigt. Für gesperrte Spieler bleiben Richtig/Falsch sichtbar, sind aber ausgegraut. Nur der aktuell buzzende Spieler kann bewertet werden.
