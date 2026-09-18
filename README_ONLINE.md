@@ -99,3 +99,8 @@ Ablauf:
 - Richtig → Anzeige verschwindet, Buzzer ist geschlossen.
 - Falsch → Anzeige verschwindet, Buzzer öffnet sich für alle außer dem bereits gesperrten Spieler.
 - Nächster Spieler buzzert → dessen Name wird wieder angezeigt.
+
+
+### v14 – Richtig/Falsch Buttons
+
+Die Hostseite übergibt Spielernamen in den Bewertungsbuttons jetzt URL-kodiert. Dadurch funktionieren **✅ Richtig** und **❌ Falsch** auch bei normalen Namen zuverlässig; die vorherige Inline-HTML-Übergabe von JSON-Strings konnte die `onclick`-Attribute ungültig machen.
