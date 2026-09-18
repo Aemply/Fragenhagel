@@ -166,6 +166,7 @@ Beim Klick auf **Richtig** wird nach dem Senden der Punkte die vorhandene `revea
 v27 basiert wieder auf der funktionierenden v25. Die vorhandene Datei-Speicher-/Upload-Logik des Face-Morph-Editors bleibt unangetastet. Der Dateiname wird ausschließlich über einen zusätzlichen `change`-Listener für die Anzeige aktualisiert, sodass das Speichern der ausgewählten Bilder nicht mehr beeinträchtigt wird.
 
 
-### v28 – Face-Morph-Auflösung
+### v28 – Face Morph Lösung mit Originalbildern
 
-Bei der Auflösung wird das Morphbild mittig angezeigt. Das Originalbild von Person 1 steht links mit dem Namen darunter, das Originalbild von Person 2 rechts mit dem Namen darunter. Vor der Auflösung bleibt ausschließlich das Morphbild sichtbar.
+Bei der aufgedeckten Face-Morph-Lösung werden die drei Bilder nebeneinander angeordnet:
+**Originalbild 1 | Morph-Bild | Originalbild 2**.
