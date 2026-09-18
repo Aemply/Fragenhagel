@@ -165,16 +165,22 @@ io.on('connection', socket => {
   socket.on('showSpecial', x => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.mode='special'; game.state.special={...x,revealed:false}; game.state.question=null; resetBuzz(game); emit(game); });
   socket.on('revealSpecial', payload => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; if(game.state.mode==='special'&&game.state.special){if(payload&&typeof payload==='object')game.state.special={...game.state.special,...payload};game.state.special.revealed=true;emit(game);} });
   socket.on('openBuzzer', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.buzzerOpen=true;game.state.buzzedBy=null;emit(game); });
-  socket.on('closeBuzzer', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.buzzerOpen=false;game.state.revealed=false;game.state.answerRevealed=false;emit(game); });
+  socket.on('closeBuzzer', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.buzzerOpen=false;emit(game); });
   socket.on('buzz', () => { const game=games.get(socket.data.code); if(!game||!socket.data.playerId)return; const p=game.players.find(x=>x.id===socket.data.playerId); if(!p||!p.connected||!game.state.buzzerOpen||game.state.buzzedBy||game.state.lockedPlayers.includes(p.id))return; game.state.buzzedBy=p.name; if(!game.state.firstBuzzedBy) game.state.firstBuzzedBy=p.name; game.state.buzzerOpen=false; emit(game); io.to(`game:${game.code}`).emit('buzzAccepted', { player: p.name }); });
   socket.on('wrong', ({ player, points }) => {
     const game=games.get(socket.data.code);
     if(!game||!socket.data.host)return;
-    if(!game.state.buzzedBy || game.state.buzzedBy !== player)return;
     const p=game.players.find(x=>x.name===player);
     if(!p)return;
-    p.score -= Number(points)||0;
-    if(!game.state.lockedPlayers.includes(p.id))game.state.lockedPlayers.push(p.id);
+
+    // A player can only be judged once for the current question.
+    if(game.state.lockedPlayers.includes(p.id)) return;
+
+    const n=Number(points)||0;
+    p.score-=n;
+    game.state.lockedPlayers.push(p.id);
+
+    // Hide the current buzzer indication and reopen the buzzer for everyone else.
     game.state.buzzedBy=null;
     game.state.buzzerOpen=true;
     emit(game);
@@ -182,15 +188,17 @@ io.on('connection', socket => {
   socket.on('correct', ({ player, points }) => {
     const game=games.get(socket.data.code);
     if(!game||!socket.data.host)return;
-    if(!game.state.buzzedBy || game.state.buzzedBy !== player)return;
     const p=game.players.find(x=>x.name===player);
     if(!p)return;
-    p.score += Number(points)||0;
-    game.state.revealed=true;
-    game.state.answerRevealed=true;
-    game.state.buzzerOpen=false;
-    game.state.buzzedBy=null;
-    game.state.lockedPlayers=[];
+
+    // Once the question is judged correct, it cannot be judged again.
+    if(game.state.judgedCorrect) return;
+
+    p.score+=Number(points)||0;
+    game.state.judgedCorrect=true;
+
+    // End the buzzer for this question and hide the indication.
+    resetBuzz(game, true);
     emit(game);
   });
   socket.on('addPoints', ({ player, amount }) => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; const p=game.players.find(x=>x.name===player); if(!p)return;p.score+=Number(amount)||0;emit(game); });
