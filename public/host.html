@@ -227,6 +227,7 @@ function renderJudge(points){
      b1.className='btn good';
      b1.type='button';
      b1.textContent='👤 '+String(p.name)+' +100';
+     b1.disabled=!!state.questionSolved || (state.lockedPlayers||[]).includes(p.id);
      b1.addEventListener('click',()=>award(p.name,100));
      j.appendChild(b1);
 
@@ -234,15 +235,20 @@ function renderJudge(points){
      b2.className='btn good';
      b2.type='button';
      b2.textContent='👥 '+String(p.name)+' +300';
+     b2.disabled=!!state.questionSolved || (state.lockedPlayers||[]).includes(p.id);
      b2.addEventListener('click',()=>award(p.name,300));
      j.appendChild(b2);
    });
  }else{
    ps.forEach(p=>{
+     const locked=(state.lockedPlayers||[]).includes(p.id);
+     const disabled=!!state.questionSolved || locked;
+
      const good=document.createElement('button');
      good.className='btn good';
      good.type='button';
      good.textContent='✅ '+String(p.name);
+     good.disabled=disabled;
      good.addEventListener('click',()=>correct(p.name,val));
      j.appendChild(good);
 
@@ -250,16 +256,22 @@ function renderJudge(points){
      bad.className='btn bad';
      bad.type='button';
      bad.textContent='❌ '+String(p.name);
+     bad.disabled=disabled;
      bad.addEventListener('click',()=>wrong(p.name,val));
      j.appendChild(bad);
    });
  }
 }
 function correct(p,v){
+ if(state.questionSolved)return;
  try{sCorrect()}catch(e){}
  socket.emit('correct',{player:String(p),points:Number(v)||100});
 }
 function wrong(p,v){
+ if(state.questionSolved || (state.lockedPlayers||[]).some(id=>{
+   const pl=(state.players||[]).find(x=>x.id===id);
+   return pl && String(pl.name)===String(p);
+ }))return;
  try{sWrong()}catch(e){}
  socket.emit('wrong',{player:String(p),points:Number(v)||100});
 }
