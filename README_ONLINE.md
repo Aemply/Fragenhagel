@@ -124,3 +124,8 @@ Die Bewertungsbuttons werden jetzt **pro Spieler** gesperrt. Wenn Spieler A fals
 ### v19 – Bewertungsbuttons nur für den aktuellen Buzzer
 
 Auf der Hostseite werden **Richtig** und **Falsch** jetzt ausschließlich für den Spieler angezeigt, der aktuell gebuzzert hat. Solange niemand gebuzzert hat, werden keine Bewertungsbuttons angezeigt. Nach einem falschen Buzzer verschwinden die Buttons zusammen mit der Buzzeranzeige; sobald der nächste Spieler buzzert, erscheinen nur für diesen Spieler wieder Richtig/Falsch.
+
+
+### v20 – Bewertungsbuttons korrekt an den aktuellen Buzzer koppeln
+
+Die Hostseite aktualisiert die Bewertungsbuttons jetzt bei jedem Server-State-Update. Dadurch erscheinen die Buttons unmittelbar beim aktuell gebuzzerten Spieler und verschwinden wieder, sobald dessen Buzzer bewertet wurde. Es werden ausschließlich **Richtig** und **Falsch** für den aktuell gebuzzerten Spieler angezeigt.
