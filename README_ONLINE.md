@@ -149,3 +149,8 @@ Die Hostseite erzwingt jetzt an jeder Stelle die Regel: **ohne `state.buzzedBy` 
 ### v23 – Buttons erscheinen sofort beim Buzzer
 
 Die Bewertungsbuttons werden jetzt sowohl beim `buzzAccepted`-Ereignis als auch beim nachfolgenden Server-State-Update gerendert. Dadurch erscheinen **Richtig/Falsch unmittelbar nachdem ein Spieler buzzert**, ohne dass erst „Lösung anzeigen“ geklickt werden muss.
+
+
+### v24 – Lösung automatisch anzeigen
+
+Wenn der Host bei einem gebuzzerten Spieler **Richtig** auswählt, wird nach dem Absenden der Punkte automatisch die vorhandene Funktion „Lösung anzeigen“ ausgelöst. Dadurch wird die Lösung eingeblendet, ohne dass der Host den Button zusätzlich drücken muss.
