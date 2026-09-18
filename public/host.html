@@ -137,10 +137,15 @@ socket.on('state',s=>{
   renderBuzz();
   renderHostBuzz();
   renderLobby();
+
+  // The judgement buttons are driven by the current server-side buzzer.
+  // They appear immediately when buzzedBy is set and disappear when it is cleared.
   const j=document.getElementById('judge');
   if(active){
     if(state.buzzedBy) renderJudge(Number(active.punkte)||100);
     else if(j) j.innerHTML='';
+  }else if(j){
+    j.innerHTML='';
   }
 });
 socket.on('buzzAccepted', ({player})=>{
@@ -148,7 +153,7 @@ socket.on('buzzAccepted', ({player})=>{
   state.buzzedBy=player;
   renderBuzz();
   renderHostBuzz();
-  if(active)renderJudge(Number(active.punkte)||100);
+  if(active) renderJudge(Number(active.punkte)||100);
 });
 socket.on('gameCreated',g=>{
   gameCode=g.code;
@@ -219,12 +224,12 @@ function renderBuzz(){
  }
 }
 function pts(p,a){socket.emit('addPoints',{player:p,amount:a})}function resetScores(){socket.emit('resetScores')}function openBuzzer(){
-  socket.emit('openBuzzer');
-  state.buzzedBy=null;
-  renderBuzz();
-  renderHostBuzz();
-  const j=document.getElementById('judge');
-  if(j)j.innerHTML='';
+ socket.emit('openBuzzer');
+ state.buzzedBy=null;
+ renderBuzz();
+ renderHostBuzz();
+ const j=document.getElementById('judge');
+ if(j)j.innerHTML='';
 }function closeBuzzer(){socket.emit('closeBuzzer')}
 function renderAll(){  renderHostBuzz();
 renderBoard();renderMainEditor();renderFace();renderGeo();renderFH();renderMusic()}
