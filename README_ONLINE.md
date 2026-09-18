@@ -101,6 +101,6 @@ Ablauf:
 - Nächster Spieler buzzert → dessen Name wird wieder angezeigt.
 
 
-### v14 – Richtig/Falsch Buttons
+### v15 – Bewertungsbuttons vollständig repariert
 
-Die Hostseite übergibt Spielernamen in den Bewertungsbuttons jetzt URL-kodiert. Dadurch funktionieren **✅ Richtig** und **❌ Falsch** auch bei normalen Namen zuverlässig; die vorherige Inline-HTML-Übergabe von JSON-Strings konnte die `onclick`-Attribute ungültig machen.
+Die Hostseite verwendet für **Richtig/Falsch** jetzt keine Inline-`onclick`-Attribute mehr. Die Buttons werden per JavaScript erzeugt und bekommen echte Click-Event-Listener. Zusätzlich sind die Soundeffekte gegen Fehler abgesichert, sodass ein Soundproblem das Senden des Bewertungsbefehls nicht mehr verhindern kann.

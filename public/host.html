@@ -214,8 +214,59 @@ function renderPlay(){if(!active)return;let html='';let points=Number(active.pun
  else if(active.type==='Musik'){const id=yt(active.youtube);html=`<h2>Musik ${active.index+1}</h2><div class="question">Welches Lied ist das?</div>${id?`<iframe width="760" height="428" style="max-width:90vw;border:0;border-radius:15px" src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`:'<div class="small">Kein gültiger YouTube-Link</div>'}${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`}
  document.getElementById('playContent').innerHTML=html; renderJudge(points);
 }
-function renderJudge(points){const j=document.getElementById('judge');const ps=state.players||[];if(active?.type==='Face Morph'){j.innerHTML=ps.map(p=>`<button class="btn good" onclick="award(${JSON.stringify(p.name)},100)">👤 ${esc(p.name)} +100</button><button class="btn good" onclick="award(${JSON.stringify(p.name)},300)">👥 ${esc(p.name)} +300</button>`).join('')}else{j.innerHTML=ps.map(p=>`<button class="btn good" onclick="correct(${JSON.stringify(p.name)},${points||100})">✅ ${esc(p.name)}</button><button class="btn bad" onclick="wrong(${JSON.stringify(p.name)},${points||100})">❌ ${esc(p.name)}</button>`).join('')}}
-function correct(p,v){sCorrect();socket.emit('correct',{player:p,points:v})}function wrong(p,v){sWrong();socket.emit('wrong',{player:p,points:v})}function award(p,v){sCorrect();socket.emit('correct',{player:p,points:v})}
+function renderJudge(points){
+ const j=document.getElementById('judge');
+ if(!j)return;
+ const ps=state.players||[];
+ const val=Number(points)||100;
+ j.innerHTML='';
+
+ if(active?.type==='Face Morph'){
+   ps.forEach(p=>{
+     const b1=document.createElement('button');
+     b1.className='btn good';
+     b1.type='button';
+     b1.textContent='👤 '+String(p.name)+' +100';
+     b1.addEventListener('click',()=>award(p.name,100));
+     j.appendChild(b1);
+
+     const b2=document.createElement('button');
+     b2.className='btn good';
+     b2.type='button';
+     b2.textContent='👥 '+String(p.name)+' +300';
+     b2.addEventListener('click',()=>award(p.name,300));
+     j.appendChild(b2);
+   });
+ }else{
+   ps.forEach(p=>{
+     const good=document.createElement('button');
+     good.className='btn good';
+     good.type='button';
+     good.textContent='✅ '+String(p.name);
+     good.addEventListener('click',()=>correct(p.name,val));
+     j.appendChild(good);
+
+     const bad=document.createElement('button');
+     bad.className='btn bad';
+     bad.type='button';
+     bad.textContent='❌ '+String(p.name);
+     bad.addEventListener('click',()=>wrong(p.name,val));
+     j.appendChild(bad);
+   });
+ }
+}
+function correct(p,v){
+ try{sCorrect()}catch(e){}
+ socket.emit('correct',{player:String(p),points:Number(v)||100});
+}
+function wrong(p,v){
+ try{sWrong()}catch(e){}
+ socket.emit('wrong',{player:String(p),points:Number(v)||100});
+}
+function award(p,v){
+ try{sCorrect()}catch(e){}
+ socket.emit('correct',{player:String(p),points:Number(v)||100});
+}
 async function reveal(){if(!active)return;active.revealed=true;if(active.kind==='question')socket.emit('revealQuestion');else{const list=Q.Sonderrunden?.[active.type]||[];const saved=list[active.index]||active;active={...saved,type:active.type,index:active.index,revealed:true};const pub=active.type==='Musik'?{...active,youtube:''}:active;socket.emit('revealSpecial',pub)}renderPlay()}
 function pickSpecial(type){const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=type==='Musik'?{...active,youtube:''}:active;socket.emit('showSpecial',pub);showPlay()}
 function tab(id){document.querySelectorAll('.tabbody').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
