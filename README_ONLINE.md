@@ -113,3 +113,8 @@ Die Hostseite verwendet für **Richtig/Falsch** jetzt keine Inline-`onclick`-Att
 3. **Richtig** → kann für A nicht noch einmal geklickt werden; die Lösung wird automatisch angezeigt und der Buzzer wird geschlossen.
 4. **Falsch** → kann für A nicht noch einmal geklickt werden; Anzeige verschwindet, A wird für diese Frage gesperrt und der Buzzer öffnet automatisch für die übrigen Spieler.
 5. Spieler B buzzert → Host sieht B und erhält wieder nur für B die Buttons.
+
+
+### v17 – Lösung nach Richtig automatisch anzeigen
+
+Nach einem erfolgreichen **Richtig**-Klick setzt der Server den Reveal-Status und sendet den neuen Spielzustand. Die Hostseite rendert daraufhin automatisch die Antwort direkt unter der Frage.

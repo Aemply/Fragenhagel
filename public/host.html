@@ -214,6 +214,24 @@ function renderPlay(){if(!active)return;let html='';let points=Number(active.pun
  else if(active.type==='Musik'){const id=yt(active.youtube);html=`<h2>Musik ${active.index+1}</h2><div class="question">Welches Lied ist das?</div>${id?`<iframe width="760" height="428" style="max-width:90vw;border:0;border-radius:15px" src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`:'<div class="small">Kein gültiger YouTube-Link</div>'}${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`}
  document.getElementById('playContent').innerHTML=html; renderJudge(points);
 }
+function renderAnswerReveal(){
+ const content=document.getElementById('playContent');
+ if(!content)return;
+ let box=document.getElementById('hostAnswerReveal');
+ if(state?.revealed && active?.kind==='question'){
+   if(!box){
+     box=document.createElement('div');
+     box.id='hostAnswerReveal';
+     box.className='answer';
+     box.style.cssText='display:block;max-width:900px;margin:18px auto;font-size:32px;text-align:center;font-weight:900';
+     content.appendChild(box);
+   }
+   box.innerHTML='✅ Lösung: '+esc(active.antwort||'');
+ }else if(box){
+   box.remove();
+ }
+}
+
 function renderJudge(points){
  const j=document.getElementById('judge');
  if(!j)return;
