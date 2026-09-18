@@ -300,7 +300,18 @@ function correct(p,v){
  lockPlayerButtons(p);
  try{sCorrect()}catch(e){}
  socket.emit('correct',{player:String(p),points:Number(v)||100});
+
+ // Use the same reveal() function as the visible button.
+ // The delay lets the correct-answer state reach the server first.
+ setTimeout(()=>{
+   try{
+     if(typeof reveal === 'function') reveal();
+   }catch(e){
+     console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e);
+   }
+ },250);
 }
+
 function wrong(p,v){
  if(judgedPlayers[String(p)])return;
  lockPlayerButtons(p);

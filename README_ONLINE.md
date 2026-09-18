@@ -154,3 +154,8 @@ Die Bewertungsbuttons werden jetzt sowohl beim `buzzAccepted`-Ereignis als auch 
 ### v24 – Lösung automatisch anzeigen
 
 Wenn der Host bei einem gebuzzerten Spieler **Richtig** auswählt, wird nach dem Absenden der Punkte automatisch die vorhandene Funktion „Lösung anzeigen“ ausgelöst. Dadurch wird die Lösung eingeblendet, ohne dass der Host den Button zusätzlich drücken muss.
+
+
+### v25 – Automatisches Anzeigen der Lösung korrigiert
+
+Beim Klick auf **Richtig** wird nach dem Senden der Punkte die vorhandene `reveal()`-Funktion direkt aufgerufen. Damit wird exakt dieselbe Funktion verwendet wie beim manuellen „Lösung anzeigen“-Button.
