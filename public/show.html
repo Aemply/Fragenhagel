@@ -1,16 +1,14 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fragenhagel Show</title><link rel="stylesheet" href="/style.css"><style>
 body{overflow:hidden}.showwrap{height:100vh;display:flex;flex-direction:column;padding:18px}.scorebar{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}.scorebar .score{min-width:150px;text-align:center}.showstage{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}.showstage>div{width:100%}.board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;max-width:1450px;margin:auto}.board .cat{min-height:520px}.showbuzz{text-align:center;margin:10px auto;max-width:800px}.join{position:fixed;inset:0;display:grid;place-items:center;background:#070714;z-index:20}.joinbox{width:min(520px,90vw);text-align:center}.joinbox input{font-size:26px;padding:14px;width:100%;box-sizing:border-box;border-radius:12px;border:1px solid #ffffff33;background:#111126;color:white}.hidden{display:none!important}
-</style>
-<style id="face-morph-solution-v29">
-.face-morph-solution-v29{display:grid;grid-template-columns:1fr 1.35fr 1fr;gap:24px;align-items:center;width:min(1200px,94vw);margin:24px auto}
-.face-morph-solution-v29 .fm-col{display:flex;flex-direction:column;align-items:center;gap:10px}
-.face-morph-solution-v29 img{display:block;max-width:100%;max-height:52vh;object-fit:contain;border-radius:14px}
-.face-morph-solution-v29 .fm-side img{max-height:38vh}
-.face-morph-solution-v29 .fm-label{font-size:clamp(16px,2vw,26px);font-weight:800}
-@media(max-width:800px){.face-morph-solution-v29{grid-template-columns:1fr}.face-morph-solution-v29 img{max-height:36vh}}
-</style>
-
-</head><body>
+</style><style id="fm-solution-v31">
+.fm-solution{display:grid;grid-template-columns:1fr 1.35fr 1fr;gap:28px;align-items:center;width:min(1250px,94vw);margin:24px auto}
+.fm-solution figure{margin:0;text-align:center}
+.fm-solution img{display:block;width:100%;max-height:44vh;object-fit:contain;border-radius:14px}
+.fm-solution .fm-main img{max-height:58vh}
+.fm-solution figcaption{font-size:clamp(16px,2vw,26px);font-weight:800;margin-top:10px}
+@media(max-width:800px){.fm-solution{grid-template-columns:1fr}.fm-solution img,.fm-solution .fm-main img{max-height:34vh}}
+.file-name{display:inline-block;margin-left:8px;opacity:.8;font-size:.9em}
+</style></head><body>
 <button id="soundToggle" onclick="toggleSound()" title="Sound an/aus" style="position:fixed;right:12px;bottom:12px;z-index:99;border:1px solid #ffffff33;background:#111126;color:white;border-radius:999px;padding:8px 11px;cursor:pointer">🔊</button>
 <div id="join" class="join"><div class="joinbox panel"><h1 class="neon">⚡ FRAGENHAGEL SHOW</h1><p>Spielcode eingeben, um die Show zu verbinden.</p><input id="code" maxlength="5" placeholder="z. B. K7XM2"><button class="btn cyan" style="margin-top:12px" onclick="connectGame()">📺 Verbinden</button><div id="joinStatus" class="small"></div></div></div>
 <div class="showwrap"><div id="scores" class="scorebar"></div><div id="buzz" class="buzz showbuzz">Buzzer geschlossen</div><div id="stage" class="showstage"></div></div>
@@ -32,51 +30,6 @@ socket.on('questionsUpdated',q=>{Q=q;render()});
 async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());render()}
 function render(){const ps=state.players||[];document.getElementById('scores').innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong></div>`).join('');const b=document.getElementById('buzz');b.textContent=state.buzzedBy?'⚡ '+state.buzzedBy+' hat gebuzzert!':state.buzzerOpen?'🟢 BUZZER OFFEN':'🔴 Buzzer geschlossen';b.className='buzz showbuzz'+(state.buzzerOpen?' open':'');const stage=document.getElementById('stage');if(state.mode==='question'&&state.question){let x=state.question;stage.innerHTML=`<div><div class="small">${esc(x.kategorie)} · ${esc(x.punkte)} Punkte</div><div class="question">${esc(x.frage)}</div>${x.revealed?`<div class="answer"><div class="small">LÖSUNG</div>${esc(x.antwort)}</div>`:''}</div>`;return}if(state.mode==='special'&&state.special){stage.innerHTML=special(state.special);return}stage.innerHTML=board()}
 function board(){return `<div class="board">${cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map(x=>`<div class="tile ${x.used?'used':''}">${x.used?'✓':esc(x.punkte)}</div>`).join('')}</div>`).join('')}</div>`}
-function special(x){const t=x.type;if(t==='Face Morph')return `<div><h2 class="neon">FACE MORPH</h2>${x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Morphbild</div>'}${x.revealed?`<div class="answer">${esc(x.person1)} + ${esc(x.person2)}</div><div class="originals">${x.original1?`<figure><img src="${img(x.original1)}"><figcaption>${esc(x.person1)}</figcaption></figure>`:''}${x.original2?`<figure><img src="${img(x.original2)}"><figcaption>${esc(x.person2)}</figcaption></figure>`:''}</div>`:''}</div>`;if(t==='Wo zum Henker ist das?')return `<div><h2 class="neon">WO ZUM HENKER IST DAS?</h2>${x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Geo-Bild</div>'}${x.revealed?`<div class="answer">📍 ${esc(x.antwort)}</div>`:''}</div>`;if(t==='Fragenhagel')return `<div><h2 class="neon">FRAGENHAGEL · ${esc(x.punkte||100)} PUNKTE</h2><div class="question">${esc(x.frage||'Noch keine Frage')}</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;if(t==='Musik')return `<div><h2 class="neon">MUSIK · ${esc(x.punkte||300)} PUNKTE</h2><div class="question">🎵 Welches Lied ist das?</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;return '<div class="question">Sonderrunde</div>'}
+function special(x){const t=x.type;if(t==='Face Morph')return `<div><h2 class="neon">FACE MORPH</h2>${!x.revealed?(x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Morphbild</div>'):`<div class="fm-solution"><figure><img src="${img(x.original1)}"><figcaption>Originalbild 1 · ${esc(x.person1)}</figcaption></figure><figure class="fm-main"><img src="${img(x.bild)}"><figcaption>Morph</figcaption></figure><figure><img src="${img(x.original2)}"><figcaption>Originalbild 2 · ${esc(x.person2)}</figcaption></figure></div>`}</div>`;if(t==='Wo zum Henker ist das?')return `<div><h2 class="neon">WO ZUM HENKER IST DAS?</h2>${x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Geo-Bild</div>'}${x.revealed?`<div class="answer">📍 ${esc(x.antwort)}</div>`:''}</div>`;if(t==='Fragenhagel')return `<div><h2 class="neon">FRAGENHAGEL · ${esc(x.punkte||100)} PUNKTE</h2><div class="question">${esc(x.frage||'Noch keine Frage')}</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;if(t==='Musik')return `<div><h2 class="neon">MUSIK · ${esc(x.punkte||300)} PUNKTE</h2><div class="question">🎵 Welches Lied ist das?</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;return '<div class="question">Sonderrunde</div>'}
 load();
-</script>
-<script id="face-morph-solution-v29-js">
-function faceMorphV29Value(o, keys){
-  for(const k of keys){
-    if(o && o[k]) return o[k];
-  }
-  return '';
-}
-function showFaceMorphV29(){
-  try{
-    const s=window.state||{};
-    const sp=s.special||s.active||{};
-    const type=String(sp.type||sp.kind||'').toLowerCase();
-    if(!type.includes('face morph')) return;
-    const revealed=!!(sp.revealed||s.revealed||s.answerRevealed||sp.showSolution||s.showSolution);
-    if(!revealed) return;
-
-    const morph=faceMorphV29Value(sp,['morph','morphImage','morphBild','bild','image','src']);
-    const one=faceMorphV29Value(sp,['original1','originalImage1','originalBild1','bild1','image1','left']);
-    const two=faceMorphV29Value(sp,['original2','originalImage2','originalBild2','bild2','image2','right']);
-    if(!morph || (!one && !two)) return;
-
-    const imgs=[...document.querySelectorAll('img')];
-    const morphImg=imgs.find(x=>x.src===morph || /morph/i.test(x.alt||''));
-    if(!morphImg) return;
-
-    const container=morphImg.closest('.stage,.special,.content,.game,.panel') || morphImg.parentElement;
-    if(!container || container.querySelector('.face-morph-solution-v29')) return;
-
-    const box=document.createElement('div');
-    box.className='face-morph-solution-v29';
-    box.innerHTML=
-      '<div class="fm-col fm-side">'+(one?'<img src="'+one+'" alt="Originalbild 1">':'')+'<div class="fm-label">Originalbild 1</div></div>'+
-      '<div class="fm-col">'+ '<img src="'+morphImg.src+'" alt="Morph-Bild"><div class="fm-label">Morph</div></div>'+
-      '<div class="fm-col fm-side">'+(two?'<img src="'+two+'" alt="Originalbild 2">':'')+'<div class="fm-label">Originalbild 2</div></div>';
-    morphImg.parentElement.replaceWith(box);
-  }catch(e){console.error(e)}
-}
-</script>
-
-
-<script id="face-morph-v29-hooks">
-document.addEventListener('DOMContentLoaded',()=>setTimeout(showFaceMorphV29,100));
-</script>
-
-</body></html>
+</script></body></html>

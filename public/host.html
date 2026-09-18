@@ -330,32 +330,25 @@ function pickSpecial(type){
  judgingLocked=false;const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=type==='Musik'?{...active,youtube:''}:active;socket.emit('showSpecial',pub);showPlay()}
 function tab(id){document.querySelectorAll('.tabbody').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
 function renderMainEditor(){document.getElementById('main').innerHTML=cats.map(c=>`<h3>${esc(c)}</h3><div class="editorgrid">${(Q[c]||[]).map((x,i)=>`<div class="card"><b>${x.punkte} Punkte</b><textarea data-main="${esc(c)}" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-main="${esc(c)}" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" style="width:100%;margin-top:6px"></div>`).join('')}</div>`).join('')}
-function renderFace(){let a=Q.Sonderrunden?.['Face Morph']||[];document.getElementById('face').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Face Morph ${i+1}</h3><input data-sp="Face Morph" data-i="${i}" data-f="person1" value="${esc(x.person1||'')}" placeholder="Person 1"><input data-sp="Face Morph" data-i="${i}" data-f="person2" value="${esc(x.person2||'')}" placeholder="Person 2"><div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div><label>Morphbild <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'bild',this)"></label><label>Original 1 <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original1',this)"></label><label>Original 2 <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original2',this)"></label></div>`).join('')+'</div>'}
-function renderGeo(){let a=Q.Sonderrunden?.['Wo zum Henker ist das?']||[];document.getElementById('geo').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Geo ${i+1}</h3><input data-sp="Wo zum Henker ist das?" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Ort"><input type="number" data-sp="Wo zum Henker ist das?" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"><div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div><input type="file" accept="image/*" onchange="uploadImg('Wo zum Henker ist das?',${i},'bild',this)"></div>`).join('')+'</div>'}
-function renderFH(){let a=Q.Sonderrunden?.Fragenhagel||[];document.getElementById('fh').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Frage ${i+1}</h3><textarea data-sp="Fragenhagel" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-sp="Fragenhagel" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Antwort" style="width:100%"><input type="number" data-sp="Fragenhagel" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||100}"></div>`).join('')+'</div>'}
-function renderMusic(){let a=Q.Sonderrunden?.Musik||[];document.getElementById('music').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Song ${i+1}</h3><input data-sp="Musik" data-i="${i}" data-f="youtube" value="${esc(x.youtube||'')}" placeholder="YouTube-Link" style="width:100%"><input data-sp="Musik" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Lied / Interpret" style="width:100%"><input type="number" data-sp="Musik" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"></div>`).join('')+'</div>'}
-async function saveAll(){document.querySelectorAll('[data-main]').forEach(el=>{let c=el.dataset.main,i=+el.dataset.i,f=el.dataset.f;Q[c][i][f]=el.value});document.querySelectorAll('[data-sp]').forEach(el=>{let t=el.dataset.sp,i=+el.dataset.i,f=el.dataset.f;Q.Sonderrunden[t][i][f]=el.type==='number'?Number(el.value)||0:el.value});let r=await fetch('/api/questions',{method:'PUT',headers:gameHeaders(),body:JSON.stringify(Q)});document.getElementById('saveStatus').textContent=r.ok?' ✅ Gespeichert':' ❌ Fehler';if(r.ok)load()}
-async function uploadImg(section,index,field,input){const file=input.files?.[0];if(!file)return;const data=await new Promise((ok,no)=>{let r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(file)});let resp=await fetch('/api/special-image',{method:'POST',headers:gameHeaders(),body:JSON.stringify({section,index,field,data})});let j=await resp.json();if(!resp.ok)return alert(j.error||'Upload fehlgeschlagen');Q.Sonderrunden[section][index][field]=j.url;renderAll();alert('Bild gespeichert ✅')}
-function yt(url){let s=String(url||'');let m=s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/);return m?m[1]:''}
-load();createOrJoin();
-</script>
+function renderFace(){let a=Q.Sonderrunden?.['Face Morph']||[];document.getElementById('face').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Face Morph ${i+1}</h3><input data-sp="Face Morph" data-i="${i}" data-f="person1" value="${esc(x.person1||'')}" placeholder="Person 1"><input data-sp="Face Morph" data-i="${i}" data-f="person2" value="${esc(x.person2||'')}" placeholder="Person 2"><div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div><label>Morphbild <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'bild',this)"><span class="file-name" data-file-name-label>${x.bildName||'Keine ausgewählt'}</span></label><label>Original 1 <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original1',this)"><span class="file-name" data-file-name-label>${x.original1Name||'Keine ausgewählt'}</span></label><label>Original 2 <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original2',this)"><span class="file-name" data-file-name-label>${x.original2Name||'Keine ausgewählt'}</span></label></div>`).join('')+'</div>'}
 
-
-
-<script id="face-morph-filename-v29">
-(function(){
-  function updateFileName(input){
-    if(!input || !input.files) return;
-    const name = input.files.length ? input.files[0].name : 'Keine ausgewählt';
-    const parent = input.parentElement;
-    if(!parent) return;
-    let label = parent.querySelector('.file-name, .file-label, [data-file-name-label]');
-    if(label) label.textContent = name;
+document.addEventListener('change', function(e){
+  if(e.target && e.target.matches('input[type="file"]')){
+    // This listener does NOT replace or interfere with the app's own
+    // change/onchange handler; it only updates the visible filename.
+    updateFaceMorphFileName(e.target);
   }
-  document.addEventListener('change', function(e){
-    if(e.target && e.target.matches('input[type="file"]')) updateFileName(e.target);
-  }, true);
-})();
+});
 </script>
 
+<script id="face-file-name-v31">
+document.addEventListener('change',function(e){
+ const input=e.target;
+ if(!input || input.type!=='file' || !input.files) return;
+ const label=input.parentElement;
+ const name=input.files.length?input.files[0].name:'Keine ausgewählt';
+ const span=label && label.querySelector('.file-name');
+ if(span) span.textContent=name;
+},true);
+</script>
 </body></html>
