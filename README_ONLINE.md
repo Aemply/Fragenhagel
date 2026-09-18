@@ -166,7 +166,6 @@ Beim Klick auf **Richtig** wird nach dem Senden der Punkte die vorhandene `revea
 v27 basiert wieder auf der funktionierenden v25. Die vorhandene Datei-Speicher-/Upload-Logik des Face-Morph-Editors bleibt unangetastet. Der Dateiname wird ausschließlich über einen zusätzlichen `change`-Listener für die Anzeige aktualisiert, sodass das Speichern der ausgewählten Bilder nicht mehr beeinträchtigt wird.
 
 
-### v28 – Face Morph Lösung mit Originalbildern
+### v29 – Face Morph Editor stabilisiert
 
-Bei der aufgedeckten Face-Morph-Lösung werden die drei Bilder nebeneinander angeordnet:
-**Originalbild 1 | Morph-Bild | Originalbild 2**.
+v29 basiert bewusst auf dem funktionierenden v27. Die bestehende Datei-/Bild-Speicherlogik wird nicht verändert. Die Anzeige des ausgewählten Dateinamens wird ausschließlich über einen zusätzlichen Capture-Event aktualisiert. Die Face-Morph-Show wurde gegenüber v27 nicht verändert, um die funktionierende Speicherfunktion nicht erneut zu beschädigen.

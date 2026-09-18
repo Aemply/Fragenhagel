@@ -339,27 +339,26 @@ async function uploadImg(section,index,field,input){const file=input.files?.[0];
 function yt(url){let s=String(url||'');let m=s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/);return m?m[1]:''}
 load();createOrJoin();
 </script>
+
+
+
 <script>
-function updateFaceMorphFileName(input){
-  if(!input) return;
-  const fileName = input.files && input.files.length
-    ? input.files[0].name
-    : 'Keine ausgewählt';
-
-  // Update the existing visible filename element, if present.
-  const parent = input.parentElement;
-  if(!parent) return;
-  const label = parent.querySelector('.file-name, .file-label, [data-file-name-label]');
-  if(label) label.textContent = fileName;
-}
-
-document.addEventListener('change', function(e){
-  if(e.target && e.target.matches('input[type="file"]')){
-    // This listener does NOT replace or interfere with the app's own
-    // change/onchange handler; it only updates the visible filename.
-    updateFaceMorphFileName(e.target);
+(function(){
+  function updateSelectedFileName(input){
+    if(!input || !input.files) return;
+    const name = input.files.length ? input.files[0].name : 'Keine ausgewählt';
+    const parent = input.parentElement;
+    if(!parent) return;
+    const labels = parent.querySelectorAll('.file-name,.file-label,[data-file-name-label]');
+    labels.forEach(el => el.textContent = name);
   }
-});
+  document.addEventListener('change', function(ev){
+    const el=ev.target;
+    if(el && el.tagName==='INPUT' && el.type==='file'){
+      updateSelectedFileName(el);
+    }
+  }, true);
+})();
 </script>
 
 </body></html>
