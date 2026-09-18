@@ -159,3 +159,8 @@ Wenn der Host bei einem gebuzzerten Spieler **Richtig** auswählt, wird nach dem
 ### v25 – Automatisches Anzeigen der Lösung korrigiert
 
 Beim Klick auf **Richtig** wird nach dem Senden der Punkte die vorhandene `reveal()`-Funktion direkt aufgerufen. Damit wird exakt dieselbe Funktion verwendet wie beim manuellen „Lösung anzeigen“-Button.
+
+
+### v26 – Face Morph Dateiname anzeigen
+
+Im Face-Morph-Editor wird nach der Dateiauswahl nun der tatsächliche Dateiname neben dem Datei-Auswahlfeld angezeigt. Vor der Auswahl steht weiterhin „Keine ausgewählt“. Das Speichern der Bilder bleibt unverändert.
