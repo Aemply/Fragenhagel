@@ -84,7 +84,8 @@ function stateSounds(x){
  prevSoundState={buzzerOpen:!!x.buzzerOpen,buzzedBy:x.buzzedBy||null,mode:x.mode,revealed:!!revealed};
 }
 
-const socket=io(); let Q={}; let state={}; let active=null; const urlCode=new URLSearchParams(location.search).get('code')||'';
+const socket=io(); let Q={}; let state={};
+let judgingLocked=false; let active=null; const urlCode=new URLSearchParams(location.search).get('code')||'';
 const storedGameCode=localStorage.getItem('fragenhagelGameCode')||'';
 let gameCode=urlCode||storedGameCode;
 let hostToken=(urlCode&&urlCode!==storedGameCode)?'':(localStorage.getItem('fragenhagelHostToken')||'');
@@ -203,9 +204,11 @@ function renderAll(){  renderHostBuzz();
 renderBoard();renderMainEditor();renderFace();renderGeo();renderFH();renderMusic()}
 async function resetUsed(){if(!confirm('Alle benutzten Felder wieder freigeben?'))return;await fetch('/api/reset-used',{method:'POST',headers:gameHeaders()});await load()}
 function renderBoard(){document.getElementById('board').innerHTML=cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map((x,i)=>`<button class="tile ${x.used?'used':''}" onclick="startQuestion('${c.replaceAll("'","\\'")}',${i})">${x.used?'✓':esc(x.punkte)}</button>`).join('')}</div>`).join('')}
-async function startQuestion(c,i){const x=Q[c][i];if(x.used)return;x.used=true;renderBoard();fetch('/api/question-used',{method:'POST',headers:gameHeaders(),body:JSON.stringify({category:c,index:i,used:true})}).catch(()=>{});active={kind:'question',category:c,index:i,...x,revealed:false};socket.emit('showQuestion',{kategorie:c,punkte:x.punkte,frage:x.frage,antwort:x.antwort});showPlay()}
+async function startQuestion(c,i){
+ judgingLocked=false;const x=Q[c][i];if(x.used)return;x.used=true;renderBoard();fetch('/api/question-used',{method:'POST',headers:gameHeaders(),body:JSON.stringify({category:c,index:i,used:true})}).catch(()=>{});active={kind:'question',category:c,index:i,...x,revealed:false};socket.emit('showQuestion',{kategorie:c,punkte:x.punkte,frage:x.frage,antwort:x.antwort});showPlay()}
 function showPlay(){document.getElementById('play').classList.add('open');renderPlay()}
-function toBoard(){document.getElementById('play').classList.remove('open');active=null;socket.emit('showBoard')}
+function toBoard(){
+ judgingLocked=false;document.getElementById('play').classList.remove('open');active=null;socket.emit('showBoard')}
 function renderPlay(){if(!active)return;let html='';let points=Number(active.punkte)||0;
  if(active.kind==='question')html=`<div class="small">${esc(active.category)} · ${points} Punkte</div><div class="question">${esc(active.frage)}</div>${active.revealed?`<div class="answer">${esc(active.antwort)}</div>`:''}`;
  else if(active.type==='Face Morph')html=`<h2>Face Morph ${active.index+1}</h2>${active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Morphbild hinterlegt</div>'}${active.revealed?`<div class="answer">${esc(active.person1)} + ${esc(active.person2)}</div><div class="originals">${active.original1?`<figure><img src="${img(active.original1)}"><figcaption>${esc(active.person1)}</figcaption></figure>`:''}${active.original2?`<figure><img src="${img(active.original2)}"><figcaption>${esc(active.person2)}</figcaption></figure>`:''}</div>`:''}`;
@@ -221,20 +224,31 @@ function renderJudge(points){
  const val=Number(points)||100;
  j.innerHTML='';
 
+ if(judgingLocked){
+   const info=document.createElement('div');
+   info.className='buzz';
+   info.textContent='🔒 Bewertung bereits ausgewählt';
+   info.style.maxWidth='900px';
+   info.style.margin='20px auto';
+   info.style.textAlign='center';
+   j.appendChild(info);
+   return;
+ }
+
  if(active?.type==='Face Morph'){
    ps.forEach(p=>{
      const b1=document.createElement('button');
      b1.className='btn good';
      b1.type='button';
      b1.textContent='👤 '+String(p.name)+' +100';
-     b1.addEventListener('click',()=>award(p.name,100));
+     b1.addEventListener('click',()=>{if(judgingLocked)return;judgingLocked=true;renderJudge(val);award(p.name,100);});
      j.appendChild(b1);
 
      const b2=document.createElement('button');
      b2.className='btn good';
      b2.type='button';
      b2.textContent='👥 '+String(p.name)+' +300';
-     b2.addEventListener('click',()=>award(p.name,300));
+     b2.addEventListener('click',()=>{if(judgingLocked)return;judgingLocked=true;renderJudge(val);award(p.name,300);});
      j.appendChild(b2);
    });
  }else{
@@ -243,14 +257,24 @@ function renderJudge(points){
      good.className='btn good';
      good.type='button';
      good.textContent='✅ '+String(p.name);
-     good.addEventListener('click',()=>correct(p.name,val));
+     good.addEventListener('click',()=>{
+       if(judgingLocked)return;
+       judgingLocked=true;
+       renderJudge(val);
+       correct(p.name,val);
+     });
      j.appendChild(good);
 
      const bad=document.createElement('button');
      bad.className='btn bad';
      bad.type='button';
      bad.textContent='❌ '+String(p.name);
-     bad.addEventListener('click',()=>wrong(p.name,val));
+     bad.addEventListener('click',()=>{
+       if(judgingLocked)return;
+       judgingLocked=true;
+       renderJudge(val);
+       wrong(p.name,val);
+     });
      j.appendChild(bad);
    });
  }
@@ -268,7 +292,8 @@ function award(p,v){
  socket.emit('correct',{player:String(p),points:Number(v)||100});
 }
 async function reveal(){if(!active)return;active.revealed=true;if(active.kind==='question')socket.emit('revealQuestion');else{const list=Q.Sonderrunden?.[active.type]||[];const saved=list[active.index]||active;active={...saved,type:active.type,index:active.index,revealed:true};const pub=active.type==='Musik'?{...active,youtube:''}:active;socket.emit('revealSpecial',pub)}renderPlay()}
-function pickSpecial(type){const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=type==='Musik'?{...active,youtube:''}:active;socket.emit('showSpecial',pub);showPlay()}
+function pickSpecial(
+ judgingLocked=false;type){const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=type==='Musik'?{...active,youtube:''}:active;socket.emit('showSpecial',pub);showPlay()}
 function tab(id){document.querySelectorAll('.tabbody').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
 function renderMainEditor(){document.getElementById('main').innerHTML=cats.map(c=>`<h3>${esc(c)}</h3><div class="editorgrid">${(Q[c]||[]).map((x,i)=>`<div class="card"><b>${x.punkte} Punkte</b><textarea data-main="${esc(c)}" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-main="${esc(c)}" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" style="width:100%;margin-top:6px"></div>`).join('')}</div>`).join('')}
 function renderFace(){let a=Q.Sonderrunden?.['Face Morph']||[];document.getElementById('face').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Face Morph ${i+1}</h3><input data-sp="Face Morph" data-i="${i}" data-f="person1" value="${esc(x.person1||'')}" placeholder="Person 1"><input data-sp="Face Morph" data-i="${i}" data-f="person2" value="${esc(x.person2||'')}" placeholder="Person 2"><div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div><label>Morphbild <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'bild',this)"></label><label>Original 1 <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original1',this)"></label><label>Original 2 <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original2',this)"></label></div>`).join('')+'</div>'}

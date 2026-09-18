@@ -104,3 +104,8 @@ Ablauf:
 ### v15 – Bewertungsbuttons vollständig repariert
 
 Die Hostseite verwendet für **Richtig/Falsch** jetzt keine Inline-`onclick`-Attribute mehr. Die Buttons werden per JavaScript erzeugt und bekommen echte Click-Event-Listener. Zusätzlich sind die Soundeffekte gegen Fehler abgesichert, sodass ein Soundproblem das Senden des Bewertungsbefehls nicht mehr verhindern kann.
+
+
+### v16 – Bewertung nach einmaligem Klick gesperrt
+
+Nach der ersten Auswahl von **Richtig** oder **Falsch** werden die Bewertungsbuttons für die aktuelle Frage sofort gesperrt. Mehrfaches Klicken kann dadurch keine weiteren Punkte mehr auslösen. Beim Start einer neuen Frage wird die Sperre automatisch zurückgesetzt.
