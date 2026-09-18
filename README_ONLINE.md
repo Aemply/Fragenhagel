@@ -60,10 +60,29 @@ Die Hostseite verwendet jetzt den vom Server tatsächlich übertragenen Spielern
 in `state.buzzedBy`. Die Anzeige bleibt für die aktuelle Frage bzw. Sonderrunde sichtbar
 und wird beim nächsten Öffnen/Wechsel des Buzzers automatisch zurückgesetzt.
 
-## v10 – stabile Host-Buzzer-Logik
-Diese Version basiert wieder auf der funktionierenden v5-Basis. Der Host speichert
-den ersten vom Server akzeptierten Buzzer separat pro Frage/Sonderrunde. Deshalb
-bleibt der Name auch nach einer Richtig/Falsch-Entscheidung sichtbar, ohne die
-bestehenden `openBuzzer`, `correct`, `wrong` oder Punkte-Funktionen zu verändern.
-Beim Wechsel auf eine neue Frage, Sonderrunde oder die Tafel wird der gespeicherte
-Buzzer gelöscht.
+## v11 – Buzzer-Anzeige auf der Hostseite
+
+Die Buzzer-Logik wurde für die Hostanzeige neu aufgebaut:
+
+- Der Server speichert zusätzlich `firstBuzzedBy`.
+- Beim ersten gültigen Buzzer einer Frage/Runde wird dieser Name dauerhaft für diese Frage/Runde gespeichert.
+- `Falsch` öffnet den Buzzer wieder, ohne den ersten Buzzer zu verlieren.
+- `Richtig` beendet die Buzzer-Phase, ohne den ersten Buzzer zu verlieren.
+- Beim Start einer neuen Frage bzw. Sonderrunde wird der erste Buzzer zurückgesetzt.
+- Die Hostseite zeigt dadurch auch nach `Richtig` oder `Falsch` weiterhin an, wer zuerst gebuzzert hat.
+- Die bisherige `buzzedBy`-Logik für die Spieler bleibt erhalten.
+
+### Deployment
+
+Diese ZIP auf GitHub hochladen bzw. die Dateien im bestehenden Repository ersetzen und anschließend bei Render deployen.
+
+Nach dem Deploy am besten einen **neuen Spielcode** erzeugen und Host-/Show-/Player-Seite jeweils neu laden.
+
+
+### Buzzer-Ablauf v12
+
+- Sobald ein Spieler buzzert, wird sein Name auf der Hostseite eingeblendet.
+- **Richtig:** Die Buzzeranzeige verschwindet und der Buzzer wird geschlossen.
+- **Falsch:** Die Buzzeranzeige verschwindet sofort. Der Buzzer wird anschließend wieder für alle anderen Spieler geöffnet.
+- Der Spieler mit dem **ersten Buzzer** bleibt für diese Frage gesperrt.
+- Sobald ein anderer Spieler buzzert, wird dessen Name wieder auf der Hostseite eingeblendet.
