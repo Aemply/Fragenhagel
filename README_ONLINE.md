@@ -148,4 +148,4 @@ Die Hostseite erzwingt jetzt an jeder Stelle die Regel: **ohne `state.buzzedBy` 
 
 ### v23 – Bewertungsbuttons direkt beim Buzzer
 
-Die Bewertungsbuttons werden jetzt beim Eintreffen des Server-States mit `buzzedBy` sofort gerendert. Das Anzeigen der Lösung ist dafür nicht mehr erforderlich.
+Die Hostseite rendert die Bewertungsbuttons jetzt direkt nach einem erfolgreichen Buzzer-State-Update. `Lösung anzeigen` ist dafür nicht mehr erforderlich. Ohne `buzzedBy` bleibt der Bewertungsbereich leer; sobald ein Spieler gebuzzert hat, werden ausschließlich dessen Richtig-/Falsch-Buttons erzeugt.

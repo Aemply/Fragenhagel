@@ -130,8 +130,30 @@ function newLobby(){
 const cats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const img=u=>u?u+'?v='+Date.now():'';
-socket.on('state',s=>{stateSounds(s);state=s||{};renderScores();renderBuzz();renderHostBuzz(); if(active && state?.buzzedBy) renderJudge(Number(active.punkte)||100); else { const _j=document.getElementById('judge'); if(_j) _j.innerHTML=''; }renderLobby();});
-socket.on('buzzAccepted', ({player})=>{ if(!player)return; state.buzzedBy=player; renderBuzz(); renderHostBuzz(); } if(active && state?.buzzedBy)renderJudge(Number(active.punkte)||100); });
+socket.on('state',s=>{
+ stateSounds(s);
+ state=s||{};
+ renderScores();
+ renderBuzz();
+ renderHostBuzz();
+ renderLobby();
+ const j=document.getElementById('judge');
+ if(j){
+   if(state.buzzedBy && active){
+     renderJudge(Number(active.punkte)||100);
+   }else{
+     j.innerHTML='';
+   }
+ }
+});
+socket.on('buzzAccepted',({player})=>{
+ if(!player)return;
+ state.buzzedBy=player;
+ renderBuzz();
+ renderHostBuzz();
+ const j=document.getElementById('judge');
+ if(j && active)renderJudge(Number(active.punkte)||100);
+});
 socket.on('gameCreated',g=>{
   gameCode=g.code;
   hostToken=g.hostToken;
@@ -203,10 +225,10 @@ function renderBuzz(){
 function pts(p,a){socket.emit('addPoints',{player:p,amount:a})}function resetScores(){socket.emit('resetScores')}function openBuzzer(){
  socket.emit('openBuzzer');
  state.buzzedBy=null;
- const j=document.getElementById('judge');
- if(j)j.innerHTML='';
  renderBuzz();
  renderHostBuzz();
+ const j=document.getElementById('judge');
+ if(j)j.innerHTML='';
 }function closeBuzzer(){socket.emit('closeBuzzer')}
 function renderAll(){  renderHostBuzz();
 renderBoard();renderMainEditor();renderFace();renderGeo();renderFH();renderMusic()}
