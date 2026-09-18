@@ -104,15 +104,3 @@ Ablauf:
 ### v15 – Bewertungsbuttons vollständig repariert
 
 Die Hostseite verwendet für **Richtig/Falsch** jetzt keine Inline-`onclick`-Attribute mehr. Die Buttons werden per JavaScript erzeugt und bekommen echte Click-Event-Listener. Zusätzlich sind die Soundeffekte gegen Fehler abgesichert, sodass ein Soundproblem das Senden des Bewertungsbefehls nicht mehr verhindern kann.
-
-
-### v16 – Buzzer-Ablauf
-
-1. Host klickt **🔔 Buzzer freigeben**.
-2. Spieler A buzzert → A wird auf der Hostseite angezeigt.
-3. Nur die Bewertungsbuttons für den aktuell gebuzzerten Spieler sind aktiv.
-4. **✅ Richtig** → Punkte werden vergeben, die Buzzeranzeige verschwindet und die Lösung wird automatisch auf Host- und Showseite eingeblendet.
-5. **❌ Falsch** → Punkte werden abgezogen, A wird für diese Frage gesperrt, die Anzeige verschwindet und der Buzzer öffnet wieder für die übrigen Spieler.
-6. Spieler B buzzert → B wird angezeigt und nur B kann jetzt bewertet werden.
-7. Für jeden bereits bewerteten Spieler bleiben die Richtig/Falsch-Buttons für den Rest der Frage deaktiviert.
-8. Beim Start einer neuen Frage werden alle Sperren und Bewertungen zurückgesetzt.
