@@ -109,3 +109,8 @@ Die Hostseite verwendet für **Richtig/Falsch** jetzt keine Inline-`onclick`-Att
 ### v16 – Bewertung nur einmal pro Frage
 
 Sobald der Host bei einer Frage einmal **Richtig** oder **Falsch** auswählt, werden sämtliche Bewertungsbuttons sofort gesperrt. Ein Doppelklick oder mehrfaches Klicken kann dadurch keine weitere Punkteänderung auslösen. Beim Start einer neuen Frage wird die Sperre zurückgesetzt.
+
+
+### v17 – Fix für Bewertungsbuttons
+
+v16 hatte einen Logikfehler: Der Click-Listener setzte die Sperre vor dem Aufruf von `correct()`/`wrong()`, worauf diese Funktionen wegen der Sperre sofort zurückkehrten. In v17 wird die Sperre ausschließlich in den Bewertungsfunktionen gesetzt. Dadurch wird der Serverbefehl wieder gesendet und die Buttons bleiben danach gesperrt.

@@ -232,9 +232,7 @@ function renderJudge(points){
    b.disabled=judgingLocked;
    b.addEventListener('click',()=>{
      if(judgingLocked)return;
-     judgingLocked=true;
-     // Disable every judgement button immediately, before the server round-trip.
-     j.querySelectorAll('button').forEach(x=>x.disabled=true);
+     // correct()/wrong()/award() set the lock and emit the server event.
      fn();
    });
    j.appendChild(b);
