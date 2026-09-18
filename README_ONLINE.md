@@ -86,3 +86,16 @@ Nach dem Deploy am besten einen **neuen Spielcode** erzeugen und Host-/Show-/Pla
 - **Falsch:** Die Buzzeranzeige verschwindet sofort. Der Buzzer wird anschließend wieder für alle anderen Spieler geöffnet.
 - Der Spieler mit dem **ersten Buzzer** bleibt für diese Frage gesperrt.
 - Sobald ein anderer Spieler buzzert, wird dessen Name wieder auf der Hostseite eingeblendet.
+
+
+### Buzzer-Anzeige v13
+
+Die Buzzeranzeige auf der Hostseite ist jetzt unabhängig von der Spielerliste.
+Dadurch kann die Spielerliste neu gerendert werden, ohne die Anzeige zu entfernen.
+
+Ablauf:
+- Host gibt Buzzer frei → zunächst wird kein Spielername angezeigt.
+- Spieler buzzert → sein Name wird sofort auf der Hostseite angezeigt.
+- Richtig → Anzeige verschwindet, Buzzer ist geschlossen.
+- Falsch → Anzeige verschwindet, Buzzer öffnet sich für alle außer dem bereits gesperrten Spieler.
+- Nächster Spieler buzzert → dessen Name wird wieder angezeigt.

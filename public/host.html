@@ -2,7 +2,7 @@
 <div class="wrap">
 <div class="top"><h1 class="neon">⚡ FRAGENHAGEL – HOST</h1><span id="gameInfo" class="buzz open">Spiel wird erstellt …</span><button class="btn cyan" onclick="openShow()">📺 Show öffnen</button><button class="btn" onclick="copyPlayerLink()">🔗 Spieler-Link kopieren</button><button class="btn accent" onclick="newLobby()">🆕 Neue Lobby</button></div>
 
-<div class="panel"><h2>Spieler & Lobby</h2><div id="lobby" class="row"></div><div class="small" id="joinHint"></div><div class="row" id="scores"><div class="row" style="margin-top:10px"><button class="btn good" onclick="openBuzzer()">🔔 Buzzer freigeben</button><button class="btn" onclick="closeBuzzer()">Buzzer schließen</button><button class="btn bad" onclick="resetScores()">Punkte auf 0</button><span id="buzz" class="buzz">Buzzer geschlossen</span></div></div>
+<div class="panel"><h2>Spieler & Lobby</h2><div id="lobby" class="row"></div><div class="small" id="joinHint"></div><div class="row" style="margin-top:10px"><button class="btn good" onclick="openBuzzer()">🔔 Buzzer freigeben</button><button class="btn" onclick="closeBuzzer()">Buzzer schließen</button><button class="btn bad" onclick="resetScores()">Punkte auf 0</button></div><div id="buzz" class="buzz" style="margin-top:12px">Buzzer geschlossen</div><div id="scores"></div></div>
 
 <div class="panel"><div class="row"><h2 style="flex:1">Fragentafel</h2><button class="btn" onclick="resetUsed()">♻️ Felder zurücksetzen</button></div><div id="board" class="grid"></div></div>
 
@@ -128,7 +128,8 @@ function newLobby(){
 const cats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const img=u=>u?u+'?v='+Date.now():'';
-socket.on('state',s=>{stateSounds(s);state=s||{};renderScores();renderBuzz();renderLobby();});
+socket.on('state',s=>{stateSounds(s);state=s||{};renderScores();renderBuzz();renderHostBuzz();renderLobby();});
+socket.on('buzzAccepted', ({player})=>{ if(!player)return; state.buzzedBy=player; renderBuzz(); renderHostBuzz(); });
 socket.on('gameCreated',g=>{
   gameCode=g.code;
   hostToken=g.hostToken;
