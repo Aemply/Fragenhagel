@@ -4,6 +4,59 @@
 .fm-file-picker .fm-file-name{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.95em;opacity:.9}
 .fm-file-picker input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 </style>
+
+<style id="face-morph-host-v37">
+.fm-host-solution{
+  display:grid !important;
+  grid-template-columns:minmax(150px,0.75fr) minmax(0,1.5fr) minmax(150px,0.75fr) !important;
+  align-items:center !important;
+  justify-items:center !important;
+  gap:28px !important;
+  width:96vw !important;
+  max-width:1600px !important;
+  margin:0 auto !important;
+  box-sizing:border-box !important;
+}
+.fm-host-solution > div{
+  min-width:0 !important;
+  width:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+.fm-host-solution .fm-host-original img{
+  display:block !important;
+  width:auto !important;
+  max-width:100% !important;
+  max-height:46vh !important;
+  object-fit:contain !important;
+  border-radius:16px !important;
+}
+.fm-host-solution .fm-host-morph{
+  width:auto !important;
+}
+.fm-host-solution .fm-host-morph .heroimg{
+  /* Same heroimg class/size as before revealing the solution. */
+  max-width:90vw !important;
+}
+.fm-host-solution figcaption{
+  margin-top:8px !important;
+  font-weight:800 !important;
+  font-size:18px !important;
+}
+@media(max-width:800px){
+  .fm-host-solution{
+    grid-template-columns:1fr !important;
+    gap:18px !important;
+  }
+  .fm-host-solution .fm-host-original img,
+  .fm-host-solution .fm-host-morph .heroimg{
+    max-height:34vh !important;
+  }
+}
+</style>
+
 </head><body><button id="soundToggle" onclick="toggleSound()" title="Sound an/aus" style="position:fixed;right:12px;bottom:12px;z-index:99;border:1px solid #ffffff33;background:#111126;color:white;border-radius:999px;padding:8px 11px;cursor:pointer">🔊</button>
 <div class="wrap">
 <div class="top"><h1 class="neon">⚡ FRAGENHAGEL – HOST</h1><span id="gameInfo" class="buzz open">Spiel wird erstellt …</span><button class="btn cyan" onclick="openShow()">📺 Show öffnen</button><button class="btn" onclick="copyPlayerLink()">🔗 Spieler-Link kopieren</button><button class="btn accent" onclick="newLobby()">🆕 Neue Lobby</button></div>
@@ -250,7 +303,7 @@ function toBoard(){
  judgingLocked=false;document.getElementById('play').classList.remove('open');active=null;socket.emit('showBoard')}
 function renderPlay(){if(!active)return;let html='';let points=Number(active.punkte)||0;
  if(active.kind==='question')html=`<div class="small">${esc(active.category)} · ${points} Punkte</div><div class="question">${esc(active.frage)}</div>${active.revealed?`<div class="answer">${esc(active.antwort)}</div>`:''}`;
- else if(active.type==='Face Morph')html=`<h2>Face Morph ${active.index+1}</h2>${active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Morphbild hinterlegt</div>'}${active.revealed?`<div class="answer">${esc(active.person1)} + ${esc(active.person2)}</div><div class="originals">${active.original1?`<figure><img src="${img(active.original1)}"><figcaption>${esc(active.person1)}</figcaption></figure>`:''}${active.original2?`<figure><img src="${img(active.original2)}"><figcaption>${esc(active.person2)}</figcaption></figure>`:''}</div>`:''}`;
+ else if(active.type==='Face Morph')html=`${active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Morphbild hinterlegt</div>'}${active.revealed?`<div class="fm-host-solution"><div class="fm-host-original"><img src="${img(active.original1)}"><figcaption>${esc(active.person1||'')}</figcaption></div><div class="fm-host-morph"><img class="heroimg" src="${img(active.bild)}"></div><div class="fm-host-original"><img src="${img(active.original2)}"><figcaption>${esc(active.person2||'')}</figcaption></div></div>`:''}`;
  else if(active.type==='Wo zum Henker ist das?')html=`<h2>Geo ${active.index+1}</h2>${active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Bild hinterlegt</div>'}${active.revealed?`<div class="answer">📍 ${esc(active.antwort)}</div>`:''}`;
  else if(active.type==='Fragenhagel')html=`<h2>Fragenhagel ${active.index+1}</h2><div class="question">${esc(active.frage||'Noch keine Frage')}</div>${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`;
  else if(active.type==='Musik'){const id=yt(active.youtube);html=`<h2>Musik ${active.index+1}</h2><div class="question">Welches Lied ist das?</div>${id?`<iframe width="760" height="428" style="max-width:90vw;border:0;border-radius:15px" src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`:'<div class="small">Kein gültiger YouTube-Link</div>'}${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`}
