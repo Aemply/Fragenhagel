@@ -108,7 +108,7 @@
 </div>
 
 <div id="play" class="modal"><div class="stage">
-<div class="row" style="justify-content:center"><button class="btn" onclick="toBoard()">← Zur Tafel</button><button class="btn good" onclick="openBuzzer()">🔔 Buzzer freigeben</button><button class="btn accent" onclick="reveal()">👁 Lösung anzeigen</button><button id="nextFaceMorphBtn" class="btn" onclick="nextFaceMorph()" style="display:none">➡️ Nächster Face Morph</button></div>
+<div class="row" style="justify-content:center"><button class="btn" onclick="toBoard()">← Zur Tafel</button><button class="btn good" onclick="openBuzzer()">🔔 Buzzer freigeben</button><button class="btn accent" onclick="reveal()">👁 Lösung anzeigen</button><button id="nextFaceMorphBtn" class="btn" onclick="nextFaceMorph()" style="display:none">➡️ Nächster Face Morph</button><button id="nextSpecialBtn" class="btn" onclick="nextSpecial()" style="display:none"></button></div>
 <div id="hostBuzzed" class="buzz" style="display:none;max-width:760px;margin:22px auto;font-size:34px;text-align:center"></div>
 <div id="playContent"></div><div id="judge" class="row" style="justify-content:center;margin-top:20px"></div>
 </div></div>
@@ -330,7 +330,7 @@ function renderPlay(){if(!active)return;let html='';let points=Number(active.pun
  else if(active.type==='Wo zum Henker ist das?')html=`<h2>Geo ${active.index+1}</h2>${active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Bild hinterlegt</div>'}${active.revealed?`<div class="answer">📍 ${esc(active.antwort)}</div>`:''}`;
  else if(active.type==='Fragenhagel')html=`<h2>Fragenhagel ${active.index+1}</h2><div class="question">${esc(active.frage||'Noch keine Frage')}</div>${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`;
  else if(active.type==='Musik'){const id=yt(active.youtube);html=`<h2>Musik ${active.index+1}</h2><div class="question">Welches Lied ist das?</div>${id?`<iframe width="760" height="428" style="max-width:90vw;border:0;border-radius:15px" src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`:'<div class="small">Kein gültiger YouTube-Link</div>'}${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`}
- document.getElementById('playContent').innerHTML=html; const nextFm=document.getElementById("nextFaceMorphBtn"); if(nextFm){const list=Q.Sonderrunden?.['Face Morph']||[]; const isFm=active?.type==='Face Morph'; nextFm.style.display=isFm?'inline-block':'none'; nextFm.disabled=!isFm || active.index>=list.length-1;} if(state?.buzzedBy)renderJudge(points);else{const _j=document.getElementById("judge");if(_j)_j.innerHTML="";}
+ document.getElementById('playContent').innerHTML=html; const nextFm=document.getElementById("nextFaceMorphBtn"); if(nextFm){const list=Q.Sonderrunden?.['Face Morph']||[]; const isFm=active?.type==='Face Morph'; nextFm.style.display=isFm?'inline-block':'none'; nextFm.disabled=!isFm || active.index>=list.length-1;} const nextSpecialBtn=document.getElementById("nextSpecialBtn"); if(nextSpecialBtn){const nextMap={"Wo zum Henker ist das?":{label:"➡️ Nächster Geo",type:"Wo zum Henker ist das?"},"Fragenhagel":{label:"➡️ Nächster Fragenhagel",type:"Fragenhagel"},"Musik":{label:"➡️ Nächste Musik",type:"Musik"}}; const cfg=nextMap[active?.type]; const list=cfg?(Q.Sonderrunden?.[cfg.type]||[]):[]; const show=!!cfg; nextSpecialBtn.style.display=show?'inline-block':'none'; nextSpecialBtn.textContent=cfg?.label||''; nextSpecialBtn.disabled=!show || Number(active.index)>=list.length-1;} if(state?.buzzedBy)renderJudge(points);else{const _j=document.getElementById("judge");if(_j)_j.innerHTML="";}
 }
 function renderJudge(points){
  const j=document.getElementById('judge');
@@ -416,6 +416,20 @@ function nextFaceMorph(){
  if(nextIndex>=list.length)return;
  active={...list[nextIndex],type:'Face Morph',index:nextIndex,revealed:false};
  socket.emit('showSpecial',active);
+ showPlay();
+}
+function nextSpecial(){
+ judgedPlayers={};
+ judgingLocked=false;
+ const type=active?.type;
+ const allowed=['Wo zum Henker ist das?','Fragenhagel','Musik'];
+ if(!allowed.includes(type))return;
+ const list=Q.Sonderrunden?.[type]||[];
+ const nextIndex=Number(active.index)+1;
+ if(nextIndex>=list.length)return;
+ active={...list[nextIndex],type,index:nextIndex,revealed:false};
+ const pub=type==='Musik'?{...active,youtube:''}:active;
+ socket.emit('showSpecial',pub);
  showPlay();
 }
 function pickSpecial(type){
