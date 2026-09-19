@@ -101,7 +101,7 @@ app.post('/api/special-image', (req, res) => {
   try {
     const game = hostAuthorized(req);
     if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
-    const { section, index, field, data, filename, person1, person2 } = req.body || {};
+    const { section, index, field, data, filename, fields, person1, person2 } = req.body || {};
     if (!['Face Morph', 'Wo zum Henker ist das?'].includes(section)) throw new Error('Ungültige Sonderrunde');
     const allowed = section === 'Face Morph' ? ['bild', 'original1', 'original2'] : ['bild'];
     if (!allowed.includes(field)) throw new Error('Ungültiges Bildfeld');
@@ -112,10 +112,16 @@ app.post('/api/special-image', (req, res) => {
     const ext = m[1].toLowerCase() === 'jpeg' ? 'jpg' : m[1].toLowerCase();
     const name = `special_${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
     fs.writeFileSync(path.join(MEDIA, name), Buffer.from(m[2], 'base64'));
+    // Preserve all unsaved editor fields when an image is uploaded.
+    // This prevents a render/save cycle from restoring older server values.
+    if (fields && typeof fields === 'object' && !Array.isArray(fields)) {
+      for (const [key, value] of Object.entries(fields)) {
+        if (key === field || key === 'bild' || key === 'original1' || key === 'original2') continue;
+        q.Sonderrunden[section][i][key] = value;
+      }
+    }
+    // Backwards-compatible Face Morph handling.
     if (section === 'Face Morph') {
-      // Preserve unsaved editor text when an image is uploaded.
-      // The image endpoint reads the current server state, so carry over
-      // Person 1/Person 2 from the editor request before writing the image.
       if (person1 !== undefined) q.Sonderrunden[section][i].person1 = String(person1);
       if (person2 !== undefined) q.Sonderrunden[section][i].person2 = String(person2);
     }
