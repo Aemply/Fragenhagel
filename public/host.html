@@ -1,6 +1,8 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Fragenhagel Host</title><link rel="stylesheet" href="/style.css"><style id="face-morph-filename-v30">.fm-file-name{display:inline-block;margin-left:8px;font-size:.9em;opacity:.8;vertical-align:middle}</style>
-<style id="face-morph-filename-v31">
-.fm-file-name{display:inline-block;margin-left:8px;vertical-align:middle;font-size:.9em;opacity:.8}
+<!doctype html><html><head><meta charset="utf-8"><title>Fragenhagel Host</title><link rel="stylesheet" href="/style.css"><style id="face-morph-filename-v32">
+.fm-file-picker{position:relative;display:inline-flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;cursor:pointer;margin:4px 0}
+.fm-file-picker .fm-file-button{display:inline-block;padding:2px 10px;border:1px solid #999;border-radius:3px;background:#eee;color:#111;font-size:16px;line-height:1.35;white-space:nowrap}
+.fm-file-picker .fm-file-name{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.95em;opacity:.9}
+.fm-file-picker input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 </style>
 </head><body><button id="soundToggle" onclick="toggleSound()" title="Sound an/aus" style="position:fixed;right:12px;bottom:12px;z-index:99;border:1px solid #ffffff33;background:#111126;color:white;border-radius:999px;padding:8px 11px;cursor:pointer">🔊</button>
 <div class="wrap">
@@ -341,18 +343,27 @@ function renderFace(){
  <input data-sp="Face Morph" data-i="${i}" data-f="person1" value="${esc(x.person1||'')}" placeholder="Person 1">
  <input data-sp="Face Morph" data-i="${i}" data-f="person2" value="${esc(x.person2||'')}" placeholder="Person 2">
  <div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div>
- <label>Morphbild
-   <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'bild',this)">
-   <span class="fm-file-name">${esc(x.bildName||'Keine ausgewählt')}</span>
- </label>
- <label>Original 1
-   <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original1',this)">
-   <span class="fm-file-name">${esc(x.original1Name||'Keine ausgewählt')}</span>
- </label>
- <label>Original 2
-   <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original2',this)">
-   <span class="fm-file-name">${esc(x.original2Name||'Keine ausgewählt')}</span>
- </label>
+ <div class="fm-file-row"><div>Morphbild</div>
+   <label class="fm-file-picker">
+     <span class="fm-file-button">Datei auswählen</span>
+     <span class="fm-file-name">${esc(x.bildName||'Keine ausgewählt')}</span>
+     <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'bild',this)">
+   </label>
+ </div>
+ <div class="fm-file-row"><div>Original 1</div>
+   <label class="fm-file-picker">
+     <span class="fm-file-button">Datei auswählen</span>
+     <span class="fm-file-name">${esc(x.original1Name||'Keine ausgewählt')}</span>
+     <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original1',this)">
+   </label>
+ </div>
+ <div class="fm-file-row"><div>Original 2</div>
+   <label class="fm-file-picker">
+     <span class="fm-file-button">Datei auswählen</span>
+     <span class="fm-file-name">${esc(x.original2Name||'Keine ausgewählt')}</span>
+     <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original2',this)">
+   </label>
+ </div>
  </div>`).join('')+'</div>';
 }
 function renderGeo(){let a=Q.Sonderrunden?.['Wo zum Henker ist das?']||[];document.getElementById('geo').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Geo ${i+1}</h3><input data-sp="Wo zum Henker ist das?" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Ort"><input type="number" data-sp="Wo zum Henker ist das?" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"><div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div><input type="file" accept="image/*" onchange="uploadImg('Wo zum Henker ist das?',${i},'bild',this)"></div>`).join('')+'</div>'}
@@ -381,8 +392,9 @@ load();createOrJoin();
 document.addEventListener('change',function(e){
   const input=e.target;
   if(!input || input.type!=='file') return;
-  const span=input.nextElementSibling;
-  if(span && span.classList.contains('fm-file-name')){
+  const picker=input.closest('.fm-file-picker');
+  const span=picker && picker.querySelector('.fm-file-name');
+  if(span){
     span.textContent=input.files && input.files.length
       ? input.files[0].name
       : 'Keine ausgewählt';
