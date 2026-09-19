@@ -10,6 +10,57 @@ body{overflow:hidden}.showwrap{height:100vh;display:flex;flex-direction:column;p
 @media(max-width:800px){.face-morph-solution-v30{grid-template-columns:1fr;gap:18px}.face-morph-solution-v30 .fm30-side img{max-height:30vh}}
 </style>
 
+
+<style id="face-morph-v35">
+.fm-solution-v35{
+  display:grid !important;
+  grid-template-columns:minmax(160px, 0.75fr) minmax(360px, 1.5fr) minmax(160px, 0.75fr) !important;
+  align-items:center !important;
+  justify-items:center !important;
+  gap:32px !important;
+  width:96vw !important;
+  max-width:1600px !important;
+  margin:20px auto !important;
+  box-sizing:border-box !important;
+}
+.fm-solution-v35 > div{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-width:0 !important;
+  width:100% !important;
+}
+.fm-solution-v35 img{
+  display:block !important;
+  width:auto !important;
+  max-width:100% !important;
+  object-fit:contain !important;
+  border-radius:16px !important;
+}
+.fm-solution-v35 .fm-original img{
+  max-height:46vh !important;
+}
+.fm-solution-v35 .fm-morph img{
+  max-height:78vh !important;
+}
+.fm-solution-v35 > div > div{
+  margin-top:8px !important;
+  font-weight:800 !important;
+  font-size:18px !important;
+}
+@media(max-width:800px){
+  .fm-solution-v35{
+    grid-template-columns:1fr !important;
+    gap:18px !important;
+  }
+  .fm-solution-v35 .fm-original img,
+  .fm-solution-v35 .fm-morph img{
+    max-height:34vh !important;
+  }
+}
+</style>
+
 </head><body>
 <button id="soundToggle" onclick="toggleSound()" title="Sound an/aus" style="position:fixed;right:12px;bottom:12px;z-index:99;border:1px solid #ffffff33;background:#111126;color:white;border-radius:999px;padding:8px 11px;cursor:pointer">🔊</button>
 <div id="join" class="join"><div class="joinbox panel"><h1 class="neon">⚡ FRAGENHAGEL SHOW</h1><p>Spielcode eingeben, um die Show zu verbinden.</p><input id="code" maxlength="5" placeholder="z. B. K7XM2"><button class="btn cyan" style="margin-top:12px" onclick="connectGame()">📺 Verbinden</button><div id="joinStatus" class="small"></div></div></div>
@@ -32,6 +83,6 @@ socket.on('questionsUpdated',q=>{Q=q;render()});
 async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());render()}
 function render(){const ps=state.players||[];document.getElementById('scores').innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong></div>`).join('');const b=document.getElementById('buzz');b.textContent=state.buzzedBy?'⚡ '+state.buzzedBy+' hat gebuzzert!':state.buzzerOpen?'🟢 BUZZER OFFEN':'🔴 Buzzer geschlossen';b.className='buzz showbuzz'+(state.buzzerOpen?' open':'');const stage=document.getElementById('stage');if(state.mode==='question'&&state.question){let x=state.question;stage.innerHTML=`<div><div class="small">${esc(x.kategorie)} · ${esc(x.punkte)} Punkte</div><div class="question">${esc(x.frage)}</div>${x.revealed?`<div class="answer"><div class="small">LÖSUNG</div>${esc(x.antwort)}</div>`:''}</div>`;return}if(state.mode==='special'&&state.special){stage.innerHTML=special(state.special);return}stage.innerHTML=board()}
 function board(){return `<div class="board">${cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map(x=>`<div class="tile ${x.used?'used':''}">${x.used?'✓':esc(x.punkte)}</div>`).join('')}</div>`).join('')}</div>`}
-function special(x){const t=x.type;if(t==='Face Morph')return `<div><h2 class="neon">FACE MORPH</h2>${!x.revealed?(x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Morphbild</div>'):`<div class="fm-solution-row" style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:24px;width:100%;max-width:1500px;margin:18px auto 0;box-sizing:border-box"><div class="fm-solution-side" style="flex:0 1 22%;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><img src="${img(x.original1)}" alt="Originalbild 1" style="display:block;max-width:100%;max-height:52vh;object-fit:contain;border-radius:16px">${x.original1?'<div style="margin-top:8px;font-weight:800;font-size:18px">Originalbild 1</div>':''}</div><div class="fm-solution-center" style="flex:1 1 56%;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><img src="${img(x.bild)}" alt="Morph-Bild" style="display:block;max-width:100%;max-height:76vh;object-fit:contain;border-radius:16px"><div style="margin-top:8px;font-weight:800;font-size:18px">Morph</div></div><div class="fm-solution-side" style="flex:0 1 22%;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><img src="${img(x.original2)}" alt="Originalbild 2" style="display:block;max-width:100%;max-height:52vh;object-fit:contain;border-radius:16px">${x.original2?'<div style="margin-top:8px;font-weight:800;font-size:18px">Originalbild 2</div>':''}</div></div>`}</div>`;if(t==='Wo zum Henker ist das?')return `<div><h2 class="neon">WO ZUM HENKER IST DAS?</h2>${x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Geo-Bild</div>'}${x.revealed?`<div class="answer">📍 ${esc(x.antwort)}</div>`:''}</div>`;if(t==='Fragenhagel')return `<div><h2 class="neon">FRAGENHAGEL · ${esc(x.punkte||100)} PUNKTE</h2><div class="question">${esc(x.frage||'Noch keine Frage')}</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;if(t==='Musik')return `<div><h2 class="neon">MUSIK · ${esc(x.punkte||300)} PUNKTE</h2><div class="question">🎵 Welches Lied ist das?</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;return '<div class="question">Sonderrunde</div>'}
+function special(x){const t=x.type;if(t==='Face Morph')return `<div><h2 class="neon">FACE MORPH</h2>${!x.revealed?(x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Morphbild</div>'):`<div class="fm-solution-v35"><div class="fm-original"><img src="${img(x.original1)}" alt="Originalbild 1"><div>Originalbild 1</div></div><div class="fm-morph"><img src="${img(x.bild)}" alt="Morph-Bild"><div>Morph</div></div><div class="fm-original"><img src="${img(x.original2)}" alt="Originalbild 2"><div>Originalbild 2</div></div></div>`}</div>`;if(t==='Wo zum Henker ist das?')return `<div><h2 class="neon">WO ZUM HENKER IST DAS?</h2>${x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Geo-Bild</div>'}${x.revealed?`<div class="answer">📍 ${esc(x.antwort)}</div>`:''}</div>`;if(t==='Fragenhagel')return `<div><h2 class="neon">FRAGENHAGEL · ${esc(x.punkte||100)} PUNKTE</h2><div class="question">${esc(x.frage||'Noch keine Frage')}</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;if(t==='Musik')return `<div><h2 class="neon">MUSIK · ${esc(x.punkte||300)} PUNKTE</h2><div class="question">🎵 Welches Lied ist das?</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;return '<div class="question">Sonderrunde</div>'}
 load();
 </script></body></html>
