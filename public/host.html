@@ -468,7 +468,8 @@ async function uploadImg(section,index,field,input){
    Q.Sonderrunden[section][index][f]=el.type==='number'?Number(el.value)||0:el.value;
  });
  const data=await new Promise((ok,no)=>{let r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(file)});
- let resp=await fetch('/api/special-image',{method:'POST',headers:gameHeaders(),body:JSON.stringify({section,index,field,data,filename:file.name})});
+ const item=Q.Sonderrunden[section][index]||{};
+ let resp=await fetch('/api/special-image',{method:'POST',headers:gameHeaders(),body:JSON.stringify({section,index,field,data,filename:file.name,person1:item.person1,person2:item.person2})});
  let j=await resp.json();
  if(!resp.ok)return alert(j.error||'Upload fehlgeschlagen');
  Q.Sonderrunden[section][index][field]=j.url;
