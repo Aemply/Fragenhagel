@@ -126,7 +126,7 @@ app.post('/api/special-image', (req, res) => {
       if (person2 !== undefined) q.Sonderrunden[section][i].person2 = String(person2);
     }
     q.Sonderrunden[section][i][field] = '/media/' + name;
-    if (section === 'Face Morph') q.Sonderrunden[section][i][field + 'Name'] = String(filename || '');
+    if (section === 'Face Morph' || section === 'Wo zum Henker ist das?') q.Sonderrunden[section][i][field + 'Name'] = String(filename || '');
     writeQ(q);
     io.to(`game:${game.code}`).emit('questionsUpdated', q);
     res.json({ ok: true, url: '/media/' + name, item: q.Sonderrunden[section][i] });
