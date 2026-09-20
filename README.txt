@@ -14,8 +14,10 @@ Wichtige Architektur:
 - Host sendet Aktionen an den Server.
 - Show rendert ausschließlich den aktuellen Serverzustand.
 - Beim Verbinden und Wiederverbinden erhält die Show sofort den aktuellen Zustand.
+- Musik-YouTube-Link wird niemals an die Show übertragen.
 
 Sonderrunden:
 - Face Morph: Morphbild + zwei Originale, Reveal in Show.
 - Geo: Bild + Lösung.
 - Fragenhagel: Frage + Antwort.
+- Musik: YouTube-Player nur Host; Show zeigt keine URL.

@@ -17,6 +17,18 @@ app.use(express.json({ limit: '100mb' }));
 app.use(express.static(path.join(ROOT, 'public')));
 app.get('/healthz', (req, res) => res.json({ ok: true }));
 
+const readQ = () => JSON.parse(fs.readFileSync(QFILE, 'utf8'));
+const writeQ = q => fs.writeFileSync(QFILE, JSON.stringify(q, null, 2), 'utf8');
+const cleanName = n => String(n || '').trim().replace(/\s+/g, ' ').slice(0, 24) || 'Gast';
+const makeCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  do { out = Array.from({ length: 5 }, () => chars[crypto.randomInt(chars.length)]).join(''); }
+  while (games.has(out));
+  return out;
+};
+const token = () => crypto.randomBytes(24).toString('hex');
+
 app.get('/api/questions', (req, res) => res.json(readQ()));
 
 const games = new Map();
@@ -55,7 +67,6 @@ app.get('/api/game/:code', (req, res) => {
   if (!game) return res.status(404).json({ ok: false, error: 'Spiel nicht gefunden' });
   res.json({ ok: true, code: game.code, players: game.players.map(p => ({ name: p.name, score: p.score, connected: p.connected })) });
 });
-
 
 app.put('/api/questions', (req, res) => {
   try {
