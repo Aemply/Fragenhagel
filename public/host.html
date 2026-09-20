@@ -1,0 +1,540 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Fragenhagel Host</title><link rel="stylesheet" href="/style.css"><style id="face-morph-filename-v32">
+.fm-file-picker{position:relative;display:inline-flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;cursor:pointer;margin:4px 0}
+.fm-file-picker .fm-file-button{display:inline-block;padding:2px 10px;border:1px solid #999;border-radius:3px;background:#eee;color:#111;font-size:16px;line-height:1.35;white-space:nowrap}
+.fm-file-picker .fm-file-name{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.95em;opacity:.9}
+.fm-file-picker input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+</style>
+
+<style id="face-morph-host-v37">
+.fm-host-solution{
+  display:grid !important;
+  grid-template-columns:minmax(150px,0.75fr) minmax(0,1.5fr) minmax(150px,0.75fr) !important;
+  align-items:center !important;
+  justify-items:center !important;
+  gap:28px !important;
+  width:96vw !important;
+  max-width:1600px !important;
+  margin:0 auto !important;
+  box-sizing:border-box !important;
+}
+.fm-host-solution > div{
+  min-width:0 !important;
+  width:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+.fm-host-solution .fm-host-original img{
+  display:block !important;
+  width:auto !important;
+  max-width:100% !important;
+  max-height:46vh !important;
+  object-fit:contain !important;
+  border-radius:16px !important;
+}
+.fm-host-solution .fm-host-morph{
+  width:auto !important;
+}
+.fm-host-solution .fm-host-morph .heroimg{
+  /* Same heroimg class/size as before revealing the solution. */
+  max-width:90vw !important;
+}
+.fm-host-solution figcaption{
+  margin-top:8px !important;
+  font-weight:800 !important;
+  font-size:18px !important;
+}
+@media(max-width:800px){
+  .fm-host-solution{
+    grid-template-columns:1fr !important;
+    gap:18px !important;
+  }
+  .fm-host-solution .fm-host-original img,
+  .fm-host-solution .fm-host-morph .heroimg{
+    max-height:34vh !important;
+  }
+}
+</style>
+
+
+<style id="face-morph-host-v39">
+.fm-host-solution{
+  margin-top:32px !important;
+}
+.fm-host-solution .fm-host-original img{
+  max-height:40vh !important;
+}
+.fm-host-solution .fm-host-morph .heroimg{
+  max-height:62vh !important;
+}
+</style>
+
+
+<style id="face-morph-host-v40">
+/* Face Morph: compact display before the solution is revealed */
+#play .stage #playContent > .heroimg{
+  max-width:78vw !important;
+  max-height:58vh !important;
+  margin-top:28px !important;
+}
+</style>
+
+</head><body><button id="soundToggle" onclick="toggleSound()" title="Sound an/aus" style="position:fixed;right:12px;bottom:12px;z-index:99;border:1px solid #ffffff33;background:#111126;color:white;border-radius:999px;padding:8px 11px;cursor:pointer">🔊</button>
+<div class="wrap">
+<div class="top"><h1 class="neon">⚡ FRAGENHAGEL – HOST</h1><span id="gameInfo" class="buzz open">Spiel wird erstellt …</span><button class="btn cyan" onclick="openShow()">📺 Show öffnen</button><button class="btn" onclick="copyPlayerLink()">🔗 Spieler-Link kopieren</button><button class="btn accent" onclick="newLobby()">🆕 Neue Lobby</button></div>
+
+<div class="panel"><h2>Spieler & Lobby</h2><div id="lobby" class="row"></div><div class="small" id="joinHint"></div><div class="row" style="margin-top:10px"><button class="btn good" onclick="openBuzzer()">🔔 Buzzer freigeben</button><button class="btn" onclick="closeBuzzer()">Buzzer schließen</button><button class="btn bad" onclick="resetScores()">Punkte auf 0</button></div><div id="buzz" class="buzz" style="margin-top:12px">Buzzer geschlossen</div><div id="scores"></div></div>
+
+<div class="panel"><div class="row"><h2 style="flex:1">Fragentafel</h2><button class="btn" onclick="resetUsed()">♻️ Felder zurücksetzen</button></div><div id="board" class="grid"></div></div>
+
+<div class="panel"><h2>Sonderrunden</h2><div class="row">
+<button class="btn accent" onclick="pickSpecial('Face Morph')">🧑‍🤝‍🧑 Face Morph</button>
+<button class="btn accent" onclick="pickSpecial('Wo zum Henker ist das?')">🌍 Geo</button>
+<button class="btn accent" onclick="pickSpecial('Fragenhagel')">🌩️ Fragenhagel</button>
+</div></div>
+
+<div class="panel"><h2>Editor</h2>
+<div class="tabs">
+<button class="btn" onclick="tab('main')">Hauptbrett</button>
+<button class="btn" onclick="tab('face')">Face Morph</button>
+<button class="btn" onclick="tab('geo')">Geo</button>
+<button class="btn" onclick="tab('fh')">Fragenhagel</button>
+</div>
+<div id="main" class="tabbody active"></div><div id="face" class="tabbody"></div><div id="geo" class="tabbody"></div><div id="fh" class="tabbody"></div>
+<div style="margin-top:12px"><button class="btn good" onclick="saveAll()">💾 Alles speichern</button><span id="saveStatus" class="small"></span></div></div>
+</div>
+
+<div id="play" class="modal"><div class="stage">
+<div class="row" style="justify-content:center"><button class="btn" onclick="toBoard()">← Zur Tafel</button><button class="btn good" onclick="openBuzzer()">🔔 Buzzer freigeben</button><button class="btn accent" onclick="reveal()">👁 Lösung anzeigen</button><button id="nextFaceMorphBtn" class="btn" onclick="nextFaceMorph()" style="display:none">➡️ Nächster Face Morph</button><button id="nextSpecialBtn" class="btn" onclick="nextSpecial()" style="display:none"></button></div>
+<div id="hostBuzzed" class="buzz" style="display:none;max-width:760px;margin:22px auto;font-size:34px;text-align:center"></div>
+<div id="playContent"></div><div id="judge" class="row" style="justify-content:center;margin-top:20px"></div>
+</div></div>
+
+
+<div id="hostBuzzPanel" class="panel host-buzz-panel">
+  <div class="panel-title">⚡ BUZZER</div>
+  <div id="hostBuzzName" class="host-buzz-name waiting">Noch niemand gebuzzert</div>
+  <div id="hostBuzzMeta" class="host-buzz-meta"></div>
+</div>
+
+<style>
+.host-buzz-panel{
+  margin:12px 0;
+  padding:16px 20px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:14px;
+}
+.host-buzz-name{
+  font-size:clamp(24px,4vw,42px);
+  font-weight:800;
+  line-height:1.1;
+  margin-top:6px;
+}
+.host-buzz-name.waiting{opacity:.55}
+.host-buzz-name.active{animation:hostBuzzPulse .7s ease-in-out infinite alternate}
+.host-buzz-meta{margin-top:6px;opacity:.7}
+@keyframes hostBuzzPulse{
+  from{transform:scale(1)}
+  to{transform:scale(1.025)}
+}
+</style>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+let soundOn=localStorage.getItem('fragenhagelSound')!=='off';
+let audioCtx=null;
+function ac(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}
+function tone(freq,dur=.12,type='sine',vol=.08,delay=0){if(!soundOn)return;try{const c=ac(),o=c.createOscillator(),g=c.createGain(),now=c.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,now);g.gain.setValueAtTime(0.0001,now);g.gain.exponentialRampToValueAtTime(vol,now+.01);g.gain.exponentialRampToValueAtTime(0.0001,now+dur);o.connect(g);g.connect(c.destination);o.start(now);o.stop(now+dur+.03)}catch(e){}}
+function sBuzz(){tone(180,.09,'square',.10);tone(120,.16,'square',.08,.08)}
+function sOpen(){tone(520,.09,'sine',.07);tone(760,.13,'sine',.07,.09)}
+function sReveal(){tone(440,.10,'triangle',.07);tone(660,.10,'triangle',.07,.10);tone(880,.18,'triangle',.08,.20)}
+function sCorrect(){tone(523,.10,'sine',.07);tone(659,.10,'sine',.07,.10);tone(784,.22,'sine',.08,.20)}
+function sWrong(){tone(220,.15,'sawtooth',.06);tone(165,.25,'sawtooth',.06,.13)}
+function toggleSound(){soundOn=!soundOn;localStorage.setItem('fragenhagelSound',soundOn?'on':'off');const b=document.getElementById('soundToggle');if(b)b.textContent=soundOn?'🔊':'🔇';if(soundOn)sOpen()}
+document.addEventListener('pointerdown',()=>{if(soundOn)ac()},{once:true});
+setTimeout(()=>{const b=document.getElementById('soundToggle');if(b)b.textContent=soundOn?'🔊':'🔇'},0);
+let prevSoundState={buzzerOpen:false,buzzedBy:null,mode:null,revealed:false};
+function stateSounds(x){
+ if(!x)return;
+ if(x.buzzedBy && x.buzzedBy!==prevSoundState.buzzedBy)sBuzz();
+ else if(x.buzzerOpen && !prevSoundState.buzzerOpen)sOpen();
+ const revealed=(x.mode==='question'?x.question?.revealed:x.mode==='special'?x.special?.revealed:false);
+ if(revealed&&!prevSoundState.revealed)sReveal();
+ prevSoundState={buzzerOpen:!!x.buzzerOpen,buzzedBy:x.buzzedBy||null,mode:x.mode,revealed:!!revealed};
+}
+
+const socket=io(); let Q={}; let state={};
+let judgedPlayers={};
+ let active=null; const urlCode=new URLSearchParams(location.search).get('code')||'';
+const storedGameCode=localStorage.getItem('fragenhagelGameCode')||'';
+let gameCode=urlCode||storedGameCode;
+let hostToken=(urlCode&&urlCode!==storedGameCode)?'':(localStorage.getItem('fragenhagelHostToken')||'');
+let creatingNewLobby=false;
+const gameHeaders=()=>({'Content-Type':'application/json','x-game-code':gameCode,'x-host-token':hostToken});
+function openShow(){if(!gameCode)return alert('Spiel wird noch erstellt.');window.open('/show.html?code='+encodeURIComponent(gameCode),'show')}
+function playerLink(){return location.origin+'/player.html?code='+encodeURIComponent(gameCode)}
+async function copyPlayerLink(){if(!gameCode)return;try{await navigator.clipboard.writeText(playerLink());document.getElementById('joinHint').textContent='Spieler-Link kopiert: '+playerLink()}catch(e){prompt('Spieler-Link',playerLink())}}
+function createOrJoin(){
+  if(gameCode&&hostToken){
+    socket.emit('hostJoin',{code:gameCode,hostToken});
+    return;
+  }
+  socket.emit('createGame');
+}
+
+function setHostUrl(code){
+  const url=new URL(location.href);
+  if(code) url.searchParams.set('code',code);
+  else url.searchParams.delete('code');
+  history.replaceState(null,'',url.pathname+(url.search?url.search:''));
+}
+
+function newLobby(){
+  if(!confirm('Neue Lobby erstellen? Die aktuelle Lobby bleibt für bereits verbundene Spieler bestehen, aber dieser Host wechselt in eine neue Lobby.')) return;
+  creatingNewLobby=true;
+  gameCode='';
+  hostToken='';
+  state={};
+  active=null;
+  localStorage.removeItem('fragenhagelGameCode');
+  localStorage.removeItem('fragenhagelHostToken');
+  setHostUrl('');
+  const info=document.getElementById('gameInfo');
+  if(info) info.textContent='Neue Lobby wird erstellt …';
+  const hint=document.getElementById('joinHint');
+  if(hint) hint.textContent='';
+  socket.emit('createGame');
+}
+
+const cats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const img=u=>u?u+'?v='+Date.now():'';
+socket.on('state',s=>{
+  const previousBuzzed=state?.buzzedBy||null;
+  stateSounds(s);
+  state=s||{};
+  renderScores();
+  renderBuzz();
+  renderHostBuzz();
+  renderLobby();
+
+  // The judgement buttons are driven by the current server-side buzzer.
+  // They appear immediately when buzzedBy is set and disappear when it is cleared.
+  const j=document.getElementById('judge');
+  if(active){
+    if(state.buzzedBy) renderJudge(Number(active.punkte)||100);
+    else if(j) j.innerHTML='';
+  }else if(j){
+    j.innerHTML='';
+  }
+});
+socket.on('buzzAccepted', ({player})=>{
+  if(!player)return;
+  state.buzzedBy=player;
+  renderBuzz();
+  renderHostBuzz();
+  if(active) renderJudge(Number(active.punkte)||100);
+});
+socket.on('gameCreated',g=>{
+  gameCode=g.code;
+  hostToken=g.hostToken;
+  setHostUrl(gameCode);
+  creatingNewLobby=false;
+  localStorage.setItem('fragenhagelGameCode',gameCode);
+  localStorage.setItem('fragenhagelHostToken',hostToken);
+  state={code:gameCode,players:[],mode:'board',question:null,special:null,buzzerOpen:false,buzzedBy:null,firstBuzzedBy:null,lockedPlayers:[]};
+  updateGameInfo();
+  renderScores();
+  renderBuzz();
+  renderLobby();
+  renderAll();
+});
+socket.on('errorMessage',m=>{
+  if(creatingNewLobby) return;
+  localStorage.removeItem('fragenhagelGameCode');
+  localStorage.removeItem('fragenhagelHostToken');
+  gameCode='';
+  hostToken='';
+  alert(m);
+  createOrJoin();
+});
+function updateGameInfo(){const el=document.getElementById('gameInfo');if(el)el.textContent=gameCode?'SPIELCODE: '+gameCode:'Spiel wird erstellt …';const h=document.getElementById('joinHint');if(h&&gameCode)h.textContent='Freunde öffnen '+playerLink()+' und geben den Spielcode '+gameCode+' ein.'}
+function renderLobby(){const el=document.getElementById('lobby');if(!el)return;const ps=state.players||[];el.innerHTML=ps.length?ps.map(p=>`<span class="score"><strong>${esc(p.name)}</strong> ${p.connected?'🟢':'⚪'}</span>`).join(''):'<span class="small">Noch niemand beigetreten.</span>';updateGameInfo()}
+
+socket.on('questionsUpdated',q=>{Q=q;renderAll();});
+async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());renderAll();updateGameInfo();if(active)renderPlay();}
+
+function renderHostBuzz(){
+  const nameEl=document.getElementById('hostBuzzName');
+  const metaEl=document.getElementById('hostBuzzMeta');
+  if(!nameEl || !metaEl) return;
+  const current=state?.buzzedBy || null;
+
+  // The visible indication is only for the currently active buzzer.
+  // After Richtig/Falsch, buzzedBy is cleared, so the indication disappears.
+  if(!current){
+    nameEl.textContent='Noch niemand gebuzzert';
+    nameEl.className='host-buzz-name waiting';
+    metaEl.textContent=state?.buzzerOpen ? 'Buzzer ist geöffnet' : 'Buzzer ist geschlossen';
+    return;
+  }
+
+  nameEl.textContent='🔔 '+current;
+  nameEl.className='host-buzz-name active';
+  metaEl.textContent = 'Hat gerade gebuzzert';
+}
+
+function renderScores(){const el=document.getElementById('scores');const ps=state.players||[];el.innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong><div><button class="btn" onclick="pts(${JSON.stringify(p.name)},100)">+100</button><button class="btn" onclick="pts(${JSON.stringify(p.name)},-100)">-100</button></div></div>`).join('')}
+function renderBuzz(){
+ const b=document.getElementById('buzz');
+ const hb=document.getElementById('hostBuzzed');
+ const current=state?.buzzedBy || null;
+
+ // Show a name only while a player is the current accepted buzzer.
+ if(current){
+   const text='⚡ '+current+' HAT GEBUZZERT!';
+   b.textContent=text; b.className='buzz';
+   if(hb){hb.style.display='block';hb.textContent=text;hb.className='buzz';}
+ }else{
+   // Important: after Richtig/Falsch the indication disappears.
+   // If the buzzer is reopened after a wrong answer, it stays hidden
+   // until the next player actually buzzes.
+   b.textContent='🔴 Buzzer geschlossen';b.className='buzz';
+   if(hb){hb.style.display='none';hb.textContent='';}
+ }
+}
+function pts(p,a){socket.emit('addPoints',{player:p,amount:a})}function resetScores(){socket.emit('resetScores')}function openBuzzer(){
+ socket.emit('openBuzzer');
+ state.buzzedBy=null;
+ renderBuzz();
+ renderHostBuzz();
+ const j=document.getElementById('judge');
+ if(j)j.innerHTML='';
+}function closeBuzzer(){socket.emit('closeBuzzer')}
+function renderAll(){  renderHostBuzz();
+renderBoard();renderMainEditor();renderFace();renderGeo();renderFH()}
+async function resetUsed(){if(!confirm('Alle benutzten Felder wieder freigeben?'))return;await fetch('/api/reset-used',{method:'POST',headers:gameHeaders()});await load()}
+function renderBoard(){document.getElementById('board').innerHTML=cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map((x,i)=>`<button class="tile ${x.used?'used':''}" onclick="startQuestion('${c.replaceAll("'","\\'")}',${i})">${x.used?'✓':esc(x.punkte)}</button>`).join('')}</div>`).join('')}
+async function startQuestion(c,i){
+ judgedPlayers={};
+ const x=Q[c][i];if(x.used)return;x.used=true;renderBoard();fetch('/api/question-used',{method:'POST',headers:gameHeaders(),body:JSON.stringify({category:c,index:i,used:true})}).catch(()=>{});active={kind:'question',category:c,index:i,...x,revealed:false};socket.emit('showQuestion',{kategorie:c,punkte:x.punkte,frage:x.frage,antwort:x.antwort});showPlay()}
+function showPlay(){document.getElementById('play').classList.add('open');renderPlay()}
+function toBoard(){
+ judgedPlayers={};
+ judgingLocked=false;
+
+ document.getElementById('play').classList.remove('open');active=null;socket.emit('showBoard')}
+
+function renderPlay(){if(!active)return;let html='';let points=Number(active.punkte)||0;
+ if(active.kind==='question')html=`<div class="small">${esc(active.category)} · ${points} Punkte</div><div class="question">${esc(active.frage)}</div>${active.revealed?`<div class="answer">${esc(active.antwort)}</div>`:''}`;
+ else if(active.type==='Face Morph')html=`${!active.revealed?(active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Morphbild hinterlegt</div>'):`<div class="fm-host-solution"><div class="fm-host-original"><img src="${img(active.original1)}"><figcaption>${esc(active.person1||'')}</figcaption></div><div class="fm-host-morph"><img class="heroimg" src="${img(active.bild)}"></div><div class="fm-host-original"><img src="${img(active.original2)}"><figcaption>${esc(active.person2||'')}</figcaption></div></div>`}`;
+ else if(active.type==='Wo zum Henker ist das?')html=`<h2>Geo ${active.index+1}</h2>${active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Bild hinterlegt</div>'}${active.revealed?`<div class="answer">📍 ${esc(active.antwort)}</div>`:''}`;
+ else if(active.type==='Fragenhagel')html=`<h2>Fragenhagel ${active.index+1}</h2><div class="question">${esc(active.frage||'Noch keine Frage')}</div>${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`;
+ document.getElementById('playContent').innerHTML=html;
+}
+function renderJudge(points){
+ const j=document.getElementById('judge');
+ if(!j)return;
+ const currentBuzz=state?.buzzedBy || null;
+ j.innerHTML='';
+
+ // Absolute rule: before somebody buzzes, there are NO judgement buttons.
+ if(!currentBuzz)return;
+
+ const ps=state.players||[];
+ const p=ps.find(x=>String(x.name)===String(currentBuzz));
+ if(!p)return;
+
+ const val=Number(points)||100;
+
+ const addBtn=(label, cls, fn)=>{
+   const b=document.createElement('button');
+   b.className='btn '+cls;
+   b.type='button';
+   b.textContent=label;
+   b.dataset.player=String(p.name);
+   b.disabled=!!judgedPlayers[String(p.name)];
+   b.addEventListener('click',()=>{ if(!b.disabled) fn(); });
+   j.appendChild(b);
+ };
+
+ if(active?.type==='Face Morph'){
+   const hasPreviousWrong=Array.isArray(state?.lockedPlayers) && state.lockedPlayers.length>0;
+   if(hasPreviousWrong){
+     addBtn('👤 '+String(p.name)+' +100','good',()=>faceMorphSecondCorrect(p.name));
+     addBtn('❌ Falsch – '+String(p.name),'bad',()=>faceMorphSecondWrong(p.name));
+   }else{
+     addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100));
+     addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
+   }
+ }else{
+   addBtn('✅ Richtig – '+String(p.name),'good',()=>correct(p.name,val));
+   addBtn('❌ Falsch – '+String(p.name),'bad',()=>wrong(p.name,val));
+ }
+}
+function lockPlayerButtons(p){
+ const key=String(p);
+ judgedPlayers[key]=true;
+ const j=document.getElementById('judge');
+ if(!j)return;
+ // Disable only the two judgement buttons belonging to this player.
+ // Other players remain fully clickable after a wrong answer.
+ const buttons=[...j.querySelectorAll('button')];
+ buttons.filter(b=>b.dataset.player===key).forEach(b=>b.disabled=true);
+}
+
+function correct(p,v){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ try{sCorrect()}catch(e){}
+ socket.emit('correct',{player:String(p),points:Number(v)||100});
+
+ // Use the same reveal() function as the visible button.
+ // The delay lets the correct-answer state reach the server first.
+ setTimeout(()=>{
+   try{
+     if(typeof reveal === 'function') reveal();
+   }catch(e){
+     console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e);
+   }
+ },250);
+}
+
+function wrong(p,v){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ try{sWrong()}catch(e){}
+ socket.emit('wrong',{player:String(p),points:Number(v)||100});
+}
+function faceMorphSecondCorrect(p){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ try{sCorrect()}catch(e){}
+ socket.emit('correct',{player:String(p),points:100});
+ setTimeout(()=>{
+   try{ if(typeof reveal === 'function') reveal(); }
+   catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
+ },250);
+}
+function faceMorphSecondWrong(p){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ try{sWrong()}catch(e){}
+ // No points are deducted on this Face Morph "Falsch" result.
+ socket.emit('wrong',{player:String(p),points:0});
+ setTimeout(()=>{
+   try{ if(typeof reveal === 'function') reveal(); }
+   catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
+ },250);
+}
+function award(p,v){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ const pts=Number(v)||0;
+ if(pts===100){
+   // Face Morph: +100 is still a wrong answer.
+   // The player keeps the 100 points, but is locked out and the buzzer reopens for others.
+   try{sWrong()}catch(e){}
+   socket.emit('faceMorphPartial',{player:String(p),points:100});
+ }else if(pts===300){
+   // Face Morph: +300 ends the question and automatically reveals the solution.
+   try{sCorrect()}catch(e){}
+   socket.emit('correct',{player:String(p),points:300});
+   setTimeout(()=>{
+     try{
+       if(typeof reveal === 'function') reveal();
+     }catch(e){
+       console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e);
+     }
+   },250);
+ }else{
+   try{sCorrect()}catch(e){}
+   socket.emit('correct',{player:String(p),points:pts});
+ }
+}
+async function reveal(){if(!active)return;active.revealed=true;if(active.kind==='question')socket.emit('revealQuestion');else{const list=Q.Sonderrunden?.[active.type]||[];const saved=list[active.index]||active;active={...saved,type:active.type,index:active.index,revealed:true};const pub=active;socket.emit('revealSpecial',pub)}renderPlay()}
+function nextFaceMorph(){
+ judgedPlayers={};
+ judgingLocked=false;
+ const list=Q.Sonderrunden?.['Face Morph']||[];
+ if(active?.type!=='Face Morph')return;
+ const nextIndex=Number(active.index)+1;
+ if(nextIndex>=list.length)return;
+ active={...list[nextIndex],type:'Face Morph',index:nextIndex,revealed:false};
+ socket.emit('showSpecial',active);
+ showPlay();
+}
+function nextSpecial(){
+ judgedPlayers={};
+ judgingLocked=false;
+ const type=active?.type;
+ const allowed=['Wo zum Henker ist das?','Fragenhagel'];
+ if(!allowed.includes(type))return;
+ const list=Q.Sonderrunden?.[type]||[];
+ const nextIndex=Number(active.index)+1;
+ if(nextIndex>=list.length)return;
+ active={...list[nextIndex],type,index:nextIndex,revealed:false};
+ const pub=active;
+ socket.emit('showSpecial',pub);
+ showPlay();
+}
+function pickSpecial(type){
+ judgedPlayers={};
+ judgingLocked=false;const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=active;socket.emit('showSpecial',pub);showPlay()}
+function tab(id){document.querySelectorAll('.tabbody').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function renderMainEditor(){document.getElementById('main').innerHTML=cats.map(c=>`<h3>${esc(c)}</h3><div class="editorgrid">${(Q[c]||[]).map((x,i)=>`<div class="card"><b>${x.punkte} Punkte</b><textarea data-main="${esc(c)}" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-main="${esc(c)}" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" style="width:100%;margin-top:6px"></div>`).join('')}</div>`).join('')}
+function renderFace(){
+ let a=Q.Sonderrunden?.['Face Morph']||[];
+ document.getElementById('face').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card">
+ <h3>Face Morph ${i+1}</h3>
+ <input data-sp="Face Morph" data-i="${i}" data-f="person1" value="${esc(x.person1||'')}" placeholder="Person 1">
+ <input data-sp="Face Morph" data-i="${i}" data-f="person2" value="${esc(x.person2||'')}" placeholder="Person 2">
+ <div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div>
+ <div class="fm-file-row"><div>Morphbild</div>
+   <label class="fm-file-picker">
+     <span class="fm-file-button">Datei auswählen</span>
+     <span class="fm-file-name">${esc(x.bildName||'Keine ausgewählt')}</span>
+     <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'bild',this)">
+   </label>
+ </div>
+ <div class="fm-file-row"><div>Original 1</div>
+   <label class="fm-file-picker">
+     <span class="fm-file-button">Datei auswählen</span>
+     <span class="fm-file-name">${esc(x.original1Name||'Keine ausgewählt')}</span>
+     <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original1',this)">
+   </label>
+ </div>
+ <div class="fm-file-row"><div>Original 2</div>
+   <label class="fm-file-picker">
+     <span class="fm-file-button">Datei auswählen</span>
+     <span class="fm-file-name">${esc(x.original2Name||'Keine ausgewählt')}</span>
+     <input type="file" accept="image/*" onchange="uploadImg('Face Morph',${i},'original2',this)">
+   </label>
+ </div>
+ </div>`).join('')+'</div>';
+}
+function renderGeo(){let a=Q.Sonderrunden?.['Wo zum Henker ist das?']||[];document.getElementById('geo').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Geo ${i+1}</h3><input data-sp="Wo zum Henker ist das?" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Ort"><input type="number" data-sp="Wo zum Henker ist das?" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"><div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div><div class="fm-file-row"><div>Bild</div><label class="fm-file-picker"><span class="fm-file-button">Datei auswählen</span><span class="fm-file-name">${esc(x.bildName||'Keine ausgewählt')}</span><input type="file" accept="image/*" onchange="uploadImg('Wo zum Henker ist das?',${i},'bild',this)"></label></div></div>`).join('')+'</div>'}
+function renderFH(){let a=Q.Sonderrunden?.Fragenhagel||[];document.getElementById('fh').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Frage ${i+1}</h3><textarea data-sp="Fragenhagel" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-sp="Fragenhagel" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Antwort" style="width:100%"><input type="number" data-sp="Fragenhagel" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||100}"></div>`).join('')+'</div>'}
+function yt(url){let s=String(url||'');let m=s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/);return m?m[1]:''}
+load();createOrJoin();
+</script>
+
+
+
+<script id="face-morph-filename-handler-v31">
+document.addEventListener('change',function(e){
+  const input=e.target;
+  if(!input || input.type!=='file') return;
+  const picker=input.closest('.fm-file-picker');
+  const span=picker && picker.querySelector('.fm-file-name');
+  if(span){
+    span.textContent=input.files && input.files.length
+      ? input.files[0].name
+      : 'Keine ausgewählt';
+  }
+},true);
+</script>
+
+</body></html>

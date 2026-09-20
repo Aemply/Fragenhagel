@@ -1,0 +1,142 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fragenhagel Show</title><link rel="stylesheet" href="/style.css"><style>
+body{overflow:hidden}.showwrap{height:100vh;display:flex;flex-direction:column;padding:18px}.scorebar{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}.scorebar .score{min-width:150px;text-align:center}.showstage{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}.showstage>div{width:100%}.board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;max-width:1450px;margin:auto}.board .cat{min-height:520px}.showbuzz{text-align:center;margin:10px auto;max-width:800px}.join{position:fixed;inset:0;display:grid;place-items:center;background:#070714;z-index:20}.joinbox{width:min(520px,90vw);text-align:center}.joinbox input{font-size:26px;padding:14px;width:100%;box-sizing:border-box;border-radius:12px;border:1px solid #ffffff33;background:#111126;color:white}.hidden{display:none!important}
+</style>
+<style id="face-morph-solution-v30">
+.face-morph-solution-v30{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:center;width:min(1250px,94vw);margin:28px auto}
+.face-morph-solution-v30 .fm30-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.face-morph-solution-v30 img{display:block;max-width:100%;max-height:58vh;object-fit:contain;border-radius:16px}
+.face-morph-solution-v30 .fm30-side img{max-height:42vh}
+.face-morph-solution-v30 figcaption{font-size:clamp(16px,2vw,28px);font-weight:800}
+@media(max-width:800px){.face-morph-solution-v30{grid-template-columns:1fr;gap:18px}.face-morph-solution-v30 .fm30-side img{max-height:30vh}}
+</style>
+
+
+<style id="face-morph-v35">
+.fm-solution-v35{
+  display:grid !important;
+  grid-template-columns:minmax(160px, 0.75fr) minmax(360px, 1.5fr) minmax(160px, 0.75fr) !important;
+  align-items:center !important;
+  justify-items:center !important;
+  gap:32px !important;
+  width:96vw !important;
+  max-width:1600px !important;
+  margin:20px auto !important;
+  box-sizing:border-box !important;
+}
+.fm-solution-v35 > div{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-width:0 !important;
+  width:100% !important;
+}
+.fm-solution-v35 img{
+  display:block !important;
+  width:auto !important;
+  max-width:100% !important;
+  object-fit:contain !important;
+  border-radius:16px !important;
+}
+.fm-solution-v35 .fm-original img{
+  max-height:46vh !important;
+}
+.fm-solution-v35 .fm-morph img{
+  max-height:78vh !important;
+}
+.fm-solution-v35 > div > div{
+  margin-top:8px !important;
+  font-weight:800 !important;
+  font-size:18px !important;
+}
+@media(max-width:800px){
+  .fm-solution-v35{
+    grid-template-columns:1fr !important;
+    gap:18px !important;
+  }
+  .fm-solution-v35 .fm-original img,
+  .fm-solution-v35 .fm-morph img{
+    max-height:34vh !important;
+  }
+}
+</style>
+
+
+<style id="face-morph-v36">
+.fm-solution-v36{
+  display:grid !important;
+  grid-template-columns:minmax(160px,0.75fr) minmax(0,1.5fr) minmax(160px,0.75fr) !important;
+  align-items:center !important;
+  justify-items:center !important;
+  gap:32px !important;
+  width:96vw !important;
+  max-width:1600px !important;
+  margin:0 auto !important;
+  box-sizing:border-box !important;
+}
+.fm-solution-v36 > div{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-width:0 !important;
+  width:100% !important;
+}
+.fm-solution-v36 .fm-original-v36 img{
+  display:block !important;
+  width:auto !important;
+  max-width:100% !important;
+  max-height:46vh !important;
+  object-fit:contain !important;
+  border-radius:16px !important;
+}
+.fm-solution-v36 .fm-morph-v36{
+  width:auto !important;
+}
+.fm-solution-v36 .fm-morph-image-v36{
+  /* Keep the existing .heroimg dimensions; don't impose a smaller solution size. */
+  max-width:90vw !important;
+}
+.fm-solution-v36 .fm-original-v36 > div{
+  margin-top:8px !important;
+  font-weight:800 !important;
+  font-size:18px !important;
+}
+@media(max-width:800px){
+  .fm-solution-v36{
+    grid-template-columns:1fr !important;
+    gap:18px !important;
+  }
+  .fm-solution-v36 .fm-original-v36 img{
+    max-height:34vh !important;
+  }
+}
+</style>
+
+</head><body>
+<button id="soundToggle" onclick="toggleSound()" title="Sound an/aus" style="position:fixed;right:12px;bottom:12px;z-index:99;border:1px solid #ffffff33;background:#111126;color:white;border-radius:999px;padding:8px 11px;cursor:pointer">🔊</button>
+<div id="join" class="join"><div class="joinbox panel"><h1 class="neon">⚡ FRAGENHAGEL SHOW</h1><p>Spielcode eingeben, um die Show zu verbinden.</p><input id="code" maxlength="5" placeholder="z. B. K7XM2"><button class="btn cyan" style="margin-top:12px" onclick="connectGame()">📺 Verbinden</button><div id="joinStatus" class="small"></div></div></div>
+<div class="showwrap"><div id="scores" class="scorebar"></div><div id="buzz" class="buzz showbuzz">Buzzer geschlossen</div><div id="stage" class="showstage"></div></div>
+<script src="/socket.io/socket.io.js"></script><script>
+let soundOn=localStorage.getItem('fragenhagelSound')!=='off',audioCtx=null;
+function ac(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}
+function tone(freq,dur=.12,type='sine',vol=.08,delay=0){if(!soundOn)return;try{const c=ac(),o=c.createOscillator(),g=c.createGain(),now=c.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,now);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(vol,now+.01);g.gain.exponentialRampToValueAtTime(.0001,now+dur);o.connect(g);g.connect(c.destination);o.start(now);o.stop(now+dur+.03)}catch(e){}}
+function sBuzz(){tone(180,.09,'square',.10);tone(120,.16,'square',.08,.08)}function sOpen(){tone(520,.09,'sine',.07);tone(760,.13,'sine',.07,.09)}function sReveal(){tone(440,.10,'triangle',.07);tone(660,.10,'triangle',.07,.10);tone(880,.18,'triangle',.08,.20)}function sCorrect(){tone(523,.10,'sine',.07);tone(659,.10,'sine',.07,.10);tone(784,.22,'sine',.08,.20)}function sWrong(){tone(220,.15,'sawtooth',.06);tone(165,.25,'sawtooth',.06,.13)}
+function toggleSound(){soundOn=!soundOn;localStorage.setItem('fragenhagelSound',soundOn?'on':'off');document.getElementById('soundToggle').textContent=soundOn?'🔊':'🔇';if(soundOn)sOpen()}
+document.addEventListener('pointerdown',()=>{if(soundOn)ac()},{once:true});
+const socket=io();let state={},Q={},code=new URLSearchParams(location.search).get('code')||localStorage.getItem('fragenhagelShowCode')||'';let prev={buzzerOpen:false,buzzedBy:null,revealed:false};
+const cats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const img=u=>u?u+'?v=1':'';
+function connectGame(){code=document.getElementById('code').value.trim().toUpperCase();if(!code)return;localStorage.setItem('fragenhagelShowCode',code);socket.emit('watchGame',{code})}
+if(code){document.getElementById('code').value=code;connectGame()}
+socket.on('errorMessage',m=>document.getElementById('joinStatus').textContent=m);
+socket.on('connect',()=>{if(code)socket.emit('watchGame',{code})});
+socket.on('state',s=>{state=s||{};document.getElementById('join').classList.add('hidden');const rev=state.mode==='question'?state.question?.revealed:state.mode==='special'?state.special?.revealed:false;if(state.buzzedBy&&state.buzzedBy!==prev.buzzedBy)sBuzz();else if(state.buzzerOpen&&!prev.buzzerOpen)sOpen();if(rev&&!prev.revealed)sReveal();prev={buzzerOpen:!!state.buzzerOpen,buzzedBy:state.buzzedBy||null,revealed:!!rev};render();});
+socket.on('questionsUpdated',q=>{Q=q;render();});socket.on('gameSound', ({type})=>{ if(type==='correct') sCorrect(); else if(type==='wrong') sWrong(); });
+
+async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());render()}
+function render(){const ps=state.players||[];document.getElementById('scores').innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong></div>`).join('');const b=document.getElementById('buzz');b.textContent=state.buzzedBy?'⚡ '+state.buzzedBy+' hat gebuzzert!':state.buzzerOpen?'🟢 BUZZER OFFEN':'🔴 Buzzer geschlossen';b.className='buzz showbuzz'+(state.buzzerOpen?' open':'');const stage=document.getElementById('stage');if(state.mode==='question'&&state.question){let x=state.question;stage.innerHTML=`<div><div class="small">${esc(x.kategorie)} · ${esc(x.punkte)} Punkte</div><div class="question">${esc(x.frage)}</div>${x.revealed?`<div class="answer"><div class="small">LÖSUNG</div>${esc(x.antwort)}</div>`:''}</div>`;return}if(state.mode==='special'&&state.special){stage.innerHTML=special(state.special);syncShowMusic();return}stage.innerHTML=board()}
+function board(){return `<div class="board">${cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map(x=>`<div class="tile ${x.used?'used':''}">${x.used?'✓':esc(x.punkte)}</div>`).join('')}</div>`).join('')}</div>`}
+function special(x){const t=x.type;if(t==='Face Morph')return `<div>${!x.revealed?(x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Morphbild</div>'):`<div class="fm-solution-v36"><div class="fm-original-v36"><img src="${img(x.original1)}" alt="${esc(x.person1||'Originalbild 1')}"><div>${esc(x.person1||'')}</div></div><div class="fm-morph-v36"><img class="heroimg fm-morph-image-v36" src="${img(x.bild)}" alt="Morph-Bild"></div><div class="fm-original-v36"><img src="${img(x.original2)}" alt="${esc(x.person2||'Originalbild 2')}"><div>${esc(x.person2||'')}</div></div></div>`}</div>`;if(t==='Wo zum Henker ist das?')return `<div><h2 class="neon">WO ZUM HENKER IST DAS?</h2>${x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Geo-Bild</div>'}${x.revealed?`<div class="answer">📍 ${esc(x.antwort)}</div>`:''}</div>`;if(t==='Fragenhagel')return `<div><h2 class="neon">FRAGENHAGEL · ${esc(x.punkte||100)} PUNKTE</h2><div class="question">${esc(x.frage||'Noch keine Frage')}</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;return '<div class="question">Sonderrunde</div>';}
+
+load();
+</script></body></html>

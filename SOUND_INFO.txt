@@ -1,0 +1,10 @@
+Sound ergänzt:
+- Buzzer freigegeben: kurzer Start-Jingle
+- Spieler buzzert: markanter Buzzer-Ton
+- Lösung anzeigen: Reveal-Jingle
+- Richtige Antwort: Erfolgs-Jingle auf Host
+- Falsche Antwort: Fehlerton auf Host
+- Host, Show und Player haben unten rechts 🔊/🔇.
+- Einstellung wird pro Browser gespeichert.
+- Sounds werden mit WebAudio erzeugt; keine fehlenden MP3/WAV-Dateien möglich.
+Hinweis: Browser erlauben Audio erst nach der ersten Interaktion/Klick auf der jeweiligen Seite. Der Sound-Button kann dafür einmal angeklickt werden.

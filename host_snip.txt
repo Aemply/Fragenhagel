@@ -1,0 +1,341 @@
+function tone(freq,dur=.12,type='sine',vol=.08,delay=0){if(!soundOn)return;try{const c=ac(),o=c.createOscillator(),g=c.createGain(),now=c.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,now);g.gain.setValueAtTime(0.0001,now);g.gain.exponentialRampToValueAtTime(vol,now+.01);g.gain.exponentialRampToValueAtTime(0.0001,now+dur);o.connect(g);g.connect(c.destination);o.start(now);o.stop(now+dur+.03)}catch(e){}}
+function sBuzz(){tone(180,.09,'square',.10);tone(120,.16,'square',.08,.08)}
+function sOpen(){tone(520,.09,'sine',.07);tone(760,.13,'sine',.07,.09)}
+function sReveal(){tone(440,.10,'triangle',.07);tone(660,.10,'triangle',.07,.10);tone(880,.18,'triangle',.08,.20)}
+function sCorrect(){tone(523,.10,'sine',.07);tone(659,.10,'sine',.07,.10);tone(784,.22,'sine',.08,.20)}
+function sWrong(){tone(220,.15,'sawtooth',.06);tone(165,.25,'sawtooth',.06,.13)}
+function toggleSound(){soundOn=!soundOn;localStorage.setItem('fragenhagelSound',soundOn?'on':'off');const b=document.getElementById('soundToggle');if(b)b.textContent=soundOn?'🔊':'🔇';if(soundOn)sOpen()}
+document.addEventListener('pointerdown',()=>{if(soundOn)ac()},{once:true});
+setTimeout(()=>{const b=document.getElementById('soundToggle');if(b)b.textContent=soundOn?'🔊':'🔇'},0);
+let prevSoundState={buzzerOpen:false,buzzedBy:null,mode:null,revealed:false};
+function stateSounds(x){
+ if(!x)return;
+ if(x.buzzedBy && x.buzzedBy!==prevSoundState.buzzedBy)sBuzz();
+ else if(x.buzzerOpen && !prevSoundState.buzzerOpen)sOpen();
+ const revealed=(x.mode==='question'?x.question?.revealed:x.mode==='special'?x.special?.revealed:false);
+ if(revealed&&!prevSoundState.revealed)sReveal();
+ prevSoundState={buzzerOpen:!!x.buzzerOpen,buzzedBy:x.buzzedBy||null,mode:x.mode,revealed:!!revealed};
+}
+
+const socket=io(); let Q={}; let state={};
+let judgedPlayers={};
+ let active=null; const urlCode=new URLSearchParams(location.search).get('code')||'';
+const storedGameCode=localStorage.getItem('fragenhagelGameCode')||'';
+let gameCode=urlCode||storedGameCode;
+let hostToken=(urlCode&&urlCode!==storedGameCode)?'':(localStorage.getItem('fragenhagelHostToken')||'');
+let creatingNewLobby=false;
+const gameHeaders=()=>({'Content-Type':'application/json','x-game-code':gameCode,'x-host-token':hostToken});
+function openShow(){if(!gameCode)return alert('Spiel wird noch erstellt.');window.open('/show.html?code='+encodeURIComponent(gameCode),'show')}
+function playerLink(){return location.origin+'/player.html?code='+encodeURIComponent(gameCode)}
+async function copyPlayerLink(){if(!gameCode)return;try{await navigator.clipboard.writeText(playerLink());document.getElementById('joinHint').textContent='Spieler-Link kopiert: '+playerLink()}catch(e){prompt('Spieler-Link',playerLink())}}
+function createOrJoin(){
+  if(gameCode&&hostToken){
+    socket.emit('hostJoin',{code:gameCode,hostToken});
+    return;
+  }
+  socket.emit('createGame');
+}
+
+function setHostUrl(code){
+  const url=new URL(location.href);
+  if(code) url.searchParams.set('code',code);
+  else url.searchParams.delete('code');
+  history.replaceState(null,'',url.pathname+(url.search?url.search:''));
+}
+
+function newLobby(){
+  if(!confirm('Neue Lobby erstellen? Die aktuelle Lobby bleibt für bereits verbundene Spieler bestehen, aber dieser Host wechselt in eine neue Lobby.')) return;
+  creatingNewLobby=true;
+  gameCode='';
+  hostToken='';
+  state={};
+  active=null;
+  localStorage.removeItem('fragenhagelGameCode');
+  localStorage.removeItem('fragenhagelHostToken');
+  setHostUrl('');
+  const info=document.getElementById('gameInfo');
+  if(info) info.textContent='Neue Lobby wird erstellt …';
+  const hint=document.getElementById('joinHint');
+  if(hint) hint.textContent='';
+  socket.emit('createGame');
+}
+
+const cats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const img=u=>u?u+'?v='+Date.now():'';
+socket.on('state',s=>{
+  stateSounds(s);
+  state=s||{};
+  renderScores();
+  renderBuzz();
+  renderHostBuzz();
+  renderLobby();
+
+  // The judgement buttons are driven by the current server-side buzzer.
+  // They appear immediately when buzzedBy is set and disappear when it is cleared.
+  const j=document.getElementById('judge');
+  if(active){
+    if(state.buzzedBy) renderJudge(Number(active.punkte)||100);
+    else if(j) j.innerHTML='';
+  }else if(j){
+    j.innerHTML='';
+  }
+});
+socket.on('buzzAccepted', ({player})=>{
+  if(!player)return;
+  state.buzzedBy=player;
+  renderBuzz();
+  renderHostBuzz();
+  if(active) renderJudge(Number(active.punkte)||100);
+});
+socket.on('gameCreated',g=>{
+  gameCode=g.code;
+  hostToken=g.hostToken;
+  setHostUrl(gameCode);
+  creatingNewLobby=false;
+  localStorage.setItem('fragenhagelGameCode',gameCode);
+  localStorage.setItem('fragenhagelHostToken',hostToken);
+  state={code:gameCode,players:[],mode:'board',question:null,special:null,buzzerOpen:false,buzzedBy:null,firstBuzzedBy:null,lockedPlayers:[]};
+  updateGameInfo();
+  renderScores();
+  renderBuzz();
+  renderLobby();
+  renderAll();
+});
+socket.on('errorMessage',m=>{
+  if(creatingNewLobby) return;
+  localStorage.removeItem('fragenhagelGameCode');
+  localStorage.removeItem('fragenhagelHostToken');
+  gameCode='';
+  hostToken='';
+  alert(m);
+  createOrJoin();
+});
+function updateGameInfo(){const el=document.getElementById('gameInfo');if(el)el.textContent=gameCode?'SPIELCODE: '+gameCode:'Spiel wird erstellt …';const h=document.getElementById('joinHint');if(h&&gameCode)h.textContent='Freunde öffnen '+playerLink()+' und geben den Spielcode '+gameCode+' ein.'}
+function renderLobby(){const el=document.getElementById('lobby');if(!el)return;const ps=state.players||[];el.innerHTML=ps.length?ps.map(p=>`<span class="score"><strong>${esc(p.name)}</strong> ${p.connected?'🟢':'⚪'}</span>`).join(''):'<span class="small">Noch niemand beigetreten.</span>';updateGameInfo()}
+
+socket.on('questionsUpdated',q=>{Q=q;renderAll();});
+async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());renderAll();updateGameInfo();}
+
+function renderHostBuzz(){
+  const nameEl=document.getElementById('hostBuzzName');
+  const metaEl=document.getElementById('hostBuzzMeta');
+  if(!nameEl || !metaEl) return;
+  const current=state?.buzzedBy || null;
+
+  // The visible indication is only for the currently active buzzer.
+  // After Richtig/Falsch, buzzedBy is cleared, so the indication disappears.
+  if(!current){
+    nameEl.textContent='Noch niemand gebuzzert';
+    nameEl.className='host-buzz-name waiting';
+    metaEl.textContent=state?.buzzerOpen ? 'Buzzer ist geöffnet' : 'Buzzer ist geschlossen';
+    return;
+  }
+
+  nameEl.textContent='🔔 '+current;
+  nameEl.className='host-buzz-name active';
+  metaEl.textContent = 'Hat gerade gebuzzert';
+}
+
+function renderScores(){const el=document.getElementById('scores');const ps=state.players||[];el.innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong><div><button class="btn" onclick="pts(${JSON.stringify(p.name)},100)">+100</button><button class="btn" onclick="pts(${JSON.stringify(p.name)},-100)">-100</button></div></div>`).join('')}
+function renderBuzz(){
+ const b=document.getElementById('buzz');
+ const hb=document.getElementById('hostBuzzed');
+ const current=state?.buzzedBy || null;
+
+ // Show a name only while a player is the current accepted buzzer.
+ if(current){
+   const text='⚡ '+current+' HAT GEBUZZERT!';
+   b.textContent=text; b.className='buzz';
+   if(hb){hb.style.display='block';hb.textContent=text;hb.className='buzz';}
+ }else{
+   // Important: after Richtig/Falsch the indication disappears.
+   // If the buzzer is reopened after a wrong answer, it stays hidden
+   // until the next player actually buzzes.
+   b.textContent='🔴 Buzzer geschlossen';b.className='buzz';
+   if(hb){hb.style.display='none';hb.textContent='';}
+ }
+}
+function pts(p,a){socket.emit('addPoints',{player:p,amount:a})}function resetScores(){socket.emit('resetScores')}function openBuzzer(){
+ socket.emit('openBuzzer');
+ state.buzzedBy=null;
+ renderBuzz();
+ renderHostBuzz();
+ const j=document.getElementById('judge');
+ if(j)j.innerHTML='';
+}function closeBuzzer(){socket.emit('closeBuzzer')}
+function renderAll(){  renderHostBuzz();
+renderBoard();renderMainEditor();renderFace();renderGeo();renderFH();renderMusic()}
+async function resetUsed(){if(!confirm('Alle benutzten Felder wieder freigeben?'))return;await fetch('/api/reset-used',{method:'POST',headers:gameHeaders()});await load()}
+function renderBoard(){document.getElementById('board').innerHTML=cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map((x,i)=>`<button class="tile ${x.used?'used':''}" onclick="startQuestion('${c.replaceAll("'","\\'")}',${i})">${x.used?'✓':esc(x.punkte)}</button>`).join('')}</div>`).join('')}
+async function startQuestion(c,i){
+ judgedPlayers={};
+ const x=Q[c][i];if(x.used)return;x.used=true;renderBoard();fetch('/api/question-used',{method:'POST',headers:gameHeaders(),body:JSON.stringify({category:c,index:i,used:true})}).catch(()=>{});active={kind:'question',category:c,index:i,...x,revealed:false};socket.emit('showQuestion',{kategorie:c,punkte:x.punkte,frage:x.frage,antwort:x.antwort});showPlay()}
+function showPlay(){document.getElementById('play').classList.add('open');renderPlay()}
+function toBoard(){
+ judgedPlayers={};
+ judgingLocked=false;document.getElementById('play').classList.remove('open');active=null;socket.emit('showBoard')}
+function renderPlay(){if(!active)return;let html='';let points=Number(active.punkte)||0;
+ if(active.kind==='question')html=`<div class="small">${esc(active.category)} · ${points} Punkte</div><div class="question">${esc(active.frage)}</div>${active.revealed?`<div class="answer">${esc(active.antwort)}</div>`:''}`;
+ else if(active.type==='Face Morph')html=`${!active.revealed?(active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Morphbild hinterlegt</div>'):`<div class="fm-host-solution"><div class="fm-host-original"><img src="${img(active.original1)}"><figcaption>${esc(active.person1||'')}</figcaption></div><div class="fm-host-morph"><img class="heroimg" src="${img(active.bild)}"></div><div class="fm-host-original"><img src="${img(active.original2)}"><figcaption>${esc(active.person2||'')}</figcaption></div></div>`}`;
+ else if(active.type==='Wo zum Henker ist das?')html=`<h2>Geo ${active.index+1}</h2>${active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Bild hinterlegt</div>'}${active.revealed?`<div class="answer">📍 ${esc(active.antwort)}</div>`:''}`;
+ else if(active.type==='Fragenhagel')html=`<h2>Fragenhagel ${active.index+1}</h2><div class="question">${esc(active.frage||'Noch keine Frage')}</div>${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`;
+ else if(active.type==='Musik'){const id=yt(active.youtube);html=`<h2>Musik ${active.index+1}</h2><div class="question">Welches Lied ist das?</div>${id?`<iframe width="760" height="428" style="max-width:90vw;border:0;border-radius:15px" src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`:'<div class="small">Kein gültiger YouTube-Link</div>'}${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`}
+ document.getElementById('playContent').innerHTML=html; const nextFm=document.getElementById("nextFaceMorphBtn"); if(nextFm){const list=Q.Sonderrunden?.['Face Morph']||[]; const isFm=active?.type==='Face Morph'; nextFm.style.display=isFm?'inline-block':'none'; nextFm.disabled=!isFm || active.index>=list.length-1;} const nextSpecialBtn=document.getElementById("nextSpecialBtn"); if(nextSpecialBtn){const nextMap={"Wo zum Henker ist das?":{label:"➡️ Nächster Geo",type:"Wo zum Henker ist das?"},"Fragenhagel":{label:"➡️ Nächster Fragenhagel",type:"Fragenhagel"},"Musik":{label:"➡️ Nächste Musik",type:"Musik"}}; const cfg=nextMap[active?.type]; const list=cfg?(Q.Sonderrunden?.[cfg.type]||[]):[]; const show=!!cfg; nextSpecialBtn.style.display=show?'inline-block':'none'; nextSpecialBtn.textContent=cfg?.label||''; nextSpecialBtn.disabled=!show || Number(active.index)>=list.length-1;} if(state?.buzzedBy)renderJudge(points);else{const _j=document.getElementById("judge");if(_j)_j.innerHTML="";}
+}
+function renderJudge(points){
+ const j=document.getElementById('judge');
+ if(!j)return;
+ const currentBuzz=state?.buzzedBy || null;
+ j.innerHTML='';
+
+ // Absolute rule: before somebody buzzes, there are NO judgement buttons.
+ if(!currentBuzz)return;
+
+ const ps=state.players||[];
+ const p=ps.find(x=>String(x.name)===String(currentBuzz));
+ if(!p)return;
+
+ const val=Number(points)||100;
+
+ const addBtn=(label, cls, fn)=>{
+   const b=document.createElement('button');
+   b.className='btn '+cls;
+   b.type='button';
+   b.textContent=label;
+   b.dataset.player=String(p.name);
+   b.disabled=!!judgedPlayers[String(p.name)];
+   b.addEventListener('click',()=>{ if(!b.disabled) fn(); });
+   j.appendChild(b);
+ };
+
+ if(active?.type==='Face Morph'){
+   const hasPreviousWrong=Array.isArray(state?.lockedPlayers) && state.lockedPlayers.length>0;
+   if(hasPreviousWrong){
+     addBtn('👤 '+String(p.name)+' +100','good',()=>faceMorphSecondCorrect(p.name));
+     addBtn('❌ Falsch – '+String(p.name),'bad',()=>faceMorphSecondWrong(p.name));
+   }else{
+     addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100));
+     addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
+   }
+ }else{
+   addBtn('✅ Richtig – '+String(p.name),'good',()=>correct(p.name,val));
+   addBtn('❌ Falsch – '+String(p.name),'bad',()=>wrong(p.name,val));
+ }
+}
+function lockPlayerButtons(p){
+ const key=String(p);
+ judgedPlayers[key]=true;
+ const j=document.getElementById('judge');
+ if(!j)return;
+ // Disable only the two judgement buttons belonging to this player.
+ // Other players remain fully clickable after a wrong answer.
+ const buttons=[...j.querySelectorAll('button')];
+ buttons.filter(b=>b.dataset.player===key).forEach(b=>b.disabled=true);
+}
+
+function correct(p,v){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ try{sCorrect()}catch(e){}
+ socket.emit('correct',{player:String(p),points:Number(v)||100});
+
+ // Use the same reveal() function as the visible button.
+ // The delay lets the correct-answer state reach the server first.
+ setTimeout(()=>{
+   try{
+     if(typeof reveal === 'function') reveal();
+   }catch(e){
+     console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e);
+   }
+ },250);
+}
+
+function wrong(p,v){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ try{sWrong()}catch(e){}
+ socket.emit('wrong',{player:String(p),points:Number(v)||100});
+}
+function faceMorphSecondCorrect(p){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ try{sCorrect()}catch(e){}
+ socket.emit('correct',{player:String(p),points:100});
+ setTimeout(()=>{
+   try{ if(typeof reveal === 'function') reveal(); }
+   catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
+ },250);
+}
+function faceMorphSecondWrong(p){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ try{sWrong()}catch(e){}
+ // No points are deducted on this Face Morph "Falsch" result.
+ socket.emit('wrong',{player:String(p),points:0});
+ setTimeout(()=>{
+   try{ if(typeof reveal === 'function') reveal(); }
+   catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
+ },250);
+}
+function award(p,v){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ const pts=Number(v)||0;
+ if(pts===100){
+   // Face Morph: +100 is still a wrong answer.
+   // The player keeps the 100 points, but is locked out and the buzzer reopens for others.
+   try{sWrong()}catch(e){}
+   socket.emit('faceMorphPartial',{player:String(p),points:100});
+ }else if(pts===300){
+   // Face Morph: +300 ends the question and automatically reveals the solution.
+   try{sCorrect()}catch(e){}
+   socket.emit('correct',{player:String(p),points:300});
+   setTimeout(()=>{
+     try{
+       if(typeof reveal === 'function') reveal();
+     }catch(e){
+       console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e);
+     }
+   },250);
+ }else{
+   try{sCorrect()}catch(e){}
+   socket.emit('correct',{player:String(p),points:pts});
+ }
+}
+async function reveal(){if(!active)return;active.revealed=true;if(active.kind==='question')socket.emit('revealQuestion');else{const list=Q.Sonderrunden?.[active.type]||[];const saved=list[active.index]||active;active={...saved,type:active.type,index:active.index,revealed:true};const pub=active.type==='Musik'?{...active,youtube:''}:active;socket.emit('revealSpecial',pub)}renderPlay()}
+function nextFaceMorph(){
+ judgedPlayers={};
+ judgingLocked=false;
+ const list=Q.Sonderrunden?.['Face Morph']||[];
+ if(active?.type!=='Face Morph')return;
+ const nextIndex=Number(active.index)+1;
+ if(nextIndex>=list.length)return;
+ active={...list[nextIndex],type:'Face Morph',index:nextIndex,revealed:false};
+ socket.emit('showSpecial',active);
+ showPlay();
+}
+function nextSpecial(){
+ judgedPlayers={};
+ judgingLocked=false;
+ const type=active?.type;
+ const allowed=['Wo zum Henker ist das?','Fragenhagel','Musik'];
+ if(!allowed.includes(type))return;
+ const list=Q.Sonderrunden?.[type]||[];
+ const nextIndex=Number(active.index)+1;
+ if(nextIndex>=list.length)return;
+ active={...list[nextIndex],type,index:nextIndex,revealed:false};
+ const pub=type==='Musik'?{...active,youtube:''}:active;
+ socket.emit('showSpecial',pub);
+ showPlay();
+}
+function pickSpecial(type){
+ judgedPlayers={};
+ judgingLocked=false;const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=type==='Musik'?{...active,youtube:''}:active;socket.emit('showSpecial',pub);showPlay()}
+function tab(id){document.querySelectorAll('.tabbody').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function renderMainEditor(){document.getElementById('main').innerHTML=cats.map(c=>`<h3>${esc(c)}</h3><div class="editorgrid">${(Q[c]||[]).map((x,i)=>`<div class="card"><b>${x.punkte} Punkte</b><textarea data-main="${esc(c)}" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-main="${esc(c)}" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" style="width:100%;margin-top:6px"></div>`).join('')}</div>`).join('')}
+function renderFace(){
+ let a=Q.Sonderrunden?.['Face Morph']||[];
+ document.getElementById('face').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card">
+ <h3>Face Morph ${i+1}</h3>
+ <input data-sp="Face Morph" data-i="${i}" data-f="person1" value="${esc(x.person1||'')}" placeholder="Person 1">
