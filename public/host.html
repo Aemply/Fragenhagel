@@ -101,6 +101,10 @@
 }
 </style>
 
+<style>
+.main-category-editor{margin-top:14px;margin-bottom:6px}
+.main-category-name{width:100%;box-sizing:border-box;font-size:1.15rem;font-weight:800;background:#101022;color:#fff;border:1px solid #ffffff22;border-radius:10px;padding:9px 12px}
+</style>
 </head><body><button id="soundToggle" onclick="toggleSound()" title="Sound an/aus" style="position:fixed;right:12px;bottom:12px;z-index:99;border:1px solid #ffffff33;background:#111126;color:white;border-radius:999px;padding:8px 11px;cursor:pointer">🔊</button>
 <div class="wrap">
 <div class="top"><h1 class="neon">⚡ FRAGENHAGEL – HOST</h1><span id="gameInfo" class="buzz open">Spiel wird erstellt …</span><button class="btn cyan" onclick="openShow()">📺 Show öffnen</button><button class="btn" onclick="copyPlayerLink()">🔗 Spieler-Link kopieren</button><button class="btn accent" onclick="newLobby()">🆕 Neue Lobby</button></div>
@@ -231,7 +235,9 @@ function newLobby(){
   socket.emit('createGame');
 }
 
-const cats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];
+const defaultCats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];
+function mainCats(){const saved=Array.isArray(Q.__categories)?Q.__categories.filter(Boolean):[];return saved.length===defaultCats.length?saved:defaultCats.filter(c=>Array.isArray(Q[c]));}
+let cats=mainCats();
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const img=u=>u?u+'?v='+Date.now():'';
 socket.on('state',s=>{
@@ -363,7 +369,7 @@ function pts(p,a){socket.emit('addPoints',{player:p,amount:a})}function resetSco
  const j=document.getElementById('judge');
  if(j)j.innerHTML='';
 }function closeBuzzer(){socket.emit('closeBuzzer')}
-function renderAll(){  renderHostBuzz();
+function renderAll(){ cats=mainCats(); renderHostBuzz();
 renderBoard();renderMainEditor();renderFace();renderGeo();renderFH();renderMusic()}
 async function resetUsed(){if(!confirm('Alle benutzten Felder wieder freigeben?'))return;await fetch('/api/reset-used',{method:'POST',headers:gameHeaders()});await load()}
 function renderBoard(){document.getElementById('board').innerHTML=cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map((x,i)=>`<button class="tile ${x.used?'used':''}" onclick="startQuestion('${c.replaceAll("'","\\'")}',${i})">${x.used?'✓':esc(x.punkte)}</button>`).join('')}</div>`).join('')}
@@ -603,7 +609,7 @@ function pickSpecial(type){
  judgedPlayers={};
  judgingLocked=false;const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=type==='Musik'?{...active,youtube:'',spotifyUrl:active.spotify}:active;socket.emit('showSpecial',pub);showPlay()}
 function tab(id){document.querySelectorAll('.tabbody').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
-function renderMainEditor(){document.getElementById('main').innerHTML=cats.map(c=>`<h3>${esc(c)}</h3><div class="editorgrid">${(Q[c]||[]).map((x,i)=>`<div class="card"><b>${x.punkte} Punkte</b><textarea data-main="${esc(c)}" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-main="${esc(c)}" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" style="width:100%;margin-top:6px"></div>`).join('')}</div>`).join('')}
+function renderMainEditor(){document.getElementById('main').innerHTML=cats.map(c=>`<div class="main-category-editor"><input class="main-category-name" data-cat-name="${esc(c)}" value="${esc(c)}" aria-label="Kategorie ${esc(c)}" placeholder="Kategoriename"></div><div class="editorgrid">${(Q[c]||[]).map((x,i)=>`<div class="card"><b>${x.punkte} Punkte</b><textarea data-main="${esc(c)}" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-main="${esc(c)}" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" style="width:100%;margin-top:6px"></div>`).join('')}</div>`).join('')}
 function renderFace(){
  let a=Q.Sonderrunden?.['Face Morph']||[];
  document.getElementById('face').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card">
@@ -659,7 +665,24 @@ async function spotifyAutofill(index,input){
  }
 }
 function renderMusic(){let a=Q.Sonderrunden?.Musik||[];document.getElementById('music').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Song ${i+1}</h3><input data-sp="Musik" data-i="${i}" data-f="spotify" value="${esc(x.spotify||'')}" placeholder="Spotify-Link" style="width:100%" oninput="clearTimeout(this._spotifyTimer);this._spotifyTimer=setTimeout(()=>spotifyAutofill(${i},this),450)"><input data-sp="Musik" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Lied / Interpret" style="width:100%"><input type="number" data-sp="Musik" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"></div>`).join('')+'</div>'}
-async function saveAll(){document.querySelectorAll('[data-main]').forEach(el=>{let c=el.dataset.main,i=+el.dataset.i,f=el.dataset.f;Q[c][i][f]=el.value});document.querySelectorAll('[data-sp]').forEach(el=>{let t=el.dataset.sp,i=+el.dataset.i,f=el.dataset.f;Q.Sonderrunden[t][i][f]=el.type==='number'?Number(el.value)||0:el.value});let r=await fetch('/api/questions',{method:'PUT',headers:gameHeaders(),body:JSON.stringify(Q)});document.getElementById('saveStatus').textContent=r.ok?' ✅ Gespeichert':' ❌ Fehler';if(r.ok)load()}
+async function saveAll(){
+ const catInputs=[...document.querySelectorAll('[data-cat-name]')];
+ const oldCats=cats.slice();
+ const newCats=catInputs.map(el=>String(el.value||'').trim());
+ if(newCats.some(c=>!c)){document.getElementById('saveStatus').textContent=' ❌ Kategorienamen dürfen nicht leer sein';return}
+ if(new Set(newCats).size!==newCats.length){document.getElementById('saveStatus').textContent=' ❌ Kategorienamen müssen eindeutig sein';return}
+ document.querySelectorAll('[data-main]').forEach(el=>{let c=el.dataset.main,i=+el.dataset.i,f=el.dataset.f;if(Q[c]?.[i])Q[c][i][f]=el.value});
+ document.querySelectorAll('[data-sp]').forEach(el=>{let t=el.dataset.sp,i=+el.dataset.i,f=el.dataset.f;if(Q.Sonderrunden?.[t]?.[i])Q.Sonderrunden[t][i][f]=el.type==='number'?Number(el.value)||0:el.value});
+ const renamed={};
+ oldCats.forEach((oldName,i)=>{renamed[newCats[i]]=Q[oldName]||[];});
+ oldCats.forEach((oldName,i)=>{if(oldName!==newCats[i])delete Q[oldName];});
+ Object.assign(Q,renamed);
+ Q.__categories=newCats;
+ cats=newCats;
+ let r=await fetch('/api/questions',{method:'PUT',headers:gameHeaders(),body:JSON.stringify(Q)});
+ document.getElementById('saveStatus').textContent=r.ok?' ✅ Gespeichert':' ❌ Fehler';
+ if(r.ok)load()
+}
 async function uploadImg(section,index,field,input){
  const file=input.files?.[0];
  if(!file)return;
