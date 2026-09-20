@@ -1,6 +1,15 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fragenhagel Show</title><link rel="stylesheet" href="/style.css"><style>
 body{overflow:hidden}.showwrap{height:100vh;display:flex;flex-direction:column;padding:18px}.scorebar{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}.scorebar .score{min-width:150px;text-align:center}.showstage{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}.showstage>div{width:100%}.board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;max-width:1450px;margin:auto}.board .cat{min-height:520px}.showbuzz{text-align:center;margin:10px auto;max-width:800px}.join{position:fixed;inset:0;display:grid;place-items:center;background:#070714;z-index:20}.joinbox{width:min(520px,90vw);text-align:center}.joinbox input{font-size:26px;padding:14px;width:100%;box-sizing:border-box;border-radius:12px;border:1px solid #ffffff33;background:#111126;color:white}.hidden{display:none!important}
 </style>
+<style id="music-spectrum-show">
+.music-spectrum-wrap{width:min(1000px,92vw);margin:34px auto 10px;display:flex;justify-content:center}
+.music-spectrum{width:min(900px,100%);height:150px;display:flex;align-items:center;justify-content:center;gap:8px;padding:22px 28px;box-sizing:border-box;border-radius:24px;background:linear-gradient(180deg,rgba(16,16,34,.92),rgba(12,12,28,.82));border:1px solid rgba(255,255,255,.12);box-shadow:0 0 30px rgba(0,0,0,.32);overflow:hidden}
+.music-spectrum .bar{width:10px;height:60px;border-radius:999px;background:linear-gradient(180deg,#ff62c8,#a95cff);opacity:.9;transform-origin:center;will-change:height;display:block}
+@media(max-width:700px){.music-spectrum{height:120px;gap:5px;padding:16px}.music-spectrum .bar{width:7px}.music-spectrum .bar:nth-child(n+21){display:none}}
+
+
+</style>
+
 <style id="face-morph-solution-v30">
 .face-morph-solution-v30{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:center;width:min(1250px,94vw);margin:28px auto}
 .face-morph-solution-v30 .fm30-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
@@ -130,12 +139,63 @@ function connectGame(){code=document.getElementById('code').value.trim().toUpper
 if(code){document.getElementById('code').value=code;connectGame()}
 socket.on('errorMessage',m=>document.getElementById('joinStatus').textContent=m);
 socket.on('connect',()=>{if(code)socket.emit('watchGame',{code})});
-socket.on('state',s=>{state=s||{};document.getElementById('join').classList.add('hidden');const rev=state.mode==='question'?state.question?.revealed:state.mode==='special'?state.special?.revealed:false;if(state.buzzedBy&&state.buzzedBy!==prev.buzzedBy)sBuzz();else if(state.buzzerOpen&&!prev.buzzerOpen)sOpen();if(rev&&!prev.revealed)sReveal();prev={buzzerOpen:!!state.buzzerOpen,buzzedBy:state.buzzedBy||null,revealed:!!rev};render()});
-socket.on('questionsUpdated',q=>{Q=q;render()});socket.on('gameSound', ({type})=>{ if(type==='correct') sCorrect(); else if(type==='wrong') sWrong(); });
+socket.on('state',s=>{state=s||{};document.getElementById('join').classList.add('hidden');const rev=state.mode==='question'?state.question?.revealed:state.mode==='special'?state.special?.revealed:false;if(state.buzzedBy&&state.buzzedBy!==prev.buzzedBy)sBuzz();else if(state.buzzerOpen&&!prev.buzzerOpen)sOpen();if(rev&&!prev.revealed)sReveal();prev={buzzerOpen:!!state.buzzerOpen,buzzedBy:state.buzzedBy||null,revealed:!!rev};updateMusicSpectrum(false);render();updateMusicSpectrum(state.mode==='special'&&state.special?.type==='Musik'&&!!state.buzzerOpen);});
+socket.on('questionsUpdated',q=>{Q=q;render();updateMusicSpectrum(state.mode==='special'&&state.special?.type==='Musik'&&!!state.buzzerOpen)});socket.on('gameSound', ({type})=>{ if(type==='correct') sCorrect(); else if(type==='wrong') sWrong(); });
+let showMusicPlaying=false;
+let musicSpectrumFrame=0;
+let musicSpectrumBars=[];
+const musicSpectrumBase=[34,58,44,76,52,92,62,108,72,86,112,68,98,58,82,104,66,94,54,78,102,62,88,48,70];
 
-async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());render()}
+function stopMusicSpectrumAnimation(){
+  showMusicPlaying=false;
+  if(musicSpectrumFrame) cancelAnimationFrame(musicSpectrumFrame);
+  musicSpectrumFrame=0;
+  const el=document.getElementById('musicSpectrum');
+  if(el) el.classList.remove('playing');
+  musicSpectrumBars=[];
+  const bars=el?.querySelectorAll('.bar')||[];
+  bars.forEach((bar,i)=>bar.style.height=(musicSpectrumBase[i]||60)+'px');
+}
+
+function startMusicSpectrumAnimation(){
+  const el=document.getElementById('musicSpectrum');
+  if(!el)return;
+  if(showMusicPlaying && musicSpectrumFrame)return;
+  showMusicPlaying=true;
+  el.classList.add('playing');
+  musicSpectrumBars=[...el.querySelectorAll('.bar')];
+  const start=performance.now();
+  const animate=(now)=>{
+    if(!showMusicPlaying || !document.getElementById('musicSpectrum')){
+      musicSpectrumFrame=0;
+      return;
+    }
+    musicSpectrumBars.forEach((bar,i)=>{
+      const base=musicSpectrumBase[i]||60;
+      const min=Math.max(18,base*0.28);
+      const max=Math.min(116,base*1.15);
+      const speed=0.0015+(i%5)*0.00032;
+      const phase=i*0.83;
+      const wave=(Math.sin((now-start)*speed+phase)+1)/2;
+      const wave2=(Math.sin((now-start)*(speed*0.63)+phase*1.7)+1)/2;
+      const mix=wave*0.72+wave2*0.28;
+      bar.style.height=(min+(max-min)*mix).toFixed(1)+'px';
+    });
+    musicSpectrumFrame=requestAnimationFrame(animate);
+  };
+  musicSpectrumFrame=requestAnimationFrame(animate);
+}
+
+function updateMusicSpectrum(shouldAnimate){
+  if(shouldAnimate)startMusicSpectrumAnimation();
+  else stopMusicSpectrumAnimation();
+}
+
+socket.on('musicSync',m=>{state.music=m});
+async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());render();updateMusicSpectrum(state.mode==='special'&&state.special?.type==='Musik'&&!!state.buzzerOpen)}
 function render(){const ps=state.players||[];document.getElementById('scores').innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong></div>`).join('');const b=document.getElementById('buzz');b.textContent=state.buzzedBy?'⚡ '+state.buzzedBy+' hat gebuzzert!':state.buzzerOpen?'🟢 BUZZER OFFEN':'🔴 Buzzer geschlossen';b.className='buzz showbuzz'+(state.buzzerOpen?' open':'');const stage=document.getElementById('stage');if(state.mode==='question'&&state.question){let x=state.question;stage.innerHTML=`<div><div class="small">${esc(x.kategorie)} · ${esc(x.punkte)} Punkte</div><div class="question">${esc(x.frage)}</div>${x.revealed?`<div class="answer"><div class="small">LÖSUNG</div>${esc(x.antwort)}</div>`:''}</div>`;return}if(state.mode==='special'&&state.special){stage.innerHTML=special(state.special);return}stage.innerHTML=board()}
 function board(){return `<div class="board">${cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map(x=>`<div class="tile ${x.used?'used':''}">${x.used?'✓':esc(x.punkte)}</div>`).join('')}</div>`).join('')}</div>`}
-function special(x){const t=x.type;if(t==='Face Morph')return `<div>${!x.revealed?(x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Morphbild</div>'):`<div class="fm-solution-v36"><div class="fm-original-v36"><img src="${img(x.original1)}" alt="${esc(x.person1||'Originalbild 1')}"><div>${esc(x.person1||'')}</div></div><div class="fm-morph-v36"><img class="heroimg fm-morph-image-v36" src="${img(x.bild)}" alt="Morph-Bild"></div><div class="fm-original-v36"><img src="${img(x.original2)}" alt="${esc(x.person2||'Originalbild 2')}"><div>${esc(x.person2||'')}</div></div></div>`}</div>`;if(t==='Wo zum Henker ist das?')return `<div><h2 class="neon">WO ZUM HENKER IST DAS?</h2>${x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Geo-Bild</div>'}${x.revealed?`<div class="answer">📍 ${esc(x.antwort)}</div>`:''}</div>`;if(t==='Fragenhagel')return `<div><h2 class="neon">FRAGENHAGEL · ${esc(x.punkte||100)} PUNKTE</h2><div class="question">${esc(x.frage||'Noch keine Frage')}</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;if(t==='Musik')return `<div><h2 class="neon">MUSIK · ${esc(x.punkte||300)} PUNKTE</h2><div class="question">🎵 Welches Lied ist das?</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;return '<div class="question">Sonderrunde</div>'}
+function special(x){const t=x.type;if(t==='Face Morph')return `<div>${!x.revealed?(x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Morphbild</div>'):`<div class="fm-solution-v36"><div class="fm-original-v36"><img src="${img(x.original1)}" alt="${esc(x.person1||'Originalbild 1')}"><div>${esc(x.person1||'')}</div></div><div class="fm-morph-v36"><img class="heroimg fm-morph-image-v36" src="${img(x.bild)}" alt="Morph-Bild"></div><div class="fm-original-v36"><img src="${img(x.original2)}" alt="${esc(x.person2||'Originalbild 2')}"><div>${esc(x.person2||'')}</div></div></div>`}</div>`;if(t==='Wo zum Henker ist das?')return `<div><h2 class="neon">WO ZUM HENKER IST DAS?</h2>${x.bild?`<img class="heroimg" src="${img(x.bild)}">`:'<div class="question">Noch kein Geo-Bild</div>'}${x.revealed?`<div class="answer">📍 ${esc(x.antwort)}</div>`:''}</div>`;if(t==='Fragenhagel')return `<div><h2 class="neon">FRAGENHAGEL · ${esc(x.punkte||100)} PUNKTE</h2><div class="question">${esc(x.frage||'Noch keine Frage')}</div>${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;if(t==='Musik')return `<div><h2 class="neon">MUSIK · ${esc(x.punkte||300)} PUNKTE</h2><div class="question">🎵 Welches Lied ist das?</div>${x.spotifyUrl?`<div class="music-spectrum-wrap"><div id="musicSpectrum" class="music-spectrum" aria-label="Musik-Audiospektrum" aria-live="polite">${Array.from({length:25},(_,i)=>`<span class="bar" style="animation-delay:-${(i%7)*.11}s"></span>`).join('')}</div></div>`:'<div class="small">Kein gültiger Spotify-Link</div>'}${x.revealed?`<div class="answer">${esc(x.antwort||'')}</div>`:''}</div>`;return '<div class="question">Sonderrunde</div>';}
+
 load();
 </script></body></html>

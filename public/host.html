@@ -80,11 +80,32 @@
 }
 </style>
 
+<style id="music-player-host-v52">
+/* Musik-Player auf dem Host: gleiche Optik wie auf der Show, Host-Funktionen bleiben erhalten. */
+.music-show-wrap{width:min(1000px,92vw);margin:26px auto}
+.music-show-bar{background:#101022e8;border:1px solid #ffffff20;border-radius:18px;padding:16px;box-shadow:0 0 28px #0008}
+.music-show-row{display:flex;align-items:center;gap:14px;width:100%}
+.music-show-row .music-seek{flex:1;min-width:180px;accent-color:var(--pink)}
+.music-show-time{min-width:105px;font-variant-numeric:tabular-nums;color:#ddd;text-align:center}
+.music-host-volume{display:flex;align-items:center;gap:6px;white-space:nowrap;color:#ddd}
+.music-host-volume input{width:110px;accent-color:var(--cyan)}
+.music-show-row #musicPlayBtn{flex:0 0 auto}
+.music-spotify-login{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #ffffff18;color:#ddd}
+.music-status{min-height:22px;margin-top:8px;text-align:center;color:#bbb;font-size:14px}
+@media(max-width:700px){.music-spotify-login{align-items:flex-start;flex-direction:column}}
+@media(max-width:700px){
+  .music-show-row{flex-wrap:wrap}
+  .music-show-row .music-seek{min-width:100%;order:3}
+  .music-show-time{min-width:auto}
+  .music-host-volume input{width:90px}
+}
+</style>
+
 </head><body><button id="soundToggle" onclick="toggleSound()" title="Sound an/aus" style="position:fixed;right:12px;bottom:12px;z-index:99;border:1px solid #ffffff33;background:#111126;color:white;border-radius:999px;padding:8px 11px;cursor:pointer">🔊</button>
 <div class="wrap">
 <div class="top"><h1 class="neon">⚡ FRAGENHAGEL – HOST</h1><span id="gameInfo" class="buzz open">Spiel wird erstellt …</span><button class="btn cyan" onclick="openShow()">📺 Show öffnen</button><button class="btn" onclick="copyPlayerLink()">🔗 Spieler-Link kopieren</button><button class="btn accent" onclick="newLobby()">🆕 Neue Lobby</button></div>
 
-<div class="panel"><h2>Spieler & Lobby</h2><div id="lobby" class="row"></div><div class="small" id="joinHint"></div><div class="row" style="margin-top:10px"><button class="btn bad" onclick="resetScores()">Punkte auf 0</button></div><div id="scores"></div></div>
+<div class="panel"><h2>Spieler & Lobby</h2><div id="lobby" class="row"></div><div class="small" id="joinHint"></div><div class="row" style="margin-top:10px"><button class="btn good" onclick="openBuzzer()">🔔 Buzzer freigeben</button><button class="btn" onclick="closeBuzzer()">Buzzer schließen</button><button class="btn bad" onclick="resetScores()">Punkte auf 0</button></div><div id="buzz" class="buzz" style="margin-top:12px">Buzzer geschlossen</div><div id="scores"></div></div>
 
 <div class="panel"><div class="row"><h2 style="flex:1">Fragentafel</h2><button class="btn" onclick="resetUsed()">♻️ Felder zurücksetzen</button></div><div id="board" class="grid"></div></div>
 
@@ -92,7 +113,7 @@
 <button class="btn accent" onclick="pickSpecial('Face Morph')">🧑‍🤝‍🧑 Face Morph</button>
 <button class="btn accent" onclick="pickSpecial('Wo zum Henker ist das?')">🌍 Geo</button>
 <button class="btn accent" onclick="pickSpecial('Fragenhagel')">🌩️ Fragenhagel</button>
-
+<button class="btn accent" onclick="pickSpecial('Musik')">🎵 Musik</button>
 </div></div>
 
 <div class="panel"><h2>Editor</h2>
@@ -101,7 +122,7 @@
 <button class="btn" onclick="tab('face')">Face Morph</button>
 <button class="btn" onclick="tab('geo')">Geo</button>
 <button class="btn" onclick="tab('fh')">Fragenhagel</button>
-
+<button class="btn" onclick="tab('music')">Musik</button>
 </div>
 <div id="main" class="tabbody active"></div><div id="face" class="tabbody"></div><div id="geo" class="tabbody"></div><div id="fh" class="tabbody"></div><div id="music" class="tabbody"></div>
 <div style="margin-top:12px"><button class="btn good" onclick="saveAll()">💾 Alles speichern</button><span id="saveStatus" class="small"></span></div></div>
@@ -114,8 +135,35 @@
 </div></div>
 
 
+<div id="hostBuzzPanel" class="panel host-buzz-panel">
+  <div class="panel-title">⚡ BUZZER</div>
+  <div id="hostBuzzName" class="host-buzz-name waiting">Noch niemand gebuzzert</div>
+  <div id="hostBuzzMeta" class="host-buzz-meta"></div>
+</div>
 
+<style>
+.host-buzz-panel{
+  margin:12px 0;
+  padding:16px 20px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:14px;
+}
+.host-buzz-name{
+  font-size:clamp(24px,4vw,42px);
+  font-weight:800;
+  line-height:1.1;
+  margin-top:6px;
+}
+.host-buzz-name.waiting{opacity:.55}
+.host-buzz-name.active{animation:hostBuzzPulse .7s ease-in-out infinite alternate}
+.host-buzz-meta{margin-top:6px;opacity:.7}
+@keyframes hostBuzzPulse{
+  from{transform:scale(1)}
+  to{transform:scale(1.025)}
+}
+</style>
 
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
 let soundOn=localStorage.getItem('fragenhagelSound')!=='off';
@@ -187,8 +235,28 @@ const cats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Mu
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const img=u=>u?u+'?v='+Date.now():'';
 socket.on('state',s=>{
+  const previousBuzzed=state?.buzzedBy||null;
   stateSounds(s);
   state=s||{};
+  // Nach einem Spotify-Login wird die Hostseite neu geladen. Der Server kennt
+  // weiterhin die aktuell geöffnete Sonderrunde, daher stellen wir diese Ansicht
+  // automatisch wieder her, statt auf dem Hauptbrett zu landen.
+  const restoreMusic=new URLSearchParams(location.search).get('restore')==='music';
+  if(!active && state.mode==='special' && state.special){
+    active={...state.special};
+    if(active.type==='Musik' && active.spotifyUrl && !active.spotify) active.spotify=active.spotifyUrl;
+    setTimeout(()=>{ if(active) { if(restoreMusic && active.type==='Musik') document.getElementById('play')?.classList.add('open'); renderPlay(); } },0);
+  } else if(restoreMusic && active?.type==='Musik'){
+    document.getElementById('play')?.classList.add('open');
+    setTimeout(()=>renderPlay(),0);
+  }
+  if(active?.type==='Musik' && state.buzzedBy && state.buzzedBy!==previousBuzzed && musicPlayerReady && musicPlayer && musicPlaying){
+    musicPlayer.pause().then(()=>{
+      musicPlaying=false;
+      stopMusicTicker();
+      musicUiUpdate(musicCurrentTime,musicDuration,false);
+    }).catch(()=>{});
+  }
   renderScores();
   renderBuzz();
   renderHostBuzz();
@@ -210,6 +278,14 @@ socket.on('buzzAccepted', ({player})=>{
   renderBuzz();
   renderHostBuzz();
   if(active) renderJudge(Number(active.punkte)||100);
+  // Musik: Sobald ein Spieler buzzert, pausiert der Host-Player automatisch.
+  if(active?.type==='Musik' && musicPlayerReady && musicPlayer && musicPlaying){
+    musicPlayer.pause().then(()=>{
+      musicPlaying=false;
+      stopMusicTicker();
+      musicUiUpdate(musicCurrentTime,musicDuration,false);
+    }).catch(()=>{});
+  }
 });
 socket.on('gameCreated',g=>{
   gameCode=g.code;
@@ -238,7 +314,7 @@ function updateGameInfo(){const el=document.getElementById('gameInfo');if(el)el.
 function renderLobby(){const el=document.getElementById('lobby');if(!el)return;const ps=state.players||[];el.innerHTML=ps.length?ps.map(p=>`<span class="score"><strong>${esc(p.name)}</strong> ${p.connected?'🟢':'⚪'}</span>`).join(''):'<span class="small">Noch niemand beigetreten.</span>';updateGameInfo()}
 
 socket.on('questionsUpdated',q=>{Q=q;renderAll();});
-async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());renderAll();updateGameInfo();}
+async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());renderAll();updateGameInfo();if(active)renderPlay();}
 
 function renderHostBuzz(){
   const nameEl=document.getElementById('hostBuzzName');
@@ -297,14 +373,75 @@ async function startQuestion(c,i){
 function showPlay(){document.getElementById('play').classList.add('open');renderPlay()}
 function toBoard(){
  judgedPlayers={};
- judgingLocked=false;document.getElementById('play').classList.remove('open');active=null;socket.emit('showBoard')}
+ judgingLocked=false;
+ if(active?.type==='Musik'&&musicPlayerReady&&musicPlayer){try{socket.emit('musicControl',{action:'pause',time:musicPlayer.getCurrentTime()});}catch(e){}}
+ resetMusicPlayer();
+ document.getElementById('play').classList.remove('open');active=null;socket.emit('showBoard')}
+let musicPlayer=null,musicPlayerId='',musicPlayerReady=false,musicTicker=null,musicPendingAction=null,musicCurrentTime=0,musicDuration=0,musicPlaying=false,spotifyDeviceId='',spotifySdkReady=false,spotifyAuth={authenticated:false,premium:false};
+window.onSpotifyWebPlaybackSDKReady=()=>{spotifySdkReady=true;if(active?.type==='Musik') initSpotifyWebPlayer();};
+function formatTime(sec){sec=Math.max(0,Math.floor(Number(sec)||0));const m=Math.floor(sec/60),s=String(sec%60).padStart(2,'0');return `${m}:${s}`}
+function spotifyTrackUri(url){const v=String(url||'').trim();if(/^spotify:track:[A-Za-z0-9]+$/.test(v))return v;const m=v.match(/open\.spotify\.com\/(?:intl-[^/]+\/)?track\/([A-Za-z0-9]+)/i);return m?`spotify:track:${m[1]}`:'';}
+async function loadSpotifyStatus(){try{const r=await fetch('/api/spotify/status');spotifyAuth=await r.json();const s=document.getElementById('spotifyStatus');if(s){if(spotifyAuth.authenticated&&spotifyAuth.premium)s.textContent=`🟢 Spotify Premium verbunden${spotifyAuth.displayName?' · '+spotifyAuth.displayName:''}`;else if(spotifyAuth.authenticated)s.textContent='🟠 Spotify verbunden, aber Premium erforderlich';else s.textContent='Nicht mit Spotify verbunden';}const b=document.getElementById('spotifyLoginBtn');if(b){b.textContent=spotifyAuth.authenticated?'🔄 Spotify neu anmelden':'🎵 Mit Spotify Premium anmelden';b.style.display='inline-block';}if(spotifyAuth.authenticated&&spotifyAuth.premium&&active?.type==='Musik')initSpotifyWebPlayer();}catch(e){}}
+function spotifyLogin(){
+  const u=new URL('/api/spotify/login',location.origin);
+  const ret=new URL('/host.html',location.origin);
+  if(gameCode) ret.searchParams.set('code',gameCode);
+  if(active?.type==='Musik'){
+    ret.searchParams.set('restore','music');
+    ret.searchParams.set('musicIndex',String(Number(active.index)||0));
+  }
+  u.searchParams.set('return',ret.pathname+ret.search);
+  window.location.href=u.toString();
+}
+async function initSpotifyWebPlayer(){if(!spotifyAuth.authenticated||!spotifyAuth.premium||!spotifySdkReady)return;if(musicPlayer)return;try{const tr=await fetch('/api/spotify/token');if(!tr.ok)throw new Error('Spotify-Anmeldung abgelaufen');const tj=await tr.json();musicPlayer=new Spotify.Player({name:'Fragenhagel Host Player',getOAuthToken:async cb=>{try{const r=await fetch('/api/spotify/token');const j=await r.json();cb(j.access_token||'')}catch(e){cb('')}},volume:1});musicPlayer.addListener('ready',({device_id})=>{spotifyDeviceId=device_id;musicPlayerReady=true;musicUiUpdate(musicCurrentTime,musicDuration,musicPlaying);if(musicPendingAction){const fn=musicPendingAction;musicPendingAction=null;fn();}});musicPlayer.addListener('not_ready',()=>{musicPlayerReady=false;spotifyDeviceId='';});musicPlayer.addListener('player_state_changed',state=>{if(!state)return;musicDuration=Number(state.duration||0)/1000;musicCurrentTime=Number(state.position||0)/1000;musicPlaying=!state.paused;musicPlayerId=state.track_window?.current_track?.uri||musicPlayerId;musicUiUpdate(musicCurrentTime,musicDuration,musicPlaying);if(musicPlaying)startMusicTicker();else stopMusicTicker();});musicPlayer.addListener('initialization_error',({message})=>{showMusicStatus('❌ Spotify Player: '+message)});musicPlayer.addListener('authentication_error',({message})=>{showMusicStatus('❌ Spotify-Anmeldung: '+message)});musicPlayer.addListener('account_error',({message})=>{showMusicStatus('❌ Spotify Premium wird benötigt');});musicPlayer.addListener('playback_error',({message})=>{showMusicStatus('❌ Wiedergabe: '+message)});musicPlayer.addListener('autoplay_failed',()=>{showMusicStatus('ℹ️ Zum Starten bitte Play drücken.');});await musicPlayer.connect();}catch(e){musicPlayer=null;musicPlayerReady=false;showMusicStatus('❌ '+e.message);}}
+function showMusicStatus(msg){const el=document.getElementById('musicStatus');if(el)el.textContent=msg;}
+function musicUiUpdate(time,duration,playing){const seek=document.getElementById('musicSeek'),tm=document.getElementById('musicTime'),btn=document.getElementById('musicPlayBtn');if(seek&&duration>0){seek.max=duration;seek.value=Math.min(duration,Math.max(0,Number(time)||0));}if(tm)tm.textContent=`${formatTime(time)} / ${formatTime(duration)}`;if(btn)btn.textContent=playing?'⏸️ Pause':'▶️ Play';}
+function startMusicTicker(){if(musicTicker)return;musicTicker=setInterval(()=>{if(!musicPlayerReady||!musicPlayer||!musicPlaying)return;musicCurrentTime+=1;musicUiUpdate(musicCurrentTime,musicDuration,true);},1000)}
+function stopMusicTicker(){if(musicTicker){clearInterval(musicTicker);musicTicker=null;}}
+function musicDo(fn){if(musicPlayerReady&&musicPlayer)return fn();musicPendingAction=fn;initSpotifyWebPlayer();}
+async function musicToggle(){
+ if(!spotifyAuth.authenticated||!spotifyAuth.premium)return spotifyLogin();
+ const uri=spotifyTrackUri(active?.spotify);
+ if(!uri)return showMusicStatus('❌ Bitte einen gültigen Spotify-Track-Link im Editor eintragen.');
+ musicDo(async()=>{
+  try{
+   if(musicPlaying){
+    await musicPlayer.pause();
+    musicPlaying=false;
+    stopMusicTicker();
+    musicUiUpdate(musicCurrentTime,musicDuration,false);
+    return;
+   }
+   if(musicPlayerId!==uri){
+    const r=await fetch('/api/spotify/play',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uri,device_id:spotifyDeviceId,position_ms:0})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(j.error||'Spotify konnte den Titel nicht starten');
+    musicPlayerId=uri;
+    musicCurrentTime=0;
+   }else{
+    await musicPlayer.resume();
+   }
+   musicPlaying=true;
+   startMusicTicker();
+   musicUiUpdate(musicCurrentTime,musicDuration,true);
+   // Musik starten => Buzzer automatisch freigeben.
+   if(!state?.buzzerOpen && !state?.buzzedBy) openBuzzer();
+   showMusicStatus(active?.antwort||'');
+  }catch(e){showMusicStatus('❌ '+e.message);}
+ });
+}
+
+function musicSeekPreview(v){const seek=Number(v)||0;const tm=document.getElementById('musicTime');if(tm)tm.textContent=`${formatTime(seek)} / ${formatTime(musicDuration)}`;}
+function musicSeekTo(v){musicDo(async()=>{try{const t=Math.max(0,Number(v)||0);musicCurrentTime=t;await musicPlayer.seek(Math.round(t*1000));musicUiUpdate(t,musicDuration,musicPlaying);}catch(e){showMusicStatus('❌ '+e.message);}});}
+function musicSetVolume(v){musicDo(async()=>{try{await musicPlayer.setVolume(Math.max(0,Math.min(1,Number(v)/100)));}catch(e){showMusicStatus('❌ Lautstärke konnte nicht geändert werden');}});}
+function resetMusicPlayer(){stopMusicTicker();if(musicPlayer){try{musicPlayer.disconnect()}catch(e){}try{musicPlayer=null}catch(e){}}musicPlayerId='';musicPlayerReady=false;spotifyDeviceId='';musicPendingAction=null;musicCurrentTime=0;musicDuration=0;musicPlaying=false;}
 function renderPlay(){if(!active)return;let html='';let points=Number(active.punkte)||0;
  if(active.kind==='question')html=`<div class="small">${esc(active.category)} · ${points} Punkte</div><div class="question">${esc(active.frage)}</div>${active.revealed?`<div class="answer">${esc(active.antwort)}</div>`:''}`;
  else if(active.type==='Face Morph')html=`${!active.revealed?(active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Morphbild hinterlegt</div>'):`<div class="fm-host-solution"><div class="fm-host-original"><img src="${img(active.original1)}"><figcaption>${esc(active.person1||'')}</figcaption></div><div class="fm-host-morph"><img class="heroimg" src="${img(active.bild)}"></div><div class="fm-host-original"><img src="${img(active.original2)}"><figcaption>${esc(active.person2||'')}</figcaption></div></div>`}`;
  else if(active.type==='Wo zum Henker ist das?')html=`<h2>Geo ${active.index+1}</h2>${active.bild?`<img class="heroimg" src="${img(active.bild)}">`:'<div class="question">Kein Bild hinterlegt</div>'}${active.revealed?`<div class="answer">📍 ${esc(active.antwort)}</div>`:''}`;
  else if(active.type==='Fragenhagel')html=`<h2>Fragenhagel ${active.index+1}</h2><div class="question">${esc(active.frage||'Noch keine Frage')}</div>${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`;
- else if(active.type==='Musik'){const id=yt(active.youtube);html=`<h2>Musik ${active.index+1}</h2><div class="question">Welches Lied ist das?</div>${id?`<iframe width="760" height="428" style="max-width:90vw;border:0;border-radius:15px" src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`:'<div class="small">Kein gültiger YouTube-Link</div>'}${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`}
- document.getElementById('playContent').innerHTML=html; const nextFm=document.getElementById("nextFaceMorphBtn"); if(nextFm){const list=Q.Sonderrunden?.['Face Morph']||[]; const isFm=active?.type==='Face Morph'; nextFm.style.display=isFm?'inline-block':'none'; nextFm.disabled=!isFm || active.index>=list.length-1;} const nextSpecialBtn=document.getElementById("nextSpecialBtn"); if(nextSpecialBtn){const nextMap={"Wo zum Henker ist das?":{label:"➡️ Nächster Geo",type:"Wo zum Henker ist das?"},"Fragenhagel":{label:"➡️ Nächster Fragenhagel",type:"Fragenhagel"},"Musik":{label:"➡️ Nächste Musik",type:"Musik"}}; const cfg=nextMap[active?.type]; const list=cfg?(Q.Sonderrunden?.[cfg.type]||[]):[]; const show=!!cfg; nextSpecialBtn.style.display=show?'inline-block':'none'; nextSpecialBtn.textContent=cfg?.label||''; nextSpecialBtn.disabled=!show || Number(active.index)>=list.length-1;} if(state?.buzzedBy)renderJudge(points);else{const _j=document.getElementById("judge");if(_j)_j.innerHTML="";}
+ else if(active.type==='Musik'){const id=String(active.spotify||'').trim();html=`<h2>Musik ${active.index+1}</h2><div class="question">Welches Lied ist das?</div>${id?`<div class="music-show-wrap"><div class="music-show-bar"><div class="music-spotify-login"><span id="spotifyStatus">Spotify wird geprüft …</span><button id="spotifyLoginBtn" class="btn cyan" type="button" onclick="spotifyLogin()">🎵 Mit Spotify Premium anmelden</button></div><div class="music-show-row"><button id="musicPlayBtn" class="btn good" type="button" onclick="musicToggle()">▶️ Play</button><input id="musicSeek" class="music-seek" type="range" min="0" max="100" step="0.1" value="0" oninput="musicSeekPreview(this.value)" onchange="musicSeekTo(this.value)"><span id="musicTime" class="music-show-time">0:00 / 0:00</span><div class="music-host-volume"><span>🔊</span><input id="musicVolume" type="range" min="0" max="100" value="100" oninput="musicSetVolume(this.value)"></div></div><div id="musicStatus" class="music-status">${esc(active.antwort||'')}</div></div></div>`:'<div class="small">Kein gültiger Spotify-Link</div>'}${active.revealed?`<div class="answer">${esc(active.antwort||'')}</div>`:''}`}
+ if(active.type==='Musik'){document.getElementById('playContent').innerHTML=html;loadSpotifyStatus();if(spotifyAuth.authenticated&&spotifyAuth.premium)initSpotifyWebPlayer();}else{resetMusicPlayer();document.getElementById('playContent').innerHTML=html;} const nextFm=document.getElementById("nextFaceMorphBtn"); if(nextFm){const list=Q.Sonderrunden?.['Face Morph']||[]; const isFm=active?.type==='Face Morph'; nextFm.style.display=isFm?'inline-block':'none'; nextFm.disabled=!isFm || active.index>=list.length-1;} const nextSpecialBtn=document.getElementById("nextSpecialBtn"); if(nextSpecialBtn){const nextMap={"Wo zum Henker ist das?":{label:"➡️ Nächster Geo",type:"Wo zum Henker ist das?"},"Fragenhagel":{label:"➡️ Nächster Fragenhagel",type:"Fragenhagel"},"Musik":{label:"➡️ Nächste Musik",type:"Musik"}}; const cfg=nextMap[active?.type]; const list=cfg?(Q.Sonderrunden?.[cfg.type]||[]):[]; const show=!!cfg; nextSpecialBtn.style.display=show?'inline-block':'none'; nextSpecialBtn.textContent=cfg?.label||''; nextSpecialBtn.disabled=!show || Number(active.index)>=list.length-1;} if(state?.buzzedBy)renderJudge(points);else{const _j=document.getElementById("judge");if(_j)_j.innerHTML="";}
 }
 function renderJudge(points){
  const j=document.getElementById('judge');
@@ -379,6 +516,14 @@ function wrong(p,v){
  lockPlayerButtons(p);
  try{sWrong()}catch(e){}
  socket.emit('wrong',{player:String(p),points:Number(v)||100});
+ // Musik: Nach einer falschen Antwort automatisch wieder abspielen.
+ if(active?.type==='Musik'){
+   setTimeout(()=>{
+     try{
+       if(typeof musicToggle==='function') musicToggle();
+     }catch(e){ console.error('Automatisches Fortsetzen der Musik fehlgeschlagen:',e); }
+   },250);
+ }
 }
 function faceMorphSecondCorrect(p){
  if(judgedPlayers[String(p)])return;
@@ -426,7 +571,7 @@ function award(p,v){
    socket.emit('correct',{player:String(p),points:pts});
  }
 }
-async function reveal(){if(!active)return;active.revealed=true;if(active.kind==='question')socket.emit('revealQuestion');else{const list=Q.Sonderrunden?.[active.type]||[];const saved=list[active.index]||active;active={...saved,type:active.type,index:active.index,revealed:true};const pub=active.type==='Musik'?{...active,youtube:''}:active;socket.emit('revealSpecial',pub)}renderPlay()}
+async function reveal(){if(!active)return;active.revealed=true;if(active.kind==='question')socket.emit('revealQuestion');else{const list=Q.Sonderrunden?.[active.type]||[];const saved=list[active.index]||active;active={...saved,type:active.type,index:active.index,revealed:true};const pub=active.type==='Musik'?{...active,youtube:'',spotifyUrl:active.spotify}:active;socket.emit('revealSpecial',pub)}renderPlay()}
 function nextFaceMorph(){
  judgedPlayers={};
  judgingLocked=false;
@@ -448,13 +593,13 @@ function nextSpecial(){
  const nextIndex=Number(active.index)+1;
  if(nextIndex>=list.length)return;
  active={...list[nextIndex],type,index:nextIndex,revealed:false};
- const pub=type==='Musik'?{...active,youtube:''}:active;
+ const pub=type==='Musik'?{...active,youtube:'',spotifyUrl:active.spotify}:active;
  socket.emit('showSpecial',pub);
  showPlay();
 }
 function pickSpecial(type){
  judgedPlayers={};
- judgingLocked=false;const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=type==='Musik'?{...active,youtube:''}:active;socket.emit('showSpecial',pub);showPlay()}
+ judgingLocked=false;const list=Q.Sonderrunden?.[type]||[];if(!list.length)return alert('Keine Einträge');let raw=prompt(`${type}: Nummer 1-${list.length}`,'1');let i=Math.max(0,Math.min(list.length-1,(Number(raw)||1)-1));active={...list[i],type,index:i,revealed:false};const pub=type==='Musik'?{...active,youtube:'',spotifyUrl:active.spotify}:active;socket.emit('showSpecial',pub);showPlay()}
 function tab(id){document.querySelectorAll('.tabbody').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
 function renderMainEditor(){document.getElementById('main').innerHTML=cats.map(c=>`<h3>${esc(c)}</h3><div class="editorgrid">${(Q[c]||[]).map((x,i)=>`<div class="card"><b>${x.punkte} Punkte</b><textarea data-main="${esc(c)}" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-main="${esc(c)}" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" style="width:100%;margin-top:6px"></div>`).join('')}</div>`).join('')}
 function renderFace(){
@@ -489,7 +634,29 @@ function renderFace(){
 }
 function renderGeo(){let a=Q.Sonderrunden?.['Wo zum Henker ist das?']||[];document.getElementById('geo').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Geo ${i+1}</h3><input data-sp="Wo zum Henker ist das?" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Ort"><input type="number" data-sp="Wo zum Henker ist das?" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"><div class="preview">${x.bild?`<img src="${img(x.bild)}">`:''}</div><div class="fm-file-row"><div>Bild</div><label class="fm-file-picker"><span class="fm-file-button">Datei auswählen</span><span class="fm-file-name">${esc(x.bildName||'Keine ausgewählt')}</span><input type="file" accept="image/*" onchange="uploadImg('Wo zum Henker ist das?',${i},'bild',this)"></label></div></div>`).join('')+'</div>'}
 function renderFH(){let a=Q.Sonderrunden?.Fragenhagel||[];document.getElementById('fh').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Frage ${i+1}</h3><textarea data-sp="Fragenhagel" data-i="${i}" data-f="frage">${esc(x.frage||'')}</textarea><input data-sp="Fragenhagel" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Antwort" style="width:100%"><input type="number" data-sp="Fragenhagel" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||100}"></div>`).join('')+'</div>'}
-function renderMusic(){let a=Q.Sonderrunden?.Musik||[];document.getElementById('music').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Song ${i+1}</h3><input data-sp="Musik" data-i="${i}" data-f="youtube" value="${esc(x.youtube||'')}" placeholder="YouTube-Link" style="width:100%"><input data-sp="Musik" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Lied / Interpret" style="width:100%"><input type="number" data-sp="Musik" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"></div>`).join('')+'</div>'}
+async function spotifyAutofill(index,input){
+ const url=String(input?.value||'').trim();
+ const m=url.match(/open\.spotify\.com\/(?:intl-[^/]+\/)?track\/([A-Za-z0-9]+)/i);
+ const valid=/^spotify:track:[A-Za-z0-9]+$/.test(url)||!!m;
+ if(!valid)return;
+ const card=input.closest('.card');
+ const answer=card?.querySelector('[data-f="antwort"]');
+ if(!answer)return;
+ try{
+   answer.placeholder='Spotify-Daten werden geladen …';
+   const r=await fetch('/api/spotify/track-metadata?url='+encodeURIComponent(url));
+   const j=await r.json().catch(()=>({}));
+   if(!r.ok)throw new Error(j.error||'Spotify-Daten konnten nicht geladen werden');
+   answer.value=j.answer||'';
+   Q.Sonderrunden.Musik[index].spotify=url;
+   Q.Sonderrunden.Musik[index].antwort=j.answer||'';
+   answer.placeholder='Lied / Interpret';
+ }catch(e){
+   answer.placeholder='Lied / Interpret';
+   console.warn('Spotify Auto-Ausfüllen:',e.message);
+ }
+}
+function renderMusic(){let a=Q.Sonderrunden?.Musik||[];document.getElementById('music').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Song ${i+1}</h3><input data-sp="Musik" data-i="${i}" data-f="spotify" value="${esc(x.spotify||'')}" placeholder="Spotify-Link" style="width:100%" oninput="clearTimeout(this._spotifyTimer);this._spotifyTimer=setTimeout(()=>spotifyAutofill(${i},this),450)"><input data-sp="Musik" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Lied / Interpret" style="width:100%"><input type="number" data-sp="Musik" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"></div>`).join('')+'</div>'}
 async function saveAll(){document.querySelectorAll('[data-main]').forEach(el=>{let c=el.dataset.main,i=+el.dataset.i,f=el.dataset.f;Q[c][i][f]=el.value});document.querySelectorAll('[data-sp]').forEach(el=>{let t=el.dataset.sp,i=+el.dataset.i,f=el.dataset.f;Q.Sonderrunden[t][i][f]=el.type==='number'?Number(el.value)||0:el.value});let r=await fetch('/api/questions',{method:'PUT',headers:gameHeaders(),body:JSON.stringify(Q)});document.getElementById('saveStatus').textContent=r.ok?' ✅ Gespeichert':' ❌ Fehler';if(r.ok)load()}
 async function uploadImg(section,index,field,input){
  const file=input.files?.[0];

@@ -17,6 +17,158 @@ app.use(express.json({ limit: '100mb' }));
 app.use(express.static(path.join(ROOT, 'public')));
 app.get('/healthz', (req, res) => res.json({ ok: true }));
 
+// Spotify Premium Web Playback authentication (Host only)
+const spotifySessions = new Map();
+const spotifyOAuthStates = new Map();
+const SPOTIFY_SCOPES = 'streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state';
+function spotifyCookie(req){
+  const raw=String(req.headers.cookie||'');
+  const m=raw.match(/(?:^|;\s*)fh_spotify_sid=([^;]+)/);
+  return m?decodeURIComponent(m[1]):'';
+}
+function setSpotifyCookie(res,sid){
+  const secure=process.env.NODE_ENV==='production' || process.env.RENDER==='true';
+  res.setHeader('Set-Cookie',`fh_spotify_sid=${encodeURIComponent(sid)}; Path=/; HttpOnly; SameSite=Lax${secure?'; Secure':''}; Max-Age=2592000`);
+}
+function spotifyRedirectUri(req){
+  if(process.env.SPOTIFY_REDIRECT_URI) return String(process.env.SPOTIFY_REDIRECT_URI);
+  const proto=String(req.headers['x-forwarded-proto']||req.protocol||'http').split(',')[0];
+  const host=String(req.headers['x-forwarded-host']||req.get('host')||'localhost:3000').split(',')[0];
+  return `${proto}://${host}/api/spotify/callback`;
+}
+function spotifyConfigured(){return !!(process.env.SPOTIFY_CLIENT_ID&&process.env.SPOTIFY_CLIENT_SECRET);}
+async function spotifyTokenRequest(params){
+  const auth=Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64');
+  const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Authorization':`Basic ${auth}`,'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(params)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.error_description||j.error||`Spotify Token-Fehler ${r.status}`);
+  return j;
+}
+async function spotifyRefreshSession(session){
+  if(!session?.refresh_token) throw new Error('Spotify-Anmeldung abgelaufen');
+  const j=await spotifyTokenRequest({grant_type:'refresh_token',refresh_token:session.refresh_token});
+  session.access_token=j.access_token;
+  session.expires_at=Date.now()+Math.max(60,Number(j.expires_in)||3600)*1000;
+  if(j.refresh_token) session.refresh_token=j.refresh_token;
+  return session;
+}
+async function spotifyAccess(req){
+  const sid=spotifyCookie(req); const session=sid&&spotifySessions.get(sid);
+  if(!session) throw new Error('Spotify-Anmeldung fehlt');
+  if(Date.now()>session.expires_at-60000) await spotifyRefreshSession(session);
+  if(session.product!=='premium') throw new Error('Spotify Premium wird für die vollständige Wiedergabe benötigt.');
+  return session;
+}
+async function spotifyApi(session,path,options={}){
+  if(Date.now()>session.expires_at-60000) await spotifyRefreshSession(session);
+  let r=await fetch(`https://api.spotify.com/v1${path}`,{...options,headers:{...(options.headers||{}),'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'}});
+  if(r.status===401){await spotifyRefreshSession(session);r=await fetch(`https://api.spotify.com/v1${path}`,{...options,headers:{...(options.headers||{}),'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'}});}
+  const text=await r.text(); let body={}; try{body=text?JSON.parse(text):{};}catch{}
+  if(!r.ok) throw new Error(body?.error?.message||`Spotify API Fehler ${r.status}`);
+  return body;
+}
+
+app.get('/api/spotify/config',(req,res)=>res.json({configured:spotifyConfigured(),redirectUri:spotifyRedirectUri(req)}));
+app.get('/api/spotify/status',async(req,res)=>{
+  try{
+    const sid=spotifyCookie(req); const session=sid&&spotifySessions.get(sid);
+    if(!session) return res.json({authenticated:false,configured:spotifyConfigured(),redirectUri:spotifyRedirectUri(req)});
+    if(Date.now()>session.expires_at-60000) await spotifyRefreshSession(session);
+    res.json({authenticated:true,configured:spotifyConfigured(),product:session.product,displayName:session.display_name||'',premium:session.product==='premium',redirectUri:spotifyRedirectUri(req)});
+  }catch(e){res.json({authenticated:false,configured:spotifyConfigured(),error:e.message,redirectUri:spotifyRedirectUri(req)});}
+});
+app.get('/api/spotify/login',(req,res)=>{
+  if(!spotifyConfigured()) return res.status(500).send('<h2>Spotify ist noch nicht eingerichtet.</h2><p>Bitte <b>SPOTIFY_CLIENT_ID</b>, <b>SPOTIFY_CLIENT_SECRET</b> und die Redirect-URL in Render hinterlegen.</p><p>Redirect-URL: <code>'+spotifyRedirectUri(req)+'</code></p>');
+  const state=crypto.randomBytes(24).toString('hex');
+  let returnTo=String(req.query.return||'').trim();
+  if(!returnTo.startsWith('/host.html')) returnTo='/host.html';
+  spotifyOAuthStates.set(state,{created:Date.now(),returnTo});
+  for(const [k,v] of spotifyOAuthStates) if(Date.now()-v.created>10*60*1000) spotifyOAuthStates.delete(k);
+  const u=new URL('https://accounts.spotify.com/authorize');
+  u.searchParams.set('client_id',process.env.SPOTIFY_CLIENT_ID);u.searchParams.set('response_type','code');u.searchParams.set('redirect_uri',spotifyRedirectUri(req));u.searchParams.set('scope',SPOTIFY_SCOPES);u.searchParams.set('state',state);
+  res.redirect(u.toString());
+});
+app.get('/api/spotify/callback',async(req,res)=>{
+  const state=String(req.query.state||''); const saved=spotifyOAuthStates.get(state); spotifyOAuthStates.delete(state);
+  if(!saved||Date.now()-saved.created>10*60*1000) return res.status(400).send('<h2>Spotify-Anmeldung abgelaufen.</h2><p>Bitte zurück zum Host und erneut anmelden.</p>');
+  if(req.query.error) return res.status(400).send('<h2>Spotify-Anmeldung abgebrochen.</h2><p>'+String(req.query.error_description||req.query.error)+'</p><p><a href="/host.html">Zurück zum Host</a></p>');
+  try{
+    const t=await spotifyTokenRequest({grant_type:'authorization_code',code:String(req.query.code||''),redirect_uri:spotifyRedirectUri(req)});
+    const grantedScopes=String(t.scope||'').split(/\s+/).filter(Boolean);if(!grantedScopes.includes('streaming'))throw new Error('Spotify hat die Berechtigung „streaming“ nicht erteilt. Bitte erneut anmelden und den Zugriff bestätigen.');const profile=await fetch('https://api.spotify.com/v1/me',{headers:{Authorization:`Bearer ${t.access_token}`}}).then(async r=>{const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j?.error?.message||'Spotify-Profil konnte nicht geladen werden');return j;});
+    const sid=crypto.randomBytes(24).toString('hex'); spotifySessions.set(sid,{access_token:t.access_token,refresh_token:t.refresh_token,expires_at:Date.now()+Math.max(60,Number(t.expires_in)||3600)*1000,product:profile.product,display_name:profile.display_name||''});
+    setSpotifyCookie(res,sid);
+    const returnTo=saved.returnTo||'/host.html';
+    const u=new URL(returnTo,'http://localhost');
+    u.searchParams.set('spotify','connected');
+    res.redirect(u.pathname+(u.search?u.search:''));
+  }catch(e){res.status(500).send('<h2>Spotify-Anmeldung fehlgeschlagen.</h2><p>'+String(e.message)+'</p><p><a href="/host.html">Zurück zum Host</a></p>');}
+});
+app.post('/api/spotify/logout',(req,res)=>{const sid=spotifyCookie(req);if(sid)spotifySessions.delete(sid);res.setHeader('Set-Cookie','fh_spotify_sid=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');res.json({ok:true});});
+app.get('/api/spotify/token',async(req,res)=>{try{const s=await spotifyAccess(req);res.json({access_token:s.access_token});}catch(e){res.status(401).json({error:e.message});}});
+let spotifyCatalogToken={access_token:'',expires_at:0};
+async function spotifyCatalogAccess(){
+  if(!spotifyConfigured()) throw new Error('Spotify ist noch nicht eingerichtet.');
+  if(spotifyCatalogToken.access_token && Date.now()<spotifyCatalogToken.expires_at-60000) return spotifyCatalogToken.access_token;
+  const j=await spotifyTokenRequest({grant_type:'client_credentials'});
+  spotifyCatalogToken={access_token:j.access_token,expires_at:Date.now()+Math.max(60,Number(j.expires_in)||3600)*1000};
+  return spotifyCatalogToken.access_token;
+}
+async function spotifyCatalogApi(path){
+  let token=await spotifyCatalogAccess();
+  let r=await fetch(`https://api.spotify.com/v1${path}`,{headers:{Authorization:`Bearer ${token}`}});
+  if(r.status===401){
+    spotifyCatalogToken={access_token:'',expires_at:0};
+    token=await spotifyCatalogAccess();
+    r=await fetch(`https://api.spotify.com/v1${path}`,{headers:{Authorization:`Bearer ${token}`}});
+  }
+  const text=await r.text(); let body={}; try{body=text?JSON.parse(text):{};}catch{}
+  if(!r.ok) throw new Error(body?.error?.message||`Spotify API Fehler ${r.status}`);
+  return body;
+}
+app.get('/api/spotify/track-metadata',async(req,res)=>{
+  try{
+    const raw=String(req.query.url||'').trim();
+    const m=raw.match(/open\.spotify\.com\/(?:intl-([^/]+)\/)?track\/([A-Za-z0-9]+)/i);
+    const uri=/^spotify:track:[A-Za-z0-9]+$/.test(raw)?raw:(m?`spotify:track:${m[2]}`:'');
+    const id=uri.replace('spotify:track:','');
+    if(!id)return res.status(400).json({error:'Kein gültiger Spotify-Track-Link.'});
+    const market=(m?.[1]||'DE').slice(0,2).toUpperCase();
+    const track=await spotifyCatalogApi(`/tracks/${encodeURIComponent(id)}?market=${encodeURIComponent(market)}`);
+    const artists=(track.artists||[]).map(a=>a.name).filter(Boolean).join(', ');
+    res.json({name:track.name||'',artists,answer:[track.name,artists].filter(Boolean).join(' - '),id});
+  }catch(e){res.status(400).json({error:e.message});}
+});
+app.post('/api/spotify/play',async(req,res)=>{
+  try{
+    const s=await spotifyAccess(req);
+    const {uri,device_id,position_ms}=req.body||{};
+    const did=String(device_id||'').trim();
+    if(!String(uri||'').startsWith('spotify:track:'))return res.status(400).json({error:'Nur Spotify-Track-Links werden unterstützt.'});
+    if(!did)return res.status(400).json({error:'Spotify-Player ist noch nicht bereit. Bitte kurz warten und erneut auf Play drücken.'});
+
+    // Der Web Playback SDK stellt zunächst ein Spotify-Connect-Gerät bereit.
+    // Dieses Gerät muss vor dem /play-Aufruf aktiv übertragen werden.
+    await spotifyApi(s,'/me/player',{method:'PUT',body:JSON.stringify({device_ids:[did],play:false})});
+
+    // Spotify propagiert den Device-Transfer nicht immer sofort. Deshalb warten
+    // wir kurz und prüfen, bis das Browser-Gerät tatsächlich aktiv ist.
+    let active=false;
+    for(let i=0;i<10;i++){
+      await new Promise(r=>setTimeout(r,250));
+      try{
+        const d=await spotifyApi(s,'/me/player/devices',{method:'GET'});
+        const dev=(d.devices||[]).find(x=>x.id===did);
+        if(dev && dev.is_active){active=true;break;}
+      }catch{}
+    }
+    if(!active)return res.status(409).json({error:'Spotify-Player wurde noch nicht als aktives Gerät erkannt. Bitte einmal Play drücken.'});
+
+    await spotifyApi(s,'/me/player/play',{method:'PUT',body:JSON.stringify({device_id:did,uris:[String(uri)],position_ms:Math.max(0,Math.floor(Number(position_ms)||0))})});
+    res.json({ok:true,device_id:did});
+  }catch(e){res.status(400).json({error:e.message});}
+});
+app.post('/api/spotify/transfer',async(req,res)=>{try{const s=await spotifyAccess(req);const {device_id}=req.body||{};await spotifyApi(s,'/me/player',{method:'PUT',body:JSON.stringify({device_ids:[String(device_id||'')],play:false})});res.json({ok:true});}catch(e){res.status(400).json({error:e.message});}});
+
 const readQ = () => JSON.parse(fs.readFileSync(QFILE, 'utf8'));
 const writeQ = q => fs.writeFileSync(QFILE, JSON.stringify(q, null, 2), 'utf8');
 const cleanName = n => String(n || '').trim().replace(/\s+/g, ' ').slice(0, 24) || 'Gast';
@@ -40,7 +192,7 @@ function newGame() {
     players: [],
     state: {
       mode: 'board', question: null, special: null,
-      buzzerOpen: false, buzzedBy: null, firstBuzzedBy: null, lockedPlayers: []
+      buzzerOpen: false, buzzedBy: null, firstBuzzedBy: null, lockedPlayers: [], music: null
     }
   };
   games.set(code, game);
@@ -174,11 +326,42 @@ io.on('connection', socket => {
   });
   socket.on('requestState', () => { const game = games.get(socket.data.code); if (game) socket.emit('state', gameState(game)); });
 
-  socket.on('showBoard', () => { const game = games.get(socket.data.code); if (!game || !socket.data.host) return; game.state.mode='board'; game.state.question=null; game.state.special=null; resetBuzz(game); emit(game); });
-  socket.on('showQuestion', q => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.mode='question'; game.state.question={...q,revealed:false}; game.state.special=null; resetBuzz(game); emit(game); });
+  socket.on('showBoard', () => { const game = games.get(socket.data.code); if (!game || !socket.data.host) return; game.state.mode='board'; game.state.question=null; game.state.special=null; game.state.music=null; resetBuzz(game); emit(game); });
+  socket.on('showQuestion', q => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.mode='question'; game.state.question={...q,revealed:false}; game.state.special=null; game.state.music=null; resetBuzz(game); emit(game); });
   socket.on('revealQuestion', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; if(game.state.mode==='question'&&game.state.question){game.state.question.revealed=true;emit(game);} });
-  socket.on('showSpecial', x => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.mode='special'; game.state.special={...x,revealed:false}; game.state.question=null; resetBuzz(game); emit(game); });
+  socket.on('showSpecial', x => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.mode='special'; game.state.special={...x,revealed:false}; game.state.question=null; game.state.music=(x&&x.type==='Musik'&&x.spotifyUrl)?{id:String(x.spotifyUrl),playing:false,time:0,volume:100,updatedAt:Date.now()}:null; resetBuzz(game); emit(game); });
   socket.on('revealSpecial', payload => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; if(game.state.mode==='special'&&game.state.special){if(payload&&typeof payload==='object')game.state.special={...game.state.special,...payload};game.state.special.revealed=true;emit(game);} });
+  socket.on('musicControl', payload => {
+    const game=games.get(socket.data.code);
+    if(!game||!socket.data.host||game.state.mode!=='special'||game.state.special?.type!=='Musik')return;
+    const m=game.state.music;
+    if(!m)return;
+    const action=String(payload?.action||'');
+    const now=Date.now();
+    let time=Number(payload?.time);
+    if(!Number.isFinite(time)) time=m.time||0;
+    if(m.playing && action!=='play') time += Math.max(0,(now-(m.updatedAt||now))/1000);
+    time=Math.max(0,time);
+    if(action==='load'){
+      const id=String(payload?.id||'');
+      if(id) m.id=id;
+      m.time=0; m.playing=false;
+    }else if(action==='play'){
+      m.time=time; m.playing=true;
+    }else if(action==='pause'){
+      m.time=time; m.playing=false;
+    }else if(action==='seek'){
+      m.time=time;
+    }else if(action==='volume'){
+      m.volume=Math.max(0,Math.min(100,Number(payload?.volume)||0));
+      m.time=time;
+    }else if(action==='tick'){
+      m.time=time;
+    }else return;
+    m.updatedAt=now;
+    socket.to(`game:${game.code}`).emit('musicSync', {...m});
+    if(action!=='tick') emit(game);
+  });
   socket.on('openBuzzer', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.buzzerOpen=true;game.state.buzzedBy=null;emit(game); });
   socket.on('closeBuzzer', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.buzzerOpen=false;emit(game); });
   socket.on('buzz', () => { const game=games.get(socket.data.code); if(!game||!socket.data.playerId)return; const p=game.players.find(x=>x.id===socket.data.playerId); if(!p||!p.connected||!game.state.buzzerOpen||game.state.buzzedBy||game.state.lockedPlayers.includes(p.id))return; game.state.buzzedBy=p.name; if(!game.state.firstBuzzedBy) game.state.firstBuzzedBy=p.name; game.state.buzzerOpen=false; emit(game); io.to(`game:${game.code}`).emit('buzzAccepted', { player: p.name }); });
