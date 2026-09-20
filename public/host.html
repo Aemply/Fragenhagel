@@ -114,33 +114,7 @@
 </div></div>
 
 
-<div id="hostBuzzPanel" class="panel host-buzz-panel">
-  <div class="panel-title">⚡ BUZZER</div>
-  <div id="hostBuzzName" class="host-buzz-name waiting">Noch niemand gebuzzert</div>
-  <div id="hostBuzzMeta" class="host-buzz-meta"></div>
-</div>
 
-<style>
-.host-buzz-panel{
-  margin:12px 0;
-  padding:16px 20px;
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:14px;
-}
-.host-buzz-name{
-  font-size:clamp(24px,4vw,42px);
-  font-weight:800;
-  line-height:1.1;
-  margin-top:6px;
-}
-.host-buzz-name.waiting{opacity:.55}
-.host-buzz-name.active{animation:hostBuzzPulse .7s ease-in-out infinite alternate}
-.host-buzz-meta{margin-top:6px;opacity:.7}
-@keyframes hostBuzzPulse{
-  from{transform:scale(1)}
-  to{transform:scale(1.025)}
-}
-</style>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
