@@ -35,7 +35,8 @@
     {
       "punkte": 200,
       "frage": "Berechne 3+3x3",
-      "antwort": "12"
+      "antwort": "12",
+      "used": true
     },
     {
       "punkte": 300,
@@ -45,7 +46,8 @@
     {
       "punkte": 500,
       "frage": "Was ist das Präteritum von \"gehen\"?",
-      "antwort": "ging"
+      "antwort": "ging",
+      "used": true
     },
     {
       "punkte": 1000,
@@ -67,7 +69,8 @@
     {
       "punkte": 300,
       "frage": "Ich komme einmal in „Minute“, zweimal in „Moment“, aber kein einziges Mal in „Stunde“ vor.",
-      "antwort": "Der Buchstabe \"M\""
+      "antwort": "Der Buchstabe \"M\"",
+      "used": true
     },
     {
       "punkte": 500,
@@ -100,7 +103,8 @@
     {
       "punkte": 300,
       "frage": "Wie heißt das Mädchen mit übernatürlichen Fähigkeiten in „Stranger Things“?",
-      "antwort": "Elf/Eleven"
+      "antwort": "Elf/Eleven",
+      "used": true
     },
     {
       "punkte": 500,
@@ -837,7 +841,8 @@
     {
       "punkte": 100,
       "frage": "\"Ich bin dein Vater\"",
-      "antwort": "Darth Vader"
+      "antwort": "Darth Vader",
+      "used": true
     },
     {
       "punkte": 200,
@@ -881,8 +886,9 @@
     },
     {
       "punkte": 300,
-      "frage": "Welche beiden Farben dominieren die Flagge der Ukraine?",
-      "antwort": "Blau und Gelb"
+      "frage": "Wie heißt die medizinische Bezeichnung für die weißen Blutkörperchen?",
+      "antwort": "Leukozyten",
+      "used": true
     },
     {
       "punkte": 500,
