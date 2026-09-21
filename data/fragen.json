@@ -234,13 +234,16 @@
       },
       {
         "id": 10,
-        "bild": "",
-        "original1": "",
-        "original2": "",
-        "person1": "",
-        "person2": "",
+        "bild": "/media/special_1789998422345_mhlnr1.png",
+        "original1": "/media/special_1789998425625_89ko94.png",
+        "original2": "/media/special_1789998427221_9c23lu.jpg",
+        "person1": "Julia (Zarbex)",
+        "person2": "Maximal Schradin",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "Maximal Julia.png",
+        "original1Name": "Julia (Zarbex).png",
+        "original2Name": "Schradin.jpeg"
       }
     ],
     "Wo zum Henker ist das?": [
