@@ -80,93 +80,6 @@
       "antwort": "Landkarte"
     }
   ],
-  "Filme & Serien": [
-    {
-      "punkte": 100,
-      "frage": "Wie heißt die Schule, die Harry Potter besucht?",
-      "antwort": "Hogwarts",
-      "optionen": [
-        "Beauxbatons",
-        "Hogwarts",
-        "Durmstrang",
-        "Ilvermorny"
-      ]
-    },
-    {
-      "punkte": 200,
-      "frage": "Wie heißt die Familie im Zentrum der Serie „The Simpsons“?",
-      "antwort": "Simpson"
-    },
-    {
-      "punkte": 300,
-      "frage": "Wie heißt der König der Löwen, der Simbas Vater ist?",
-      "antwort": "Mufasa"
-    },
-    {
-      "punkte": 500,
-      "frage": "In welcher Filmreihe gibt es die Figuren Frodo, Gandalf und Aragorn?",
-      "antwort": "Der Herr der Ringe"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Welche Serie spielt größtenteils in der fiktiven Kleinstadt Hawkins und enthält das Upside Down?",
-      "antwort": "Stranger Things"
-    }
-  ],
-  "Musik": [
-    {
-      "punkte": 100,
-      "frage": "Wie viele Saiten hat eine klassische Gitarre?",
-      "antwort": "6"
-    },
-    {
-      "punkte": 200,
-      "frage": "Welches Instrument hat schwarze und weiße Tasten und wird häufig mit Pedalen gespielt?",
-      "antwort": "Klavier"
-    },
-    {
-      "punkte": 300,
-      "frage": "Wie nennt man den Teil eines Songs, der sich meist zwischen den Strophen wiederholt?",
-      "antwort": "Refrain"
-    },
-    {
-      "punkte": 500,
-      "frage": "Welche Band veröffentlichte den Song „Bohemian Rhapsody“?",
-      "antwort": "Queen"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Wie nennt man in der Musik die Geschwindigkeit eines Stücks?",
-      "antwort": "Tempo"
-    }
-  ],
-  "Flaggen": [
-    {
-      "punkte": 100,
-      "frage": "Welche Farben hat die deutsche Flagge?",
-      "antwort": "Schwarz, Rot, Gold"
-    },
-    {
-      "punkte": 200,
-      "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
-      "antwort": "Japan"
-    },
-    {
-      "punkte": 300,
-      "frage": "Welche beiden Farben dominieren die Flagge der Ukraine?",
-      "antwort": "Blau und Gelb"
-    },
-    {
-      "punkte": 500,
-      "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
-      "antwort": "Schweiz"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
-      "antwort": "Nepal"
-    }
-  ],
   "Sonderrunden": {
     "Face Morph": [
       {
@@ -843,8 +756,95 @@
     "YouTube-Titel",
     "Back to School",
     "Was bin ich?",
-    "Filme & Serien",
-    "Musik",
-    "Flaggen"
+    "Wer hat das gesagt?",
+    "Serien/Filme",
+    "Medizin/Körper"
+  ],
+  "Wer hat das gesagt?": [
+    {
+      "punkte": 100,
+      "frage": "Wie heißt die Schule, die Harry Potter besucht?",
+      "antwort": "Hogwarts",
+      "optionen": [
+        "Beauxbatons",
+        "Hogwarts",
+        "Durmstrang",
+        "Ilvermorny"
+      ]
+    },
+    {
+      "punkte": 200,
+      "frage": "Wie heißt die Familie im Zentrum der Serie „The Simpsons“?",
+      "antwort": "Simpson"
+    },
+    {
+      "punkte": 300,
+      "frage": "Wie heißt der König der Löwen, der Simbas Vater ist?",
+      "antwort": "Mufasa"
+    },
+    {
+      "punkte": 500,
+      "frage": "In welcher Filmreihe gibt es die Figuren Frodo, Gandalf und Aragorn?",
+      "antwort": "Der Herr der Ringe"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Welche Serie spielt größtenteils in der fiktiven Kleinstadt Hawkins und enthält das Upside Down?",
+      "antwort": "Stranger Things"
+    }
+  ],
+  "Serien/Filme": [
+    {
+      "punkte": 100,
+      "frage": "Wie viele Saiten hat eine klassische Gitarre?",
+      "antwort": "6"
+    },
+    {
+      "punkte": 200,
+      "frage": "Welches Instrument hat schwarze und weiße Tasten und wird häufig mit Pedalen gespielt?",
+      "antwort": "Klavier"
+    },
+    {
+      "punkte": 300,
+      "frage": "Wie nennt man den Teil eines Songs, der sich meist zwischen den Strophen wiederholt?",
+      "antwort": "Refrain"
+    },
+    {
+      "punkte": 500,
+      "frage": "Welche Band veröffentlichte den Song „Bohemian Rhapsody“?",
+      "antwort": "Queen"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Wie nennt man in der Musik die Geschwindigkeit eines Stücks?",
+      "antwort": "Tempo"
+    }
+  ],
+  "Medizin/Körper": [
+    {
+      "punkte": 100,
+      "frage": "Welche Farben hat die deutsche Flagge?",
+      "antwort": "Schwarz, Rot, Gold"
+    },
+    {
+      "punkte": 200,
+      "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
+      "antwort": "Japan"
+    },
+    {
+      "punkte": 300,
+      "frage": "Welche beiden Farben dominieren die Flagge der Ukraine?",
+      "antwort": "Blau und Gelb"
+    },
+    {
+      "punkte": 500,
+      "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
+      "antwort": "Schweiz"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
+      "antwort": "Nepal"
+    }
   ]
 }
