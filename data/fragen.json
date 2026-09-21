@@ -56,35 +56,35 @@
   "Was bin ich?": [
     {
       "punkte": 100,
-      "frage": "Ich habe vier Beine, bin aber kein Tier. Auf mir kann man sitzen.",
-      "antwort": "Stuhl"
+      "frage": "Ich bin voller Löcher und kann trotzdem Wasser halten. ",
+      "antwort": "Ein Schwamm"
     },
     {
       "punkte": 200,
-      "frage": "Ich habe Zähne, kann aber nicht beißen. Man benutzt mich morgens oft im Badezimmer.",
-      "antwort": "Zahnbürste"
+      "frage": "Ich gehöre dir, aber andere benutzen mich häufiger als du.",
+      "antwort": "Dein Name"
     },
     {
       "punkte": 300,
-      "frage": "Ich habe viele Seiten, aber keine Tür. Man kann mich lesen.",
-      "antwort": "Buch"
+      "frage": "Ich komme einmal in „Minute“, zweimal in „Moment“, aber kein einziges Mal in „Stunde“ vor.",
+      "antwort": "Der Buchstabe \"M\""
     },
     {
       "punkte": 500,
-      "frage": "Ich kann dir den Weg zeigen, obwohl ich keinen Schritt mache. Oft bin ich auf Papier oder im Handy.",
-      "antwort": "Karte"
+      "frage": "Ich kann einen Raum vollständig füllen, nehme aber keinen Platz ein. Ohne mich kannst du sehen, aber mich selbst kannst du nicht festhalten.",
+      "antwort": "Licht"
     },
     {
       "punkte": 1000,
-      "frage": "Ich habe Städte ohne Häuser, Flüsse ohne Wasser und Straßen ohne Autos. Was bin ich?",
-      "antwort": "Landkarte"
+      "frage": "Ich bin immer vor dir, aber du wirst mich niemals sehen. Je länger du lebst, desto kleiner werde ich.",
+      "antwort": "Deine Zukunft"
     }
   ],
   "Filme & Serien": [
     {
       "punkte": 100,
-      "frage": "Wie heißt die Schule, die Harry Potter besucht?",
-      "antwort": "Hogwarts",
+      "frage": "In welcher Stadt lebt SpongeBob Schwammkopf?",
+      "antwort": "Bikini Bottom",
       "optionen": [
         "Beauxbatons",
         "Hogwarts",
@@ -94,23 +94,23 @@
     },
     {
       "punkte": 200,
-      "frage": "Wie heißt die Familie im Zentrum der Serie „The Simpsons“?",
-      "antwort": "Simpson"
+      "frage": "Aus welchem Distrikt stammt Katniss Everdeen in „Die Tribute von Panem“?",
+      "antwort": "Distrikt 12"
     },
     {
       "punkte": 300,
-      "frage": "Wie heißt der König der Löwen, der Simbas Vater ist?",
-      "antwort": "Mufasa"
+      "frage": "Wie heißt das Mädchen mit übernatürlichen Fähigkeiten in „Stranger Things“?",
+      "antwort": "Elf/Eleven"
     },
     {
       "punkte": 500,
-      "frage": "In welcher Filmreihe gibt es die Figuren Frodo, Gandalf und Aragorn?",
-      "antwort": "Der Herr der Ringe"
+      "frage": "Wie lautet der zweite Vorname von Sheldon Cooper aus „The Big Bang Theory“?",
+      "antwort": "Lee"
     },
     {
       "punkte": 1000,
-      "frage": "Welche Serie spielt größtenteils in der fiktiven Kleinstadt Hawkins und enthält das Upside Down?",
-      "antwort": "Stranger Things"
+      "frage": "Welche Nummer trägt Spieler 456 in „Squid Game“ – bzw. wie heißt er?",
+      "antwort": "Seong Gi-hun"
     }
   ],
   "Sonderrunden": {
@@ -786,28 +786,28 @@
   "Wer hat das gesagt?": [
     {
       "punkte": 100,
-      "frage": "Wie viele Saiten hat eine klassische Gitarre?",
-      "antwort": "6"
+      "frage": "\"Ich bin dein Vater\"",
+      "antwort": "Darth Vader"
     },
     {
       "punkte": 200,
-      "frage": "Welches Instrument hat schwarze und weiße Tasten und wird häufig mit Pedalen gespielt?",
-      "antwort": "Klavier"
+      "frage": "„Ich bin ein Berliner.“",
+      "antwort": "John F. Kennedy"
     },
     {
       "punkte": 300,
-      "frage": "Wie nennt man den Teil eines Songs, der sich meist zwischen den Strophen wiederholt?",
-      "antwort": "Refrain"
+      "frage": "\"Mein Schatz!\"",
+      "antwort": "Gollum"
     },
     {
       "punkte": 500,
-      "frage": "Welche Band veröffentlichte den Song „Bohemian Rhapsody“?",
-      "antwort": "Queen"
+      "frage": "\"Bio ist für mich Abfall\"",
+      "antwort": "Nadine - Frauentausch"
     },
     {
       "punkte": 1000,
-      "frage": "Wie nennt man in der Musik die Geschwindigkeit eines Stücks?",
-      "antwort": "Tempo"
+      "frage": "„Das Leben ist wie Fahrrad fahren. Um die Balance zu halten, musst du in Bewegung bleiben.“",
+      "antwort": "Albert Einstein"
     }
   ],
   "__categories": [
@@ -821,13 +821,13 @@
   "Medizin/Köper": [
     {
       "punkte": 100,
-      "frage": "Welche Farben hat die deutsche Flagge?",
-      "antwort": "Schwarz, Rot, Gold"
+      "frage": "Welches Organ produziert Insulin?",
+      "antwort": "Bauchspeicheldrüse"
     },
     {
       "punkte": 200,
-      "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
-      "antwort": "Japan"
+      "frage": "Wie heißen die drei Gehörknöchelchen?",
+      "antwort": "Hammer, Amboss und Steigbügel"
     },
     {
       "punkte": 300,
@@ -836,13 +836,13 @@
     },
     {
       "punkte": 500,
-      "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
-      "antwort": "Schweiz"
+      "frage": "Wie heißt der einzige Knochen des menschlichen Körpers, der nicht direkt mit einem anderen Knochen verbunden ist?",
+      "antwort": "Zungenbein"
     },
     {
       "punkte": 1000,
-      "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
-      "antwort": "Nepal"
+      "frage": "Wie heißt der Muskel, der hauptsächlich für die Atmung verantwortlich ist und Brust- und Bauchraum voneinander trennt?",
+      "antwort": "Zwerchfell"
     }
   ]
 }
