@@ -2,28 +2,28 @@
   "YouTube-Titel": [
     {
       "punkte": 100,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "frage": "Hate Kommentare singen | feat. Julia Beautx",
+      "antwort": "Rezo"
     },
     {
       "punkte": 200,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "frage": "Undercover als Fake-Maskottchen beim EM-Eröffnungsspiel",
+      "antwort": "Marvin Wildhage"
     },
     {
       "punkte": 300,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "frage": "10 Arten von Pärchen",
+      "antwort": "BibisBeautyPalace"
     },
     {
       "punkte": 500,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "frage": "Fame ohne Folgen? – warum Influencer mit (fast) allem davonkommen",
+      "antwort": "Sashka"
     },
     {
       "punkte": 1000,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "frage": "ich bin Papa geworden! (kein Clickbait)",
+      "antwort": "Vik"
     }
   ],
   "Back to School": [
@@ -111,33 +111,6 @@
       "punkte": 1000,
       "frage": "Welche Serie spielt größtenteils in der fiktiven Kleinstadt Hawkins und enthält das Upside Down?",
       "antwort": "Stranger Things"
-    }
-  ],
-  "Flaggen": [
-    {
-      "punkte": 100,
-      "frage": "Welche Farben hat die deutsche Flagge?",
-      "antwort": "Schwarz, Rot, Gold"
-    },
-    {
-      "punkte": 200,
-      "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
-      "antwort": "Japan"
-    },
-    {
-      "punkte": 300,
-      "frage": "Welche beiden Farben dominieren die Flagge der Ukraine?",
-      "antwort": "Blau und Gelb"
-    },
-    {
-      "punkte": 500,
-      "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
-      "antwort": "Schweiz"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
-      "antwort": "Nepal"
     }
   ],
   "Sonderrunden": {
@@ -843,6 +816,33 @@
     "Was bin ich?",
     "Filme & Serien",
     "Wer hat das gesagt?",
-    "Flaggen"
+    "Medizin/Köper"
+  ],
+  "Medizin/Köper": [
+    {
+      "punkte": 100,
+      "frage": "Welche Farben hat die deutsche Flagge?",
+      "antwort": "Schwarz, Rot, Gold"
+    },
+    {
+      "punkte": 200,
+      "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
+      "antwort": "Japan"
+    },
+    {
+      "punkte": 300,
+      "frage": "Welche beiden Farben dominieren die Flagge der Ukraine?",
+      "antwort": "Blau und Gelb"
+    },
+    {
+      "punkte": 500,
+      "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
+      "antwort": "Schweiz"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
+      "antwort": "Nepal"
+    }
   ]
 }
