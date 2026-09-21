@@ -1,7 +1,2 @@
-# Fragenhagel Online v86 – Editor-Berechtigung stabilisiert
-
-Basis: v85.
-
-Fix: Der Host-Editor erneuert die stateless Editor-Session vor jedem Speichervorgang und vor Bild-Uploads. Requests verwenden explizit same-origin credentials. Dadurch funktioniert der Editor auch direkt nach dem Erstellen einer neuen Lobby zuverlässig.
-
-GitHub-Persistenz aus v84/v85 bleibt erhalten.
+# Fragenhagel v88
+Basis: v87. Geo-Bild-Upload verwendet dieselbe Editor-/Host-Autorisierung wie das normale Editor-Speichern und Face-Morph-Bild-Upload. Dadurch funktionieren Geo-Bild-Uploads auch nach einer neuen Lobby zuverlässig.
