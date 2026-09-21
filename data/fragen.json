@@ -1,31 +1,4 @@
 {
-  "Back to School": [
-    {
-      "punkte": 100,
-      "frage": "Wie viele Tage hat eine Woche?",
-      "antwort": "7"
-    },
-    {
-      "punkte": 200,
-      "frage": "Wie viele Ecken hat ein Quadrat?",
-      "antwort": "4"
-    },
-    {
-      "punkte": 300,
-      "frage": "Wie nennt man H₂O im Alltag?",
-      "antwort": "Wasser"
-    },
-    {
-      "punkte": 500,
-      "frage": "Wie heißt die Hauptstadt von Frankreich?",
-      "antwort": "Paris"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
-      "antwort": "Primzahl"
-    }
-  ],
   "Was bin ich?": [
     {
       "punkte": 100,
@@ -840,10 +813,37 @@
   ],
   "__categories": [
     "TEST",
-    "Back to School",
+    "TEST2",
     "Was bin ich?",
     "Filme & Serien",
     "Musik",
     "Flaggen"
+  ],
+  "TEST2": [
+    {
+      "punkte": 100,
+      "frage": "Wie viele Tage hat eine Woche?",
+      "antwort": "7"
+    },
+    {
+      "punkte": 200,
+      "frage": "Wie viele Ecken hat ein Quadrat?",
+      "antwort": "4"
+    },
+    {
+      "punkte": 300,
+      "frage": "Wie nennt man H₂O im Alltag?",
+      "antwort": "Wasser"
+    },
+    {
+      "punkte": 500,
+      "frage": "Wie heißt die Hauptstadt von Frankreich?",
+      "antwort": "Paris"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
+      "antwort": "Primzahl"
+    }
   ]
 }
