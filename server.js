@@ -445,8 +445,8 @@ app.post('/api/special-image', async (req, res) => {
     // Verwende hier bewusst dieselbe Host-Token-Prüfung wie beim normalen
     // Fragen-Speichern. Dadurch bleibt der Upload nach 'Neue Lobby'
     // zuverlässig autorisiert und hängt nicht von einer alten Editor-Cookie-Session ab.
-    const game = hostAuthorized(req) || games.get(String(req.headers['x-game-code'] || '').toUpperCase());
-    if (!game || !editorOrHostAuthorized(req)) return res.status(403).json({ ok: false, error: 'Editor-/Host-Berechtigung fehlt' });
+    const game = hostAuthorized(req);
+    if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
     const { section, index, field, data, filename, fields, person1, person2 } = req.body || {};
     if (!['Face Morph', 'Wo zum Henker ist das?'].includes(section)) throw new Error('Ungültige Sonderrunde');
     const allowed = section === 'Face Morph' ? ['bild', 'original1', 'original2'] : ['bild'];
@@ -475,9 +475,11 @@ app.post('/api/special-image', async (req, res) => {
     }
     q.Sonderrunden[section][i][field] = '/media/' + name;
     if (section === 'Face Morph' || section === 'Wo zum Henker ist das?') q.Sonderrunden[section][i][field + 'Name'] = String(filename || '');
-    await persistQuestions(q, `Fragenhagel: ${section} speichern`);
-    io.to(`game:${game.code}`).emit('questionsUpdated', q);
-    res.json({ ok: true, url: '/media/' + name, item: q.Sonderrunden[section][i], persistent: githubEnabled() });
+    if (!req.body?.deferPersist) {
+      await persistQuestions(q, `Fragenhagel: ${section} speichern`);
+      io.to(`game:${game.code}`).emit('questionsUpdated', q);
+    }
+    res.json({ ok: true, url: '/media/' + name, item: q.Sonderrunden[section][i], persistent: githubEnabled(), deferred: Boolean(req.body?.deferPersist) });
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
 });
 

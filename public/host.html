@@ -666,38 +666,53 @@ async function saveAll(){
  Object.assign(Q,renamed);
  Q.__categories=newCats;
  cats=newCats;
+ // Ausgewählte Bilder jetzt erst beim expliziten 'Alles speichern' hochladen.
+ try {
+   for(const [key,p] of pendingImageUploads){
+     const item=Q.Sonderrunden?.[p.section]?.[p.index]||{};
+     const fields={};
+     document.querySelectorAll(`[data-sp="${p.section}"][data-i="${p.index}"]`).forEach(el=>{
+       const f=el.dataset.f;
+       if(!f || el.type==='file') return;
+       fields[f]=el.type==='number'?Number(el.value)||0:el.value;
+     });
+     const resp=await fetch('/api/special-image',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({section:p.section,index:p.index,field:p.field,data:p.data,filename:p.filename,fields,person1:item.person1,person2:item.person2,deferPersist:true})});
+     const j=await resp.json().catch(()=>({}));
+     if(!resp.ok) throw new Error(j.error||'Bild-Upload fehlgeschlagen');
+     Q.Sonderrunden[p.section][p.index][p.field]=j.url;
+     Q.Sonderrunden[p.section][p.index][p.field+'Name']=p.filename;
+   }
+ } catch(e) {
+   document.getElementById('saveStatus').textContent=' ❌ '+e.message;
+   return;
+ }
+ pendingImageUploads.clear();
  let r=await fetch('/api/questions',{method:'PUT',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify(Q)});
  let result={}; try{result=await r.json()}catch(e){}
  document.getElementById('saveStatus').textContent=r.ok?' ✅ Gespeichert':' ❌ '+String(result.error||('Fehler '+r.status));
  if(r.ok)load()
 }
+const pendingImageUploads = new Map();
 async function uploadImg(section,index,field,input){
  const file=input.files?.[0];
  if(!file)return;
- // Nicht gespeicherte Eingaben aus dem Editor vor dem Rendern in Q übernehmen,
- // damit die Felder Person 1/Person 2 beim Bild-Upload nicht zurückgesetzt werden.
- document.querySelectorAll(`[data-sp=\"${section}\"][data-i=\"${index}\"]`).forEach(el=>{
-   const f=el.dataset.f;
-   if(!f || el.type==='file') return;
-   Q.Sonderrunden[section][index][f]=el.type==='number'?Number(el.value)||0:el.value;
- });
+ // Die Dateiauswahl ist zunächst nur lokal. Es wird NICHT sofort gespeichert.
+ // Erst 'Alles speichern' lädt die Datei hoch und persistiert sie in GitHub.
  const data=await new Promise((ok,no)=>{let r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(file)});
- const item=Q.Sonderrunden[section][index]||{};
- const fields={};
- document.querySelectorAll(`[data-sp="${section}"][data-i="${index}"]`).forEach(el=>{
-   const f=el.dataset.f;
-   if(!f || el.type==='file') return;
-   fields[f]=el.type==='number'?Number(el.value)||0:el.value;
- });
- await ensureEditorSession();
- let resp=await fetch('/api/special-image',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({section,index,field,data,filename:file.name,fields,person1:item.person1,person2:item.person2})});
- let j=await resp.json();
- if(!resp.ok)return alert(j.error||'Upload fehlgeschlagen');
- Q.Sonderrunden[section][index][field]=j.url;
- if(section==='Face Morph') Q.Sonderrunden[section][index][field+'Name']=file.name;
- renderAll();
- alert('Bild gespeichert ✅');
+ pendingImageUploads.set(`${section}\0${index}\0${field}`,{section,index,field,data,filename:file.name});
+ const row=input.closest('.fm-file-picker');
+ const nameEl=row?.querySelector('.fm-file-name');
+ if(nameEl) nameEl.textContent=file.name;
+ const card=input.closest('.card');
+ if(card){
+   let preview=card.querySelector('.preview');
+   if(!preview){ preview=document.createElement('div'); preview.className='preview'; const firstRow=card.querySelector('.fm-file-row'); if(firstRow) card.insertBefore(preview, firstRow); }
+   preview.innerHTML=`<img src="${data}">`;
+ }
+ const status=document.getElementById('saveStatus');
+ if(status) status.textContent=' 📝 Bild ausgewählt – noch nicht gespeichert';
 }
+
 function yt(url){let s=String(url||'');let m=s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/);return m?m[1]:''}
 ensureEditorSession();load();createOrJoin();
 </script>
