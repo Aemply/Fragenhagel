@@ -655,21 +655,6 @@ io.on('connection', socket => {
     emit(game);
   });
 
-  socket.on('faceMorphWrong', ({ player }) => {
-    const game=games.get(socket.data.code);
-    if(!game||!socket.data.host)return;
-    const p=game.players.find(x=>x.name===player);
-    if(!p)return;
-
-    // Face Morph: "Falsch" gives no points and deducts no points.
-    // The player is locked for the current question and the buzzer reopens for everyone else.
-    if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
-    game.state.buzzedBy=null;
-    game.state.buzzerOpen=true;
-    io.to(`game:${game.code}`).emit('gameSound', { type: 'wrong' });
-    emit(game);
-  });
-
   socket.on('correct', ({ player, points }) => {
     const game=games.get(socket.data.code);
     if(!game||!socket.data.host)return;

@@ -347,12 +347,14 @@ function renderBuzz(){
    if(hb){hb.style.display='none';hb.textContent='';}
  }
 }
-async function pts(p,a){
-  try{
-    const r=await fetch('/api/player-score',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({player:p,amount:a})});
-    const result=await r.json().catch(()=>({}));
-    if(!r.ok) console.error('Punkte konnten nicht geändert werden:',result.error||r.status);
-  }catch(e){console.error('Punkte konnten nicht geändert werden:',e);}
+function pts(p,a){
+  // Manuelle Punkteänderung direkt über die bestehende Host-Socket-Verbindung.
+  // Dadurch werden dieselben Server-/Sync-Mechanismen wie beim restlichen Spiel verwendet.
+  if(!socket || !socket.connected){
+    console.error('Punkte konnten nicht geändert werden: Host-Verbindung nicht aktiv');
+    return;
+  }
+  socket.emit('addPoints',{player:String(p),amount:Number(a)});
 }
 async function kickPlayer(playerId,playerName){
   if(!playerId)return;
@@ -480,15 +482,12 @@ function renderJudge(points){
  };
 
  if(active?.type==='Face Morph'){
-   const hasPreviousWrong=Array.isArray(state?.lockedPlayers) && state.lockedPlayers.length>0;
-   if(hasPreviousWrong){
-     addBtn('👤 '+String(p.name)+' +100','good',()=>faceMorphSecondCorrect(p.name));
-     addBtn('❌ Falsch','bad',()=>faceMorphWrong(p.name));
-   }else{
-     addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100));
-     addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
-     addBtn('❌ Falsch','bad',()=>faceMorphWrong(p.name));
-   }
+   // Bei jedem gebuzzerten Spieler stehen immer alle drei Face-Morph-Buttons zur Verfügung.
+   // +100 und +300 behalten ihre bisherigen Funktionen. Falsch zieht keine Punkte ab,
+   // sperrt nur den aktuellen Spieler und öffnet den Buzzer für die anderen.
+   addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100));
+   addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
+   addBtn('❌ Falsch – '+String(p.name),'bad',()=>faceMorphWrong(p.name));
  }else{
    addBtn('✅ Richtig – '+String(p.name),'good',()=>correct(p.name,val));
    addBtn('❌ Falsch – '+String(p.name),'bad',()=>wrong(p.name,val));
@@ -546,16 +545,24 @@ function faceMorphSecondCorrect(p){
    catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
  },250);
 }
+function faceMorphSecondWrong(p){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ try{sWrong()}catch(e){}
+ // No points are deducted on this Face Morph "Falsch" result.
+ socket.emit('wrong',{player:String(p),points:0});
+ setTimeout(()=>{
+   try{ if(typeof reveal === 'function') reveal(); }
+   catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
+ },250);
+}
 function faceMorphWrong(p){
  if(judgedPlayers[String(p)])return;
  lockPlayerButtons(p);
  try{sWrong()}catch(e){}
- // Face Morph: "Falsch" zieht keine Punkte ab, sperrt den Spieler für die aktuelle Frage
- // und öffnet den Buzzer für die übrigen Spieler erneut. Die Lösung bleibt verborgen.
- socket.emit('faceMorphWrong',{player:String(p)});
-}
-function faceMorphSecondWrong(p){
- return faceMorphWrong(p);
+ // "Falsch" has no point effect. The player is locked for this round
+ // and the buzzer is reopened for the remaining players.
+ socket.emit('wrong',{player:String(p),points:0});
 }
 function award(p,v){
  if(judgedPlayers[String(p)])return;
