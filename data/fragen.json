@@ -1,37 +1,4 @@
 {
-  "Filme & Serien": [
-    {
-      "punkte": 100,
-      "frage": "Wie heißt die Schule, die Harry Potter besucht?",
-      "antwort": "Hogwarts",
-      "optionen": [
-        "Beauxbatons",
-        "Hogwarts",
-        "Durmstrang",
-        "Ilvermorny"
-      ]
-    },
-    {
-      "punkte": 200,
-      "frage": "Wie heißt die Familie im Zentrum der Serie „The Simpsons“?",
-      "antwort": "Simpson"
-    },
-    {
-      "punkte": 300,
-      "frage": "Wie heißt der König der Löwen, der Simbas Vater ist?",
-      "antwort": "Mufasa"
-    },
-    {
-      "punkte": 500,
-      "frage": "In welcher Filmreihe gibt es die Figuren Frodo, Gandalf und Aragorn?",
-      "antwort": "Der Herr der Ringe"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Welche Serie spielt größtenteils in der fiktiven Kleinstadt Hawkins und enthält das Upside Down?",
-      "antwort": "Stranger Things"
-    }
-  ],
   "Musik": [
     {
       "punkte": 100,
@@ -792,7 +759,7 @@
     "TEST",
     "TEST2",
     "LULULU",
-    "Filme & Serien",
+    "LULULU2",
     "Musik",
     "Flaggen"
   ],
@@ -848,6 +815,39 @@
       "punkte": 1000,
       "frage": "Ich habe Städte ohne Häuser, Flüsse ohne Wasser und Straßen ohne Autos. Was bin ich?",
       "antwort": "Landkarte"
+    }
+  ],
+  "LULULU2": [
+    {
+      "punkte": 100,
+      "frage": "Wie heißt die Schule, die Harry Potter besucht?",
+      "antwort": "Hogwarts",
+      "optionen": [
+        "Beauxbatons",
+        "Hogwarts",
+        "Durmstrang",
+        "Ilvermorny"
+      ]
+    },
+    {
+      "punkte": 200,
+      "frage": "Wie heißt die Familie im Zentrum der Serie „The Simpsons“?",
+      "antwort": "Simpson"
+    },
+    {
+      "punkte": 300,
+      "frage": "Wie heißt der König der Löwen, der Simbas Vater ist?",
+      "antwort": "Mufasa"
+    },
+    {
+      "punkte": 500,
+      "frage": "In welcher Filmreihe gibt es die Figuren Frodo, Gandalf und Aragorn?",
+      "antwort": "Der Herr der Ringe"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Welche Serie spielt größtenteils in der fiktiven Kleinstadt Hawkins und enthält das Upside Down?",
+      "antwort": "Stranger Things"
     }
   ]
 }
