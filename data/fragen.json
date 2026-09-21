@@ -249,99 +249,115 @@
     "Wo zum Henker ist das?": [
       {
         "id": 1,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998660951_oknpa2.png",
+        "antwort": "Australien/Melbourne",
+        "punkte": 300,
+        "bildName": "Australien_Melbourne.png"
       },
       {
         "id": 2,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998664648_6q15ob.png",
+        "antwort": "Brasilien/Rio de Janeiro",
+        "punkte": 300,
+        "bildName": "Brasilien_Rio De Janeiro.png"
       },
       {
         "id": 3,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998668050_tp49dd.png",
+        "antwort": "Deutschland/Uehlfeld",
+        "punkte": 300,
+        "bildName": "Deutschland_Uehlfeld.png"
       },
       {
         "id": 4,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998673046_k6q965.png",
+        "antwort": "Finnland/Helsinki",
+        "punkte": 300,
+        "bildName": "Finnland.png"
       },
       {
         "id": 5,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998676644_ywkgou.png",
+        "antwort": "Griechenland",
+        "punkte": 300,
+        "bildName": "Griechenland.png"
       },
       {
         "id": 6,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998680656_em3atd.png",
+        "antwort": "Deutschland/Soltau",
+        "punkte": 300,
+        "bildName": "HeidePark.png"
       },
       {
         "id": 7,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998684863_hbxflc.png",
+        "antwort": "Indien",
+        "punkte": 300,
+        "bildName": "Indien.png"
       },
       {
         "id": 8,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998689250_vexm9r.png",
+        "antwort": "Irland/Dublin",
+        "punkte": 300,
+        "bildName": "Irland_Dublin.png"
       },
       {
         "id": 9,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998692746_ljqv6f.png",
+        "antwort": "Island",
+        "punkte": 300,
+        "bildName": "Island.png"
       },
       {
         "id": 10,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998697059_fa242i.png",
+        "antwort": "Italien/Sirmione",
+        "punkte": 300,
+        "bildName": "Italien_Garda Village.png"
       },
       {
         "id": 11,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998701455_iw20jp.png",
+        "antwort": "Grossbritannien/London",
+        "punkte": 300,
+        "bildName": "London_Grossbritannien.png"
       },
       {
         "id": 12,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998706148_2psaqc.png",
+        "antwort": "Mexico",
+        "punkte": 300,
+        "bildName": "Mexico.png"
       },
       {
         "id": 13,
-        "bild": "",
+        "bild": "/media/special_1789998710044_chbbxq.png",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "bildName": "Niederlande.png"
       },
       {
         "id": 14,
-        "bild": "",
+        "bild": "/media/special_1789998714046_8yq7mq.png",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "bildName": "Polen.png"
       },
       {
         "id": 15,
-        "bild": "",
+        "bild": "/media/special_1789998718748_773uly.png",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "bildName": "Schweden.png"
       },
       {
         "id": 16,
-        "bild": "",
+        "bild": "/media/special_1789998722852_w7loem.png",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "bildName": "Screenshot (34).png"
       },
       {
         "id": 17,
