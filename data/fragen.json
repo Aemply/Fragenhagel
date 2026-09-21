@@ -1,31 +1,4 @@
 {
-  "YouTube-Titel": [
-    {
-      "punkte": 100,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 200,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 300,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 500,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    }
-  ],
   "Back to School": [
     {
       "punkte": 100,
@@ -753,7 +726,7 @@
     ]
   },
   "__categories": [
-    "YouTube-Titel",
+    "TEST",
     "Back to School",
     "Was bin ich?",
     "Wer hat das gesagt?",
@@ -845,6 +818,33 @@
       "punkte": 1000,
       "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
       "antwort": "Nepal"
+    }
+  ],
+  "TEST": [
+    {
+      "punkte": 100,
+      "frage": "TEST",
+      "antwort": "TEST"
+    },
+    {
+      "punkte": 200,
+      "frage": "Möp",
+      "antwort": "Miep"
+    },
+    {
+      "punkte": 300,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    },
+    {
+      "punkte": 500,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
     }
   ]
 }
