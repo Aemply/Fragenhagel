@@ -858,27 +858,31 @@
       "punkte": 100,
       "frage": "\"Ich bin dein Vater\"",
       "antwort": "Darth Vade",
-      "used": true
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "„Ich bin ein Berliner.“",
-      "antwort": "John F. Kennedy"
+      "antwort": "John F. Kennedy",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "\"Mein Schatz!\"",
-      "antwort": "Gollum"
+      "antwort": "Gollum",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "\"Bio ist für mich Abfall\"",
-      "antwort": "Nadine - Frauentausch"
+      "antwort": "Nadine - Frauentausch",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "„Das Leben ist wie Fahrrad fahren. Um die Balance zu halten, musst du in Bewegung bleiben.“",
-      "antwort": "Albert Einstein"
+      "antwort": "Albert Einstein",
+      "used": false
     }
   ],
   "__categories": [
@@ -893,28 +897,32 @@
     {
       "punkte": 100,
       "frage": "Welches Organ produziert Insulin?",
-      "antwort": "Bauchspeicheldrüse"
+      "antwort": "Bauchspeicheldrüse",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Wie heißen die drei Gehörknöchelchen?",
-      "antwort": "Hammer, Amboss und Steigbügel"
+      "antwort": "Hammer, Amboss und Steigbügel",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Wie heißt die medizinische Bezeichnung für die weißen Blutkörperchen?",
       "antwort": "Leukozyten",
-      "used": true
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Wie heißt der einzige Knochen des menschlichen Körpers, der nicht direkt mit einem anderen Knochen verbunden ist?",
-      "antwort": "Zungenbein"
+      "antwort": "Zungenbein",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Wie heißt der Muskel, der hauptsächlich für die Atmung verantwortlich ist und Brust- und Bauchraum voneinander trennt?",
-      "antwort": "Zwerchfell"
+      "antwort": "Zwerchfell",
+      "used": false
     }
   ]
 }
