@@ -334,54 +334,58 @@
       {
         "id": 13,
         "bild": "/media/special_1789998710044_chbbxq.png",
-        "antwort": "",
+        "antwort": "Niederlande/Amsterdam",
         "punkte": 300,
         "bildName": "Niederlande.png"
       },
       {
         "id": 14,
         "bild": "/media/special_1789998714046_8yq7mq.png",
-        "antwort": "",
+        "antwort": "Polen",
         "punkte": 300,
         "bildName": "Polen.png"
       },
       {
         "id": 15,
         "bild": "/media/special_1789998718748_773uly.png",
-        "antwort": "",
+        "antwort": "Schweden",
         "punkte": 300,
         "bildName": "Schweden.png"
       },
       {
         "id": 16,
         "bild": "/media/special_1789998722852_w7loem.png",
-        "antwort": "",
+        "antwort": "Mallorca",
         "punkte": 300,
         "bildName": "Screenshot (34).png"
       },
       {
         "id": 17,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998837746_6b52ew.png",
+        "antwort": "Seattle",
+        "punkte": 300,
+        "bildName": "Seattle.png"
       },
       {
         "id": 18,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998842846_v06lo2.png",
+        "antwort": "Spanien/Madrid",
+        "punkte": 300,
+        "bildName": "Spanien_Madrid.png"
       },
       {
         "id": 19,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998848071_2httye.png",
+        "antwort": "Südafrika",
+        "punkte": 300,
+        "bildName": "Südafrika.png"
       },
       {
         "id": 20,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789998851279_r76xq1.png",
+        "antwort": "Türkei/Ankara",
+        "punkte": 300,
+        "bildName": "Türkei_Ankara.png"
       }
     ],
     "Fragenhagel": [
