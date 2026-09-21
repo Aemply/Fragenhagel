@@ -1,31 +1,4 @@
 {
-  "Back to School": [
-    {
-      "punkte": 100,
-      "frage": "Wie viele Tage hat eine Woche?",
-      "antwort": "7"
-    },
-    {
-      "punkte": 200,
-      "frage": "Wie viele Ecken hat ein Quadrat?",
-      "antwort": "4"
-    },
-    {
-      "punkte": 300,
-      "frage": "Wie nennt man H₂O im Alltag?",
-      "antwort": "Wasser"
-    },
-    {
-      "punkte": 500,
-      "frage": "Wie heißt die Hauptstadt von Frankreich?",
-      "antwort": "Paris"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
-      "antwort": "Primzahl"
-    }
-  ],
   "Was bin ich?": [
     {
       "punkte": 100,
@@ -155,13 +128,16 @@
       },
       {
         "id": 2,
-        "bild": "",
-        "original1": "",
-        "original2": "",
-        "person1": "",
-        "person2": "",
+        "bild": "/media/special_1789991484743_lxvv16.jpg",
+        "original1": "/media/special_1789991486284_1rwrol.jpg",
+        "original2": "/media/special_1789991487658_x9jis0.jpg",
+        "person1": "TEST12",
+        "person2": "TEST13",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "0001.jpg",
+        "original1Name": "0002.jpg",
+        "original2Name": "0009.jpg"
       },
       {
         "id": 3,
@@ -254,9 +230,10 @@
       },
       {
         "id": 2,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789991489014_g2hwpx.png",
+        "antwort": "TEST14",
+        "punkte": 300,
+        "bildName": "10.png"
       },
       {
         "id": 3,
@@ -376,8 +353,8 @@
       },
       {
         "id": 2,
-        "frage": "",
-        "antwort": "",
+        "frage": "TEST15",
+        "antwort": "TEST16",
         "punkte": 100
       },
       {
@@ -841,10 +818,37 @@
   ],
   "__categories": [
     "TEST01",
-    "Back to School",
+    "TEST09",
     "Was bin ich?",
     "Filme & Serien",
     "Musik",
     "Flaggen"
+  ],
+  "TEST09": [
+    {
+      "punkte": 100,
+      "frage": "TEST10",
+      "antwort": "TEST11"
+    },
+    {
+      "punkte": 200,
+      "frage": "Wie viele Ecken hat ein Quadrat?",
+      "antwort": "4"
+    },
+    {
+      "punkte": 300,
+      "frage": "Wie nennt man H₂O im Alltag?",
+      "antwort": "Wasser"
+    },
+    {
+      "punkte": 500,
+      "frage": "Wie heißt die Hauptstadt von Frankreich?",
+      "antwort": "Paris"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
+      "antwort": "Primzahl"
+    }
   ]
 }
