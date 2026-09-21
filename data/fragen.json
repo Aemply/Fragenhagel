@@ -1,31 +1,4 @@
 {
-  "YouTube-Titel": [
-    {
-      "punkte": 100,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 200,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 300,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 500,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    }
-  ],
   "Back to School": [
     {
       "punkte": 100,
@@ -171,13 +144,14 @@
     "Face Morph": [
       {
         "id": 1,
-        "bild": "",
+        "bild": "/media/special_1789991303134_mvsazb.png",
         "original1": "",
         "original2": "",
-        "person1": "",
-        "person2": "",
+        "person1": "TEST04",
+        "person2": "TEST05",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "Screenshot 2026-04-23 153937.png"
       },
       {
         "id": 2,
@@ -273,9 +247,10 @@
     "Wo zum Henker ist das?": [
       {
         "id": 1,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789991305801_kona3p.png",
+        "antwort": "TEST06",
+        "punkte": 300,
+        "bildName": "01.png"
       },
       {
         "id": 2,
@@ -395,8 +370,8 @@
     "Fragenhagel": [
       {
         "id": 1,
-        "frage": "",
-        "antwort": "",
+        "frage": "TEST07",
+        "antwort": "TEST08",
         "punkte": 100
       },
       {
@@ -699,122 +674,177 @@
         "id": 1,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 2,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 3,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 4,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 5,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 6,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 7,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 8,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 9,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 10,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 11,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 12,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 13,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 14,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 15,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 16,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 17,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 18,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 19,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 20,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       }
     ]
-  }
+  },
+  "TEST01": [
+    {
+      "punkte": 100,
+      "frage": "TEST02",
+      "antwort": "TEST03"
+    },
+    {
+      "punkte": 200,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    },
+    {
+      "punkte": 300,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    },
+    {
+      "punkte": 500,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    }
+  ],
+  "__categories": [
+    "TEST01",
+    "Back to School",
+    "Was bin ich?",
+    "Filme & Serien",
+    "Musik",
+    "Flaggen"
+  ]
 }
