@@ -214,6 +214,9 @@ async function githubGetFile(filePath) {
 }
 
 async function githubPutFile(filePath, contentBuffer, message) {
+  const safeMessage = /\[(?:skip render|render skip|skip deploy|deploy skip)\]/i.test(String(message || ''))
+    ? String(message)
+    : `${String(message || 'Fragenhagel: Daten speichern')} [skip render]`;
   let sha;
   try {
     const current = await githubGetFile(filePath);
@@ -222,7 +225,7 @@ async function githubPutFile(filePath, contentBuffer, message) {
     if (e.status !== 404) throw e;
   }
   const body = {
-    message,
+    message: safeMessage,
     content: Buffer.from(contentBuffer).toString('base64'),
     branch: GITHUB_BRANCH
   };
@@ -245,7 +248,7 @@ async function syncQuestionsFromGitHub() {
   } catch (e) {
     if (e.status === 404) {
       const local = fs.readFileSync(QFILE);
-      await githubPutFile(GITHUB_DATA_PATH, local, 'Fragenhagel: initiale Fragen speichern');
+      await githubPutFile(GITHUB_DATA_PATH, local, 'Fragenhagel: initiale Fragen speichern [skip render]');
       return { enabled: true, loaded: false, initialized: true };
     }
     console.error('GitHub: Fragen konnten beim Start nicht geladen werden:', e.message);
@@ -274,14 +277,14 @@ async function syncMediaFromGitHub() {
   }
 }
 
-async function persistQuestions(q, commitMessage = 'Fragenhagel: Fragen speichern') {
+async function persistQuestions(q, commitMessage = 'Fragenhagel: Fragen speichern [skip render]') {
   writeQLocal(q);
   if (githubEnabled()) {
     await githubPutFile(GITHUB_DATA_PATH, Buffer.from(JSON.stringify(q, null, 2), 'utf8'), commitMessage);
   }
 }
 
-async function persistMedia(fileName, buffer, commitMessage = 'Fragenhagel: Bild speichern') {
+async function persistMedia(fileName, buffer, commitMessage = 'Fragenhagel: Bild speichern [skip render]') {
   if (!githubEnabled()) return;
   await githubPutFile(`${GITHUB_MEDIA_DIR}/${path.basename(fileName)}`, buffer, commitMessage);
 }
