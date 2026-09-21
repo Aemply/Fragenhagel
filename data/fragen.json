@@ -1,31 +1,4 @@
 {
-  "Was bin ich?": [
-    {
-      "punkte": 100,
-      "frage": "Ich habe vier Beine, bin aber kein Tier. Auf mir kann man sitzen.",
-      "antwort": "Stuhl"
-    },
-    {
-      "punkte": 200,
-      "frage": "Ich habe Zähne, kann aber nicht beißen. Man benutzt mich morgens oft im Badezimmer.",
-      "antwort": "Zahnbürste"
-    },
-    {
-      "punkte": 300,
-      "frage": "Ich habe viele Seiten, aber keine Tür. Man kann mich lesen.",
-      "antwort": "Buch"
-    },
-    {
-      "punkte": 500,
-      "frage": "Ich kann dir den Weg zeigen, obwohl ich keinen Schritt mache. Oft bin ich auf Papier oder im Handy.",
-      "antwort": "Karte"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Ich habe Städte ohne Häuser, Flüsse ohne Wasser und Straßen ohne Autos. Was bin ich?",
-      "antwort": "Landkarte"
-    }
-  ],
   "Filme & Serien": [
     {
       "punkte": 100,
@@ -815,7 +788,7 @@
   "__categories": [
     "TEST",
     "TEST2",
-    "Was bin ich?",
+    "TEST3",
     "Filme & Serien",
     "Musik",
     "Flaggen"
@@ -845,6 +818,33 @@
       "punkte": 1000,
       "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
       "antwort": "Primzahl"
+    }
+  ],
+  "TEST3": [
+    {
+      "punkte": 100,
+      "frage": "Ich habe vier Beine, bin aber kein Tier. Auf mir kann man sitzen.",
+      "antwort": "Stuhl"
+    },
+    {
+      "punkte": 200,
+      "frage": "Ich habe Zähne, kann aber nicht beißen. Man benutzt mich morgens oft im Badezimmer.",
+      "antwort": "Zahnbürste"
+    },
+    {
+      "punkte": 300,
+      "frage": "Ich habe viele Seiten, aber keine Tür. Man kann mich lesen.",
+      "antwort": "Buch"
+    },
+    {
+      "punkte": 500,
+      "frage": "Ich kann dir den Weg zeigen, obwohl ich keinen Schritt mache. Oft bin ich auf Papier oder im Handy.",
+      "antwort": "Karte"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Ich habe Städte ohne Häuser, Flüsse ohne Wasser und Straßen ohne Autos. Was bin ich?",
+      "antwort": "Landkarte"
     }
   ]
 }
