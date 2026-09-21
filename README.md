@@ -1,7 +1,7 @@
-# Fragenhagel v85 – Editor-Berechtigung beim Lobbywechsel behoben
+# Fragenhagel Online v86 – Editor-Berechtigung stabilisiert
 
-Basis: v84.
+Basis: v85.
 
-Fix: Die Editor-HTTP-Endpunkte `/api/questions` und `/api/special-image` können jetzt auch nach einem Lobbywechsel korrekt mit der stateless Editor-Session arbeiten. Der aktuelle Game-Code wird für die Socket.IO-Aktualisierung verwendet, auch wenn der Host-Token nicht mehr im RAM erkannt wird. Dadurch sollten Fragen speichern und Bild-Uploads in einer neu erstellten Lobby nicht mehr fälschlich mit „Host-Berechtigung fehlt“ abgewiesen werden.
+Fix: Der Host-Editor erneuert die stateless Editor-Session vor jedem Speichervorgang und vor Bild-Uploads. Requests verwenden explizit same-origin credentials. Dadurch funktioniert der Editor auch direkt nach dem Erstellen einer neuen Lobby zuverlässig.
 
-GitHub-Persistenz bleibt unverändert.
+GitHub-Persistenz aus v84/v85 bleibt erhalten.

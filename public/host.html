@@ -176,8 +176,17 @@ function openShow(){if(!gameCode)return alert('Spiel wird noch erstellt.');windo
 function playerLink(){return location.origin+'/player.html?code='+encodeURIComponent(gameCode)}
 async function copyPlayerLink(){if(!gameCode)return;try{await navigator.clipboard.writeText(playerLink());document.getElementById('joinHint').textContent='Spieler-Link kopiert: '+playerLink()}catch(e){prompt('Spieler-Link',playerLink())}}
 async function ensureEditorSession(){
-  if(!gameCode)return;
-  try{await fetch('/api/editor-session?code='+encodeURIComponent(gameCode),{cache:'no-store'})}catch(e){}
+  if(!gameCode)return false;
+  try{
+    const r=await fetch('/api/editor-session?code='+encodeURIComponent(gameCode),{
+      cache:'no-store',
+      credentials:'same-origin',
+      headers:{'x-game-code':gameCode}
+    });
+    return r.ok;
+  }catch(e){
+    return false;
+  }
 }
 function createOrJoin(){
   if(gameCode&&hostToken){
@@ -297,7 +306,7 @@ function updateGameInfo(){const el=document.getElementById('gameInfo');if(el)el.
 function renderLobby(){const el=document.getElementById('lobby');if(!el)return;const ps=state.players||[];el.innerHTML=ps.length?ps.map(p=>`<span class="score"><strong>${esc(p.name)}</strong> ${p.connected?'🟢':'⚪'}</span>`).join(''):'<span class="small">Noch niemand beigetreten.</span>';updateGameInfo()}
 
 socket.on('questionsUpdated',q=>{Q=q;renderAll();});
-async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store'}).then(r=>r.json());renderAll();updateGameInfo();if(active)renderPlay();}
+async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store',credentials:'same-origin'}).then(r=>r.json());renderAll();updateGameInfo();if(active)renderPlay();}
 
 function renderHostBuzz(){
   const nameEl=document.getElementById('hostBuzzName');
@@ -643,6 +652,7 @@ async function spotifyAutofill(index,input){
 }
 function renderMusic(){let a=Q.Sonderrunden?.Musik||[];document.getElementById('music').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Song ${i+1}</h3><input data-sp="Musik" data-i="${i}" data-f="spotify" value="${esc(x.spotify||'')}" placeholder="Spotify-Link" style="width:100%" oninput="clearTimeout(this._spotifyTimer);this._spotifyTimer=setTimeout(()=>spotifyAutofill(${i},this),450)"><input data-sp="Musik" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Lied / Interpret" style="width:100%"><input type="number" data-sp="Musik" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"></div>`).join('')+'</div>'}
 async function saveAll(){
+ await ensureEditorSession();
  const catInputs=[...document.querySelectorAll('[data-cat-name]')];
  const oldCats=cats.slice();
  const newCats=catInputs.map(el=>String(el.value||'').trim());
@@ -656,7 +666,7 @@ async function saveAll(){
  Object.assign(Q,renamed);
  Q.__categories=newCats;
  cats=newCats;
- let r=await fetch('/api/questions',{method:'PUT',headers:gameHeaders(),body:JSON.stringify(Q)});
+ let r=await fetch('/api/questions',{method:'PUT',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify(Q)});
  let result={}; try{result=await r.json()}catch(e){}
  document.getElementById('saveStatus').textContent=r.ok?' ✅ Gespeichert':' ❌ '+String(result.error||('Fehler '+r.status));
  if(r.ok)load()
@@ -680,7 +690,7 @@ async function uploadImg(section,index,field,input){
    fields[f]=el.type==='number'?Number(el.value)||0:el.value;
  });
  await ensureEditorSession();
- let resp=await fetch('/api/special-image',{method:'POST',headers:gameHeaders(),body:JSON.stringify({section,index,field,data,filename:file.name,fields,person1:item.person1,person2:item.person2})});
+ let resp=await fetch('/api/special-image',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({section,index,field,data,filename:file.name,fields,person1:item.person1,person2:item.person2})});
  let j=await resp.json();
  if(!resp.ok)return alert(j.error||'Upload fehlgeschlagen');
  Q.Sonderrunden[section][index][field]=j.url;
