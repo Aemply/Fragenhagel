@@ -1,31 +1,4 @@
 {
-  "Flaggen": [
-    {
-      "punkte": 100,
-      "frage": "Welche Farben hat die deutsche Flagge?",
-      "antwort": "Schwarz, Rot, Gold"
-    },
-    {
-      "punkte": 200,
-      "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
-      "antwort": "Japan"
-    },
-    {
-      "punkte": 300,
-      "frage": "Welche beiden Farben dominieren die Flagge der Ukraine?",
-      "antwort": "Blau und Gelb"
-    },
-    {
-      "punkte": 500,
-      "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
-      "antwort": "Schweiz"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
-      "antwort": "Nepal"
-    }
-  ],
   "Sonderrunden": {
     "Face Morph": [
       {
@@ -736,7 +709,7 @@
     "LULULU",
     "LULULU2",
     "LELELE",
-    "Flaggen"
+    "LILILI2"
   ],
   "TEST2": [
     {
@@ -850,6 +823,33 @@
       "punkte": 1000,
       "frage": "Wie nennt man in der Musik die Geschwindigkeit eines Stücks?",
       "antwort": "Tempo"
+    }
+  ],
+  "LILILI2": [
+    {
+      "punkte": 100,
+      "frage": "Welche Farben hat die deutsche Flagge?",
+      "antwort": "Schwarz, Rot, Gold"
+    },
+    {
+      "punkte": 200,
+      "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
+      "antwort": "Japan"
+    },
+    {
+      "punkte": 300,
+      "frage": "Welche beiden Farben dominieren die Flagge der Ukraine?",
+      "antwort": "Blau und Gelb"
+    },
+    {
+      "punkte": 500,
+      "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
+      "antwort": "Schweiz"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
+      "antwort": "Nepal"
     }
   ]
 }
