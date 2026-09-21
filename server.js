@@ -169,8 +169,126 @@ app.post('/api/spotify/play',async(req,res)=>{
 });
 app.post('/api/spotify/transfer',async(req,res)=>{try{const s=await spotifyAccess(req);const {device_id}=req.body||{};await spotifyApi(s,'/me/player',{method:'PUT',body:JSON.stringify({device_ids:[String(device_id||'')],play:false})});res.json({ok:true});}catch(e){res.status(400).json({error:e.message});}});
 
+// -----------------------------------------------------------------------------
+// Dauerhafte Quizdaten über GitHub (kostenlos, ohne Render Persistent Disk)
+//
+// Render darf schlafen/restarten/suspendiert werden. Die eigentlichen Quizdaten
+// werden bei konfiguriertem GitHub-Speicher im Repository abgelegt. Der Token
+// bleibt ausschließlich serverseitig in Render Environment Variables.
+// -----------------------------------------------------------------------------
+const GITHUB_OWNER = String(process.env.GITHUB_OWNER || '').trim();
+const GITHUB_REPO = String(process.env.GITHUB_REPO || '').trim();
+const GITHUB_TOKEN = String(process.env.GITHUB_TOKEN || '').trim();
+const GITHUB_BRANCH = String(process.env.GITHUB_BRANCH || 'main').trim() || 'main';
+const GITHUB_DATA_PATH = String(process.env.GITHUB_DATA_PATH || 'data/fragen.json').replace(/^\/+|\/+$/g,'') || 'data/fragen.json';
+const GITHUB_MEDIA_DIR = String(process.env.GITHUB_MEDIA_DIR || 'data/media').replace(/^\/+|\/+$/g,'') || 'data/media';
+const githubEnabled = () => !!(GITHUB_OWNER && GITHUB_REPO && GITHUB_TOKEN);
+const githubApiBase = () => `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents`;
+const githubHeaders = () => ({
+  'Authorization': `Bearer ${GITHUB_TOKEN}`,
+  'Accept': 'application/vnd.github+json',
+  'X-GitHub-Api-Version': '2022-11-28',
+  'User-Agent': 'Fragenhagel-Online'
+});
+
+async function githubRequest(filePath, options = {}) {
+  if (!githubEnabled()) throw new Error('GitHub-Speicher ist nicht konfiguriert.');
+  const r = await fetch(`${githubApiBase()}/${filePath.split('/').map(encodeURIComponent).join('/')}`, {
+    ...options,
+    headers: { ...githubHeaders(), ...(options.headers || {}) }
+  });
+  const text = await r.text();
+  let body = {};
+  try { body = text ? JSON.parse(text) : {}; } catch {}
+  if (!r.ok) {
+    const e = new Error(body?.message || `GitHub API Fehler ${r.status}`);
+    e.status = r.status;
+    e.body = body;
+    throw e;
+  }
+  return body;
+}
+
+async function githubGetFile(filePath) {
+  return githubRequest(filePath, { method: 'GET' });
+}
+
+async function githubPutFile(filePath, contentBuffer, message) {
+  let sha;
+  try {
+    const current = await githubGetFile(filePath);
+    sha = current.sha;
+  } catch (e) {
+    if (e.status !== 404) throw e;
+  }
+  const body = {
+    message,
+    content: Buffer.from(contentBuffer).toString('base64'),
+    branch: GITHUB_BRANCH
+  };
+  if (sha) body.sha = sha;
+  return githubRequest(filePath, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+}
+
+async function syncQuestionsFromGitHub() {
+  if (!githubEnabled()) return { enabled: false, loaded: false };
+  try {
+    const file = await githubGetFile(GITHUB_DATA_PATH);
+    if (!file.content) throw new Error('GitHub-Datei enthält keinen Inhalt.');
+    const q = JSON.parse(Buffer.from(file.content.replace(/\n/g, ''), 'base64').toString('utf8'));
+    fs.writeFileSync(QFILE, JSON.stringify(q, null, 2), 'utf8');
+    return { enabled: true, loaded: true };
+  } catch (e) {
+    if (e.status === 404) {
+      const local = fs.readFileSync(QFILE);
+      await githubPutFile(GITHUB_DATA_PATH, local, 'Fragenhagel: initiale Fragen speichern');
+      return { enabled: true, loaded: false, initialized: true };
+    }
+    console.error('GitHub: Fragen konnten beim Start nicht geladen werden:', e.message);
+    return { enabled: true, loaded: false, error: e.message };
+  }
+}
+
+async function syncMediaFromGitHub() {
+  if (!githubEnabled()) return;
+  try {
+    const listing = await githubGetFile(GITHUB_MEDIA_DIR);
+    const files = Array.isArray(listing) ? listing.filter(x => x.type === 'file') : [];
+    for (const file of files) {
+      if (!file.download_url && !file.path) continue;
+      try {
+        const body = await githubGetFile(file.path);
+        if (!body.content) continue;
+        const target = path.join(MEDIA, path.basename(file.path));
+        fs.writeFileSync(target, Buffer.from(body.content.replace(/\n/g, ''), 'base64'));
+      } catch (e) {
+        console.error(`GitHub: Bild ${file.path} konnte nicht geladen werden:`, e.message);
+      }
+    }
+  } catch (e) {
+    if (e.status !== 404) console.error('GitHub: Bilder konnten beim Start nicht synchronisiert werden:', e.message);
+  }
+}
+
+async function persistQuestions(q, commitMessage = 'Fragenhagel: Fragen speichern') {
+  writeQLocal(q);
+  if (githubEnabled()) {
+    await githubPutFile(GITHUB_DATA_PATH, Buffer.from(JSON.stringify(q, null, 2), 'utf8'), commitMessage);
+  }
+}
+
+async function persistMedia(fileName, buffer, commitMessage = 'Fragenhagel: Bild speichern') {
+  if (!githubEnabled()) return;
+  await githubPutFile(`${GITHUB_MEDIA_DIR}/${path.basename(fileName)}`, buffer, commitMessage);
+}
+
 const readQ = () => JSON.parse(fs.readFileSync(QFILE, 'utf8'));
-const writeQ = q => fs.writeFileSync(QFILE, JSON.stringify(q, null, 2), 'utf8');
+const writeQLocal = q => fs.writeFileSync(QFILE, JSON.stringify(q, null, 2), 'utf8');
+const writeQ = q => writeQLocal(q);
 const cleanName = n => String(n || '').trim().replace(/\s+/g, ' ').slice(0, 24) || 'Gast';
 const makeCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -181,7 +299,28 @@ const makeCode = () => {
 };
 const token = () => crypto.randomBytes(24).toString('hex');
 
-app.get('/api/questions', (req, res) => res.json(readQ()));
+app.get('/api/questions', async (req, res) => {
+  try {
+    // Immer den aktuellsten gespeicherten Stand laden, wenn GitHub-Speicher aktiv ist.
+    // Dadurch ist kein Render-Neustart nötig, damit der Editor aktuelle Daten sieht.
+    if (githubEnabled()) await syncQuestionsFromGitHub();
+    res.set('Cache-Control', 'no-store');
+    res.json(readQ());
+  } catch (e) {
+    console.error('GitHub: Fragen konnten beim Laden nicht aktualisiert werden:', e.message);
+    // Falls GitHub gerade nicht erreichbar ist, weiter mit dem zuletzt lokal vorhandenen Stand.
+    res.set('Cache-Control', 'no-store');
+    res.json(readQ());
+  }
+});
+
+app.get('/api/persistence', (req, res) => res.json({
+  github: githubEnabled(),
+  owner: githubEnabled() ? GITHUB_OWNER : '',
+  repo: githubEnabled() ? GITHUB_REPO : '',
+  branch: githubEnabled() ? GITHUB_BRANCH : '',
+  dataPath: githubEnabled() ? GITHUB_DATA_PATH : ''
+}));
 
 const games = new Map();
 function newGame() {
@@ -220,16 +359,16 @@ app.get('/api/game/:code', (req, res) => {
   res.json({ ok: true, code: game.code, players: game.players.map(p => ({ name: p.name, score: p.score, connected: p.connected })) });
 });
 
-app.put('/api/questions', (req, res) => {
+app.put('/api/questions', async (req, res) => {
   try {
     const game = hostAuthorized(req);
     if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
-    writeQ(req.body);
+    await persistQuestions(req.body, 'Fragenhagel: Editor speichern');
     io.to(`game:${game.code}`).emit('questionsUpdated', readQ());
-    res.json({ ok: true });
+    res.json({ ok: true, persistent: githubEnabled() });
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
 });
-app.post('/api/question-used', (req, res) => {
+app.post('/api/question-used', async (req, res) => {
   try {
     const game = hostAuthorized(req);
     if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
@@ -240,16 +379,16 @@ app.post('/api/question-used', (req, res) => {
     io.to(`game:${game.code}`).emit('questionsUpdated', q); res.json({ ok: true });
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
 });
-app.post('/api/reset-used', (req, res) => {
+app.post('/api/reset-used', async (req, res) => {
   try {
     const game = hostAuthorized(req);
     if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
     const q = readQ();
     for (const c of ['YouTube-Titel', 'Back to School', 'Was bin ich?', 'Filme & Serien', 'Musik', 'Flaggen']) if (Array.isArray(q[c])) q[c].forEach(x => x.used = false);
-    writeQ(q); io.to(`game:${game.code}`).emit('questionsUpdated', q); res.json({ ok: true });
+    await persistQuestions(q, 'Fragenhagel: Felder zurücksetzen'); io.to(`game:${game.code}`).emit('questionsUpdated', q); res.json({ ok: true, persistent: githubEnabled() });
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
 });
-app.post('/api/special-image', (req, res) => {
+app.post('/api/special-image', async (req, res) => {
   try {
     const game = hostAuthorized(req);
     if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
@@ -263,7 +402,9 @@ app.post('/api/special-image', (req, res) => {
     if (!m) throw new Error('Bitte PNG, JPG, JPEG, WEBP oder GIF verwenden');
     const ext = m[1].toLowerCase() === 'jpeg' ? 'jpg' : m[1].toLowerCase();
     const name = `special_${Date.now()}_${Math.random().toString(36).slice(2,8)}.${ext}`;
-    fs.writeFileSync(path.join(MEDIA, name), Buffer.from(m[2], 'base64'));
+    const imageBuffer = Buffer.from(m[2], 'base64');
+    fs.writeFileSync(path.join(MEDIA, name), imageBuffer);
+    if (githubEnabled()) await persistMedia(name, imageBuffer, `Fragenhagel: Bild ${name} speichern`);
     // Preserve all unsaved editor fields when an image is uploaded.
     // This prevents a render/save cycle from restoring older server values.
     if (fields && typeof fields === 'object' && !Array.isArray(fields)) {
@@ -279,9 +420,9 @@ app.post('/api/special-image', (req, res) => {
     }
     q.Sonderrunden[section][i][field] = '/media/' + name;
     if (section === 'Face Morph' || section === 'Wo zum Henker ist das?') q.Sonderrunden[section][i][field + 'Name'] = String(filename || '');
-    writeQ(q);
+    await persistQuestions(q, `Fragenhagel: ${section} speichern`);
     io.to(`game:${game.code}`).emit('questionsUpdated', q);
-    res.json({ ok: true, url: '/media/' + name, item: q.Sonderrunden[section][i] });
+    res.json({ ok: true, url: '/media/' + name, item: q.Sonderrunden[section][i], persistent: githubEnabled() });
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
 });
 
@@ -424,4 +565,16 @@ io.on('connection', socket => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => console.log(`FRAGENHAGEL läuft auf Port ${PORT}`));
+(async () => {
+  if (githubEnabled()) {
+    console.log(`GitHub-Speicher aktiv: ${GITHUB_OWNER}/${GITHUB_REPO}@${GITHUB_BRANCH}`);
+    await syncQuestionsFromGitHub();
+    await syncMediaFromGitHub();
+  } else {
+    console.log('GitHub-Speicher nicht konfiguriert – lokale Fragen.json wird verwendet.');
+  }
+  server.listen(PORT, '0.0.0.0', () => console.log(`FRAGENHAGEL läuft auf Port ${PORT}`));
+})().catch(err => {
+  console.error('Start-Synchronisierung fehlgeschlagen:', err);
+  server.listen(PORT, '0.0.0.0', () => console.log(`FRAGENHAGEL läuft auf Port ${PORT}`));
+});
