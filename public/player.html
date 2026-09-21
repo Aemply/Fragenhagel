@@ -17,6 +17,14 @@ if(code)document.getElementById('code').value=code;if(name)document.getElementBy
 function joinGame(){code=document.getElementById('code').value.trim().toUpperCase();name=document.getElementById('playerName').value.trim();if(!code||!name)return document.getElementById('joinStatus').textContent='Bitte Spielcode und Namen eingeben.';socket.emit('joinGame',{code,name})}
 socket.on('joined',x=>{code=x.code;name=x.name;localStorage.setItem('fragenhagelPlayerCode',code);localStorage.setItem('fragenhagelPlayerName',name);const u=new URL(location.href);u.searchParams.set('code',code);u.searchParams.delete('name');history.replaceState(null,'',u.pathname+u.search+u.hash);document.getElementById('join').classList.add('hidden');document.getElementById('game').classList.remove('hidden');document.getElementById('name').textContent=name;document.getElementById('gameCode').textContent='Spielcode: '+code});
 socket.on('joinError',m=>document.getElementById('joinStatus').textContent=m);
+socket.on('kicked',x=>{
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('join').classList.remove('hidden');
+  document.getElementById('joinStatus').textContent=(x&&x.reason)||'Du wurdest vom Host aus dem Spiel gekickt.';
+  const u=new URL(location.href);
+  u.searchParams.delete('name');
+  history.replaceState(null,'',u.pathname+u.search+u.hash);
+});
 socket.on('state',x=>{if(!name)return;if(x.buzzerOpen&&!prev.buzzerOpen)sOpen();if(x.buzzedBy&&x.buzzedBy!==prev.buzzedBy)sBuzz();prev={buzzerOpen:!!x.buzzerOpen,buzzedBy:x.buzzedBy||null};let mine=x.buzzedBy===name;let open=x.buzzerOpen&&!x.buzzedBy;document.getElementById('b').disabled=!open;document.getElementById('s').textContent=mine?'⚡ DU WARST SCHNELLSTER!':x.buzzedBy?x.buzzedBy+' hat gebuzzert':open?'🟢 Buzzer offen':'🔴 Buzzer geschlossen'});
 document.getElementById('b').onclick=()=>socket.emit('buzz');
 </script></body></html>

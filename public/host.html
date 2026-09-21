@@ -328,7 +328,7 @@ function renderHostBuzz(){
   metaEl.textContent = 'Hat gerade gebuzzert';
 }
 
-function renderScores(){const el=document.getElementById('scores');const ps=state.players||[];el.innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong><div><button class="btn" onclick="pts(${JSON.stringify(p.name)},100)">+100</button><button class="btn" onclick="pts(${JSON.stringify(p.name)},-100)">-100</button></div></div>`).join('')}
+function renderScores(){const el=document.getElementById('scores');const ps=state.players||[];el.innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong><div><button class="btn" onclick="pts(${JSON.stringify(p.name)},100)">+100</button><button class="btn" onclick="pts(${JSON.stringify(p.name)},-100)">-100</button><button class="btn bad" onclick="kickPlayer(${JSON.stringify(p.id)},${JSON.stringify(p.name)})">Spieler kicken</button></div></div>`).join('')}
 function renderBuzz(){
  const b=document.getElementById('buzz');
  const hb=document.getElementById('hostBuzzed');
@@ -347,7 +347,23 @@ function renderBuzz(){
    if(hb){hb.style.display='none';hb.textContent='';}
  }
 }
-function pts(p,a){socket.emit('addPoints',{player:p,amount:a})}function resetScores(){socket.emit('resetScores')}function openBuzzer(){
+async function pts(p,a){
+  try{
+    const r=await fetch('/api/player-score',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({player:p,amount:a})});
+    const result=await r.json().catch(()=>({}));
+    if(!r.ok) console.error('Punkte konnten nicht geändert werden:',result.error||r.status);
+  }catch(e){console.error('Punkte konnten nicht geändert werden:',e);}
+}
+async function kickPlayer(playerId,playerName){
+  if(!playerId)return;
+  if(!confirm('Soll '+String(playerName)+' wirklich aus dem Spiel gekickt werden?'))return;
+  try{
+    const r=await fetch('/api/kick-player',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({playerId})});
+    const result=await r.json().catch(()=>({}));
+    if(!r.ok) alert(result.error||('Spieler konnte nicht gekickt werden (Fehler '+r.status+')'));
+  }catch(e){alert('Spieler konnte nicht gekickt werden.');}
+}
+function resetScores(){socket.emit('resetScores')}function openBuzzer(){
  socket.emit('openBuzzer');
  state.buzzedBy=null;
  renderBuzz();
@@ -467,10 +483,11 @@ function renderJudge(points){
    const hasPreviousWrong=Array.isArray(state?.lockedPlayers) && state.lockedPlayers.length>0;
    if(hasPreviousWrong){
      addBtn('👤 '+String(p.name)+' +100','good',()=>faceMorphSecondCorrect(p.name));
-     addBtn('❌ Falsch – '+String(p.name),'bad',()=>faceMorphSecondWrong(p.name));
+     addBtn('❌ Falsch','bad',()=>faceMorphWrong(p.name));
    }else{
      addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100));
      addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
+     addBtn('❌ Falsch','bad',()=>faceMorphWrong(p.name));
    }
  }else{
    addBtn('✅ Richtig – '+String(p.name),'good',()=>correct(p.name,val));
@@ -529,16 +546,16 @@ function faceMorphSecondCorrect(p){
    catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
  },250);
 }
-function faceMorphSecondWrong(p){
+function faceMorphWrong(p){
  if(judgedPlayers[String(p)])return;
  lockPlayerButtons(p);
  try{sWrong()}catch(e){}
- // No points are deducted on this Face Morph "Falsch" result.
- socket.emit('wrong',{player:String(p),points:0});
- setTimeout(()=>{
-   try{ if(typeof reveal === 'function') reveal(); }
-   catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
- },250);
+ // Face Morph: "Falsch" zieht keine Punkte ab, sperrt den Spieler für die aktuelle Frage
+ // und öffnet den Buzzer für die übrigen Spieler erneut. Die Lösung bleibt verborgen.
+ socket.emit('faceMorphWrong',{player:String(p)});
+}
+function faceMorphSecondWrong(p){
+ return faceMorphWrong(p);
 }
 function award(p,v){
  if(judgedPlayers[String(p)])return;
@@ -727,6 +744,12 @@ async function uploadImg(section,index,field,input){
 }
 
 function yt(url){let s=String(url||'');let m=s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/);return m?m[1]:''}
+socket.on('connect',()=>{
+  // Nach einem Socket.IO-Reconnect die Host-Berechtigung auf dem neuen
+  // Socket wiederherstellen. Dadurch funktionieren auch die manuellen
+  // Punktebuttons nach einer kurzen Verbindungsunterbrechung zuverlässig.
+  if(gameCode&&hostToken) socket.emit('hostJoin',{code:gameCode,hostToken});
+});
 ensureEditorSession();load();createOrJoin();
 </script>
 
