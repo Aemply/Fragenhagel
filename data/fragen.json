@@ -171,13 +171,14 @@
     "Face Morph": [
       {
         "id": 1,
-        "bild": "",
+        "bild": "/media/special_1789985730106_e3wm3y.jpg",
         "original1": "",
         "original2": "",
-        "person1": "",
-        "person2": "",
+        "person1": "Papa",
+        "person2": "Tobi",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "0001.jpg"
       },
       {
         "id": 2,
