@@ -177,13 +177,14 @@
       },
       {
         "id": 4,
-        "bild": "",
+        "bild": "/media/special_1789993786237_9qyr2n.png",
         "original1": "",
         "original2": "",
         "person1": "",
         "person2": "",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "07.png"
       },
       {
         "id": 5,
