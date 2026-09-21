@@ -3,84 +3,96 @@
     {
       "punkte": 100,
       "frage": "Hate Kommentare singen | feat. Julia Beautx",
-      "antwort": "Rezo"
+      "antwort": "Rezo",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Undercover als Fake-Maskottchen beim EM-Eröffnungsspiel",
-      "antwort": "Marvin Wildhage"
+      "antwort": "Marvin Wildhage",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "10 Arten von Pärchen",
-      "antwort": "BibisBeautyPalace"
+      "antwort": "BibisBeautyPalace",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Fame ohne Folgen? – warum Influencer mit (fast) allem davonkommen",
-      "antwort": "Sashka"
+      "antwort": "Sashka",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "ich bin Papa geworden! (kein Clickbait)",
-      "antwort": "Vik"
+      "antwort": "Vik",
+      "used": false
     }
   ],
   "Back to School": [
     {
       "punkte": 100,
       "frage": "Welches ist das flächenmäßig größte Land der Erde?",
-      "antwort": "Russland"
+      "antwort": "Russland",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Berechne 3+3x3",
       "antwort": "12",
-      "used": true
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Wie viel sin 15% von 200",
-      "antwort": "30"
+      "antwort": "30",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Was ist das Präteritum von \"gehen\"?",
       "antwort": "ging",
-      "used": true
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Für welches Element steht das Symbol Fe?",
-      "antwort": "Eisen"
+      "antwort": "Eisen",
+      "used": false
     }
   ],
   "Was bin ich?": [
     {
       "punkte": 100,
       "frage": "Ich bin voller Löcher und kann trotzdem Wasser halten. ",
-      "antwort": "Ein Schwamm"
+      "antwort": "Ein Schwamm",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Ich gehöre dir, aber andere benutzen mich häufiger als du.",
-      "antwort": "Dein Name"
+      "antwort": "Dein Name",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Ich komme einmal in „Minute“, zweimal in „Moment“, aber kein einziges Mal in „Stunde“ vor.",
       "antwort": "Der Buchstabe \"M\"",
-      "used": true
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Ich kann einen Raum vollständig füllen, nehme aber keinen Platz ein. Ohne mich kannst du sehen, aber mich selbst kannst du nicht festhalten.",
-      "antwort": "Licht"
+      "antwort": "Licht",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Ich bin immer vor dir, aber du wirst mich niemals sehen. Je länger du lebst, desto kleiner werde ich.",
-      "antwort": "Deine Zukunft"
+      "antwort": "Deine Zukunft",
+      "used": false
     }
   ],
   "Filme & Serien": [
@@ -93,28 +105,32 @@
         "Hogwarts",
         "Durmstrang",
         "Ilvermorny"
-      ]
+      ],
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Aus welchem Distrikt stammt Katniss Everdeen in „Die Tribute von Panem“?",
-      "antwort": "Distrikt 12"
+      "antwort": "Distrikt 12",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Wie heißt das Mädchen mit übernatürlichen Fähigkeiten in „Stranger Things“?",
       "antwort": "Elf/Eleven",
-      "used": true
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Wie lautet der zweite Vorname von Sheldon Cooper aus „The Big Bang Theory“?",
-      "antwort": "Lee"
+      "antwort": "Lee",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Welche Nummer trägt Spieler 456 in „Squid Game“ – bzw. wie heißt er?",
-      "antwort": "Seong Gi-hun"
+      "antwort": "Seong Gi-hun",
+      "used": false
     }
   ],
   "Sonderrunden": {
