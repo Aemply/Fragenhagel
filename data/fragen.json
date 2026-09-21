@@ -395,14 +395,14 @@
     "Fragenhagel": [
       {
         "id": 1,
-        "frage": "",
-        "antwort": "",
+        "frage": "Wer stinkt?",
+        "antwort": "Du.",
         "punkte": 100
       },
       {
         "id": 2,
-        "frage": "",
-        "antwort": "",
+        "frage": "Wer riecht gut?",
+        "antwort": "Nicht du...",
         "punkte": 100
       },
       {
@@ -699,122 +699,150 @@
         "id": 1,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 2,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 3,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 4,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 5,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 6,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 7,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 8,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 9,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 10,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 11,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 12,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 13,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 14,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 15,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 16,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 17,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 18,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 19,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 20,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       }
     ]
-  }
+  },
+  "__categories": [
+    "YouTube-Titel",
+    "Back to School",
+    "Was bin ich?",
+    "Filme & Serien",
+    "Musik",
+    "Flaggen"
+  ]
 }
