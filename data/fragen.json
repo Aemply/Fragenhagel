@@ -248,9 +248,10 @@
     "Wo zum Henker ist das?": [
       {
         "id": 1,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789989603144_dohz9z.png",
+        "antwort": "TEST-GEO",
+        "punkte": 300,
+        "bildName": "10.png"
       },
       {
         "id": 2,
