@@ -1,31 +1,4 @@
 {
-  "Was bin ich?": [
-    {
-      "punkte": 100,
-      "frage": "Ich habe vier Beine, bin aber kein Tier. Auf mir kann man sitzen.",
-      "antwort": "Stuhl"
-    },
-    {
-      "punkte": 200,
-      "frage": "Ich habe Zähne, kann aber nicht beißen. Man benutzt mich morgens oft im Badezimmer.",
-      "antwort": "Zahnbürste"
-    },
-    {
-      "punkte": 300,
-      "frage": "Ich habe viele Seiten, aber keine Tür. Man kann mich lesen.",
-      "antwort": "Buch"
-    },
-    {
-      "punkte": 500,
-      "frage": "Ich kann dir den Weg zeigen, obwohl ich keinen Schritt mache. Oft bin ich auf Papier oder im Handy.",
-      "antwort": "Karte"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Ich habe Städte ohne Häuser, Flüsse ohne Wasser und Straßen ohne Autos. Was bin ich?",
-      "antwort": "Landkarte"
-    }
-  ],
   "Filme & Serien": [
     {
       "punkte": 100,
@@ -141,13 +114,14 @@
       },
       {
         "id": 3,
-        "bild": "",
+        "bild": "/media/special_1789991801471_9oikf0.png",
         "original1": "",
         "original2": "",
-        "person1": "",
-        "person2": "",
+        "person1": "TEST20",
+        "person2": "TEST21",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "03.png"
       },
       {
         "id": 4,
@@ -237,9 +211,10 @@
       },
       {
         "id": 3,
-        "bild": "",
-        "antwort": "",
-        "punkte": 300
+        "bild": "/media/special_1789991802829_uos29r.png",
+        "antwort": "TEST22",
+        "punkte": 300,
+        "bildName": "05.png"
       },
       {
         "id": 4,
@@ -359,8 +334,8 @@
       },
       {
         "id": 3,
-        "frage": "",
-        "antwort": "",
+        "frage": "TEST23",
+        "antwort": "TEST24",
         "punkte": 100
       },
       {
@@ -819,7 +794,7 @@
   "__categories": [
     "TEST01",
     "TEST09",
-    "Was bin ich?",
+    "TEST17",
     "Filme & Serien",
     "Musik",
     "Flaggen"
@@ -849,6 +824,33 @@
       "punkte": 1000,
       "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
       "antwort": "Primzahl"
+    }
+  ],
+  "TEST17": [
+    {
+      "punkte": 100,
+      "frage": "TEST18",
+      "antwort": "TEST19"
+    },
+    {
+      "punkte": 200,
+      "frage": "Ich habe Zähne, kann aber nicht beißen. Man benutzt mich morgens oft im Badezimmer.",
+      "antwort": "Zahnbürste"
+    },
+    {
+      "punkte": 300,
+      "frage": "Ich habe viele Seiten, aber keine Tür. Man kann mich lesen.",
+      "antwort": "Buch"
+    },
+    {
+      "punkte": 500,
+      "frage": "Ich kann dir den Weg zeigen, obwohl ich keinen Schritt mache. Oft bin ich auf Papier oder im Handy.",
+      "antwort": "Karte"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Ich habe Städte ohne Häuser, Flüsse ohne Wasser und Straßen ohne Autos. Was bin ich?",
+      "antwort": "Landkarte"
     }
   ]
 }
