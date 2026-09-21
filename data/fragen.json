@@ -1,31 +1,4 @@
 {
-  "Musik": [
-    {
-      "punkte": 100,
-      "frage": "Wie viele Saiten hat eine klassische Gitarre?",
-      "antwort": "6"
-    },
-    {
-      "punkte": 200,
-      "frage": "Welches Instrument hat schwarze und weiße Tasten und wird häufig mit Pedalen gespielt?",
-      "antwort": "Klavier"
-    },
-    {
-      "punkte": 300,
-      "frage": "Wie nennt man den Teil eines Songs, der sich meist zwischen den Strophen wiederholt?",
-      "antwort": "Refrain"
-    },
-    {
-      "punkte": 500,
-      "frage": "Welche Band veröffentlichte den Song „Bohemian Rhapsody“?",
-      "antwort": "Queen"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Wie nennt man in der Musik die Geschwindigkeit eines Stücks?",
-      "antwort": "Tempo"
-    }
-  ],
   "Flaggen": [
     {
       "punkte": 100,
@@ -761,7 +734,7 @@
     "TEST2",
     "LULULU",
     "LULULU2",
-    "Musik",
+    "LELELE",
     "Flaggen"
   ],
   "TEST2": [
@@ -849,6 +822,33 @@
       "punkte": 1000,
       "frage": "Welche Serie spielt größtenteils in der fiktiven Kleinstadt Hawkins und enthält das Upside Down?",
       "antwort": "Stranger Things"
+    }
+  ],
+  "LELELE": [
+    {
+      "punkte": 100,
+      "frage": "Wie viele Saiten hat eine klassische Gitarre?",
+      "antwort": "6"
+    },
+    {
+      "punkte": 200,
+      "frage": "Welches Instrument hat schwarze und weiße Tasten und wird häufig mit Pedalen gespielt?",
+      "antwort": "Klavier"
+    },
+    {
+      "punkte": 300,
+      "frage": "Wie nennt man den Teil eines Songs, der sich meist zwischen den Strophen wiederholt?",
+      "antwort": "Refrain"
+    },
+    {
+      "punkte": 500,
+      "frage": "Welche Band veröffentlichte den Song „Bohemian Rhapsody“?",
+      "antwort": "Queen"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Wie nennt man in der Musik die Geschwindigkeit eines Stücks?",
+      "antwort": "Tempo"
     }
   ]
 }
