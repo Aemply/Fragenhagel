@@ -228,9 +228,10 @@
       },
       {
         "id": 2,
-        "bild": "",
+        "bild": "/media/special_1789996334508_iqsnmr.png",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "bildName": "02.png"
       },
       {
         "id": 3,
