@@ -651,13 +651,26 @@ async function spotifyAutofill(index,input){
  }
 }
 function renderMusic(){let a=Q.Sonderrunden?.Musik||[];document.getElementById('music').innerHTML='<div class="editorgrid">'+a.map((x,i)=>`<div class="card"><h3>Song ${i+1}</h3><input data-sp="Musik" data-i="${i}" data-f="spotify" value="${esc(x.spotify||'')}" placeholder="Spotify-Link" style="width:100%" oninput="clearTimeout(this._spotifyTimer);this._spotifyTimer=setTimeout(()=>spotifyAutofill(${i},this),450)"><input data-sp="Musik" data-i="${i}" data-f="antwort" value="${esc(x.antwort||'')}" placeholder="Lied / Interpret" style="width:100%"><input type="number" data-sp="Musik" data-i="${i}" data-f="punkte" value="${Number(x.punkte)||300}"></div>`).join('')+'</div>'}
+let saveStatusTimer=null;
+function setSaveStatus(text){
+ const el=document.getElementById('saveStatus');
+ if(!el)return;
+ if(saveStatusTimer){clearTimeout(saveStatusTimer);saveStatusTimer=null;}
+ el.textContent=text;
+ if(String(text).trim()==='✅ Gespeichert') {
+   saveStatusTimer=setTimeout(()=>{
+     if(document.getElementById('saveStatus')?.textContent===text) document.getElementById('saveStatus').textContent='';
+     saveStatusTimer=null;
+   },3000);
+ }
+}
 async function saveAll(){
  await ensureEditorSession();
  const catInputs=[...document.querySelectorAll('[data-cat-name]')];
  const oldCats=cats.slice();
  const newCats=catInputs.map(el=>String(el.value||'').trim());
- if(newCats.some(c=>!c)){document.getElementById('saveStatus').textContent=' ❌ Kategorienamen dürfen nicht leer sein';return}
- if(new Set(newCats).size!==newCats.length){document.getElementById('saveStatus').textContent=' ❌ Kategorienamen müssen eindeutig sein';return}
+ if(newCats.some(c=>!c)){setSaveStatus(' ❌ Kategorienamen dürfen nicht leer sein');return}
+ if(new Set(newCats).size!==newCats.length){setSaveStatus(' ❌ Kategorienamen müssen eindeutig sein');return}
  document.querySelectorAll('[data-main]').forEach(el=>{let c=el.dataset.main,i=+el.dataset.i,f=el.dataset.f;if(Q[c]?.[i])Q[c][i][f]=el.value});
  document.querySelectorAll('[data-sp]').forEach(el=>{let t=el.dataset.sp,i=+el.dataset.i,f=el.dataset.f;if(Q.Sonderrunden?.[t]?.[i])Q.Sonderrunden[t][i][f]=el.type==='number'?Number(el.value)||0:el.value});
  const renamed={};
@@ -683,13 +696,13 @@ async function saveAll(){
      Q.Sonderrunden[p.section][p.index][p.field+'Name']=p.filename;
    }
  } catch(e) {
-   document.getElementById('saveStatus').textContent=' ❌ '+e.message;
+   setSaveStatus(' ❌ '+e.message);
    return;
  }
  pendingImageUploads.clear();
  let r=await fetch('/api/questions',{method:'PUT',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify(Q)});
  let result={}; try{result=await r.json()}catch(e){}
- document.getElementById('saveStatus').textContent=r.ok?' ✅ Gespeichert':' ❌ '+String(result.error||('Fehler '+r.status));
+ setSaveStatus(r.ok?' ✅ Gespeichert':' ❌ '+String(result.error||('Fehler '+r.status)));
  if(r.ok)load()
 }
 const pendingImageUploads = new Map();
