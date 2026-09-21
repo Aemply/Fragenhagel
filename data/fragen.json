@@ -74,13 +74,14 @@
       },
       {
         "id": 5,
-        "bild": "",
+        "bild": "/media/special_1789996563722_aui5nm.png",
         "original1": "",
         "original2": "",
         "person1": "",
         "person2": "",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "03.png"
       },
       {
         "id": 6,
