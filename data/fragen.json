@@ -144,13 +144,14 @@
     "Face Morph": [
       {
         "id": 1,
-        "bild": "",
+        "bild": "/media/special_1789995597953_7ggko5.png",
         "original1": "",
         "original2": "",
         "person1": "",
         "person2": "",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "Screenshot 2026-04-23 153937.png"
       },
       {
         "id": 2,
