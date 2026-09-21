@@ -175,6 +175,10 @@ const gameHeaders=()=>({'Content-Type':'application/json','x-game-code':gameCode
 function openShow(){if(!gameCode)return alert('Spiel wird noch erstellt.');window.open('/show.html?code='+encodeURIComponent(gameCode),'show')}
 function playerLink(){return location.origin+'/player.html?code='+encodeURIComponent(gameCode)}
 async function copyPlayerLink(){if(!gameCode)return;try{await navigator.clipboard.writeText(playerLink());document.getElementById('joinHint').textContent='Spieler-Link kopiert: '+playerLink()}catch(e){prompt('Spieler-Link',playerLink())}}
+async function ensureEditorSession(){
+  if(!gameCode)return;
+  try{await fetch('/api/editor-session?code='+encodeURIComponent(gameCode),{cache:'no-store'})}catch(e){}
+}
 function createOrJoin(){
   if(gameCode&&hostToken){
     socket.emit('hostJoin',{code:gameCode,hostToken});
@@ -272,6 +276,7 @@ socket.on('gameCreated',g=>{
   creatingNewLobby=false;
   localStorage.setItem('fragenhagelGameCode',gameCode);
   localStorage.setItem('fragenhagelHostToken',hostToken);
+  ensureEditorSession();
   state={code:gameCode,players:[],mode:'board',question:null,special:null,buzzerOpen:false,buzzedBy:null,firstBuzzedBy:null,lockedPlayers:[]};
   updateGameInfo();
   renderScores();
@@ -652,7 +657,8 @@ async function saveAll(){
  Q.__categories=newCats;
  cats=newCats;
  let r=await fetch('/api/questions',{method:'PUT',headers:gameHeaders(),body:JSON.stringify(Q)});
- document.getElementById('saveStatus').textContent=r.ok?' ✅ Gespeichert':' ❌ Fehler';
+ let result={}; try{result=await r.json()}catch(e){}
+ document.getElementById('saveStatus').textContent=r.ok?' ✅ Gespeichert':' ❌ '+String(result.error||('Fehler '+r.status));
  if(r.ok)load()
 }
 async function uploadImg(section,index,field,input){
@@ -673,6 +679,7 @@ async function uploadImg(section,index,field,input){
    if(!f || el.type==='file') return;
    fields[f]=el.type==='number'?Number(el.value)||0:el.value;
  });
+ await ensureEditorSession();
  let resp=await fetch('/api/special-image',{method:'POST',headers:gameHeaders(),body:JSON.stringify({section,index,field,data,filename:file.name,fields,person1:item.person1,person2:item.person2})});
  let j=await resp.json();
  if(!resp.ok)return alert(j.error||'Upload fehlgeschlagen');
@@ -682,7 +689,7 @@ async function uploadImg(section,index,field,input){
  alert('Bild gespeichert ✅');
 }
 function yt(url){let s=String(url||'');let m=s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/);return m?m[1]:''}
-load();createOrJoin();
+ensureEditorSession();load();createOrJoin();
 </script>
 
 

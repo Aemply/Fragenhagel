@@ -349,6 +349,48 @@ function hostAuthorized(req) {
   return game && hostToken && game.hostToken === hostToken ? game : null;
 }
 
+// Editor-Zugriff darf nicht an die flüchtige Lobby im RAM gebunden sein.
+// Nach einem Render-Neustart existiert die Lobby-Map nicht mehr, während
+// die dauerhaft gespeicherten Quizdaten in GitHub weiter vorhanden sind.
+// Deshalb verwenden die Editor-HTTP-Endpunkte zusätzlich eine stateless,
+// signierte Browser-Session. Der geheime Signaturschlüssel bleibt auf dem
+// Server (GITHUB_TOKEN bzw. optional EDITOR_SESSION_SECRET).
+const EDITOR_SESSION_COOKIE = 'fh_editor_session';
+const EDITOR_SESSION_SECRET = String(process.env.EDITOR_SESSION_SECRET || GITHUB_TOKEN || 'fragenhagel-editor-session-secret');
+const editorSessionSign = value => crypto.createHmac('sha256', EDITOR_SESSION_SECRET).update(value).digest('base64url');
+function editorSessionValue(code) {
+  const payload = `${String(code || '').toUpperCase()}|${Date.now()}`;
+  return `${payload}|${editorSessionSign(payload)}`;
+}
+function editorSessionAuthorized(req) {
+  const code = String(req.headers['x-game-code'] || '').toUpperCase();
+  if (!code) return false;
+  const raw = String(req.headers.cookie || '');
+  const m = raw.match(new RegExp('(?:^|;\\s*)' + EDITOR_SESSION_COOKIE + '=([^;]+)'));
+  if (!m) return false;
+  const value = decodeURIComponent(m[1]);
+  const parts = value.split('|');
+  if (parts.length !== 3) return false;
+  const [cookieCode, ts, sig] = parts;
+  const timestamp = Number(ts);
+  if (cookieCode !== code || !Number.isFinite(timestamp) || Date.now() - timestamp > 30 * 24 * 60 * 60 * 1000) return false;
+  const expected = editorSessionSign(`${cookieCode}|${ts}`);
+  try { return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected)); } catch { return false; }
+}
+function setEditorSessionCookie(res, code) {
+  const secure = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+  res.setHeader('Set-Cookie', `${EDITOR_SESSION_COOKIE}=${encodeURIComponent(editorSessionValue(code))}; Path=/; HttpOnly; SameSite=Lax${secure ? '; Secure' : ''}; Max-Age=2592000`);
+}
+app.get('/api/editor-session', (req, res) => {
+  const code = String(req.query.code || req.headers['x-game-code'] || '').toUpperCase();
+  if (!code) return res.status(400).json({ ok: false, error: 'Spielcode fehlt' });
+  setEditorSessionCookie(res, code);
+  res.json({ ok: true });
+});
+function editorOrHostAuthorized(req) {
+  return editorSessionAuthorized(req) || hostAuthorized(req);
+}
+
 app.post('/api/game', (req, res) => {
   const game = newGame();
   res.json({ ok: true, code: game.code, hostToken: game.hostToken });
@@ -361,8 +403,8 @@ app.get('/api/game/:code', (req, res) => {
 
 app.put('/api/questions', async (req, res) => {
   try {
-    const game = hostAuthorized(req);
-    if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
+    const game = hostAuthorized(req) || games.get(String(req.headers['x-game-code'] || '').toUpperCase());
+    if (!game || !editorOrHostAuthorized(req)) return res.status(403).json({ ok: false, error: 'Editor-/Host-Berechtigung fehlt' });
     await persistQuestions(req.body, 'Fragenhagel: Editor speichern');
     io.to(`game:${game.code}`).emit('questionsUpdated', readQ());
     res.json({ ok: true, persistent: githubEnabled() });
@@ -390,8 +432,8 @@ app.post('/api/reset-used', async (req, res) => {
 });
 app.post('/api/special-image', async (req, res) => {
   try {
-    const game = hostAuthorized(req);
-    if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
+    const game = hostAuthorized(req) || games.get(String(req.headers['x-game-code'] || '').toUpperCase());
+    if (!game || !editorOrHostAuthorized(req)) return res.status(403).json({ ok: false, error: 'Editor-/Host-Berechtigung fehlt' });
     const { section, index, field, data, filename, fields, person1, person2 } = req.body || {};
     if (!['Face Morph', 'Wo zum Henker ist das?'].includes(section)) throw new Error('Ungültige Sonderrunde');
     const allowed = section === 'Face Morph' ? ['bild', 'original1', 'original2'] : ['bild'];
