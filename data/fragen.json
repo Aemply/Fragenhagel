@@ -128,13 +128,14 @@
       },
       {
         "id": 2,
-        "bild": "",
+        "bild": "/media/special_1789995627472_fwjltf.png",
         "original1": "",
         "original2": "",
         "person1": "",
         "person2": "",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "01.png"
       },
       {
         "id": 3,
