@@ -156,12 +156,13 @@
       {
         "id": 2,
         "bild": "",
-        "original1": "",
+        "original1": "/media/special_1789993626895_w7ogd9.png",
         "original2": "",
         "person1": "",
         "person2": "",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "original1Name": "09.png"
       },
       {
         "id": 3,
