@@ -90,13 +90,14 @@
       },
       {
         "id": 4,
-        "bild": "",
+        "bild": "/media/special_1789996459138_nqmq86.png",
         "original1": "",
         "original2": "",
         "person1": "",
         "person2": "",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "08.png"
       },
       {
         "id": 5,
