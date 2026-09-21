@@ -145,13 +145,14 @@
       {
         "id": 1,
         "bild": "/media/special_1789989490772_9355oe.png",
-        "original1": "",
+        "original1": "/media/special_1789989575181_usqhls.jpg",
         "original2": "",
         "person1": "LENNY",
-        "person2": "",
+        "person2": "Tobi",
         "punkteEinePerson": 100,
         "punkteBeide": 300,
-        "bildName": "Screenshot 2026-04-23 153937.png"
+        "bildName": "Screenshot 2026-04-23 153937.png",
+        "original1Name": "0009.jpg"
       },
       {
         "id": 2,
