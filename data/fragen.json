@@ -29,28 +29,28 @@
   "Back to School": [
     {
       "punkte": 100,
-      "frage": "Wie viele Tage hat eine Woche?",
-      "antwort": "7"
+      "frage": "Welches ist das flächenmäßig größte Land der Erde?",
+      "antwort": "Russland"
     },
     {
       "punkte": 200,
-      "frage": "Wie viele Ecken hat ein Quadrat?",
-      "antwort": "4"
+      "frage": "Berechne 3+3x3",
+      "antwort": "12"
     },
     {
       "punkte": 300,
-      "frage": "Wie nennt man H₂O im Alltag?",
-      "antwort": "Wasser"
+      "frage": "Wie viel sin 15% von 200",
+      "antwort": "30"
     },
     {
       "punkte": 500,
-      "frage": "Wie heißt die Hauptstadt von Frankreich?",
-      "antwort": "Paris"
+      "frage": "Was ist das Präteritum von \"gehen\"?",
+      "antwort": "ging"
     },
     {
       "punkte": 1000,
-      "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
-      "antwort": "Primzahl"
+      "frage": "Für welches Element steht das Symbol Fe?",
+      "antwort": "Eisen"
     }
   ],
   "Was bin ich?": [
