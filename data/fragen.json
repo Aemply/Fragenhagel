@@ -172,13 +172,14 @@
       {
         "id": 1,
         "bild": "/media/special_1789985730106_e3wm3y.jpg",
-        "original1": "",
+        "original1": "/media/special_1789985737531_5xcyx4.jpg",
         "original2": "",
         "person1": "Papa",
         "person2": "Tobi",
         "punkteEinePerson": 100,
         "punkteBeide": 300,
-        "bildName": "0001.jpg"
+        "bildName": "0001.jpg",
+        "original1Name": "0002.jpg"
       },
       {
         "id": 2,
