@@ -344,8 +344,8 @@
     "Fragenhagel": [
       {
         "id": 1,
-        "frage": "",
-        "antwort": "",
+        "frage": "TEST3",
+        "antwort": "TEST4",
         "punkte": 100
       },
       {
