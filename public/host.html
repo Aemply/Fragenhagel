@@ -181,7 +181,7 @@ async function ensureEditorSession(){
     const r=await fetch('/api/editor-session?code='+encodeURIComponent(gameCode),{
       cache:'no-store',
       credentials:'same-origin',
-      headers:{'x-game-code':gameCode}
+      headers:{'x-game-code':gameCode,'x-host-token':hostToken}
     });
     return r.ok;
   }catch(e){

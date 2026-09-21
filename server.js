@@ -384,6 +384,15 @@ function setEditorSessionCookie(res, code) {
 app.get('/api/editor-session', (req, res) => {
   const code = String(req.query.code || req.headers['x-game-code'] || '').toUpperCase();
   if (!code) return res.status(400).json({ ok: false, error: 'Spielcode fehlt' });
+  // Only the current host may mint/refresh an editor session for a lobby.
+  // The previous version allowed every visitor who knew a game code to get
+  // an editor cookie, which made the image-upload authorization unreliable
+  // after switching lobbies.
+  const game = games.get(code);
+  const suppliedHostToken = String(req.headers['x-host-token'] || '');
+  if (!game || !suppliedHostToken || game.hostToken !== suppliedHostToken) {
+    return res.status(403).json({ ok: false, error: 'Editor-/Host-Berechtigung fehlt' });
+  }
   setEditorSessionCookie(res, code);
   res.json({ ok: true });
 });
@@ -432,8 +441,12 @@ app.post('/api/reset-used', async (req, res) => {
 });
 app.post('/api/special-image', async (req, res) => {
   try {
-    const game = hostAuthorized(req) || games.get(String(req.headers['x-game-code'] || '').toUpperCase());
-    if (!game || !editorOrHostAuthorized(req)) return res.status(403).json({ ok: false, error: 'Editor-/Host-Berechtigung fehlt' });
+    // Bild-Uploads kommen ausschließlich aus der Host-Editorseite.
+    // Verwende hier bewusst dieselbe Host-Token-Prüfung wie beim normalen
+    // Fragen-Speichern. Dadurch bleibt der Upload nach 'Neue Lobby'
+    // zuverlässig autorisiert und hängt nicht von einer alten Editor-Cookie-Session ab.
+    const game = hostAuthorized(req);
+    if (!game) return res.status(403).json({ ok: false, error: 'Editor-/Host-Berechtigung fehlt' });
     const { section, index, field, data, filename, fields, person1, person2 } = req.body || {};
     if (!['Face Morph', 'Wo zum Henker ist das?'].includes(section)) throw new Error('Ungültige Sonderrunde');
     const allowed = section === 'Face Morph' ? ['bild', 'original1', 'original2'] : ['bild'];
