@@ -1,58 +1,4 @@
 {
-  "YouTube-Titel": [
-    {
-      "punkte": 100,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 200,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 300,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 500,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
-    }
-  ],
-  "Back to School": [
-    {
-      "punkte": 100,
-      "frage": "Wie viele Tage hat eine Woche?",
-      "antwort": "7"
-    },
-    {
-      "punkte": 200,
-      "frage": "Wie viele Ecken hat ein Quadrat?",
-      "antwort": "4"
-    },
-    {
-      "punkte": 300,
-      "frage": "Wie nennt man H₂O im Alltag?",
-      "antwort": "Wasser"
-    },
-    {
-      "punkte": 500,
-      "frage": "Wie heißt die Hauptstadt von Frankreich?",
-      "antwort": "Paris"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
-      "antwort": "Primzahl"
-    }
-  ],
   "Was bin ich?": [
     {
       "punkte": 100,
@@ -841,11 +787,65 @@
     ]
   },
   "__categories": [
-    "YouTube-Titel",
-    "Back to School",
+    "Blah Blah",
+    "Blubb Blubb",
     "Was bin ich?",
     "Filme & Serien",
     "Musik",
     "Flaggen"
+  ],
+  "Blah Blah": [
+    {
+      "punkte": 100,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    },
+    {
+      "punkte": 200,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    },
+    {
+      "punkte": 300,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    },
+    {
+      "punkte": 500,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+    }
+  ],
+  "Blubb Blubb": [
+    {
+      "punkte": 100,
+      "frage": "Wie viele Tage hat eine Woche?",
+      "antwort": "7"
+    },
+    {
+      "punkte": 200,
+      "frage": "Wie viele Ecken hat ein Quadrat?",
+      "antwort": "4"
+    },
+    {
+      "punkte": 300,
+      "frage": "Wie nennt man H₂O im Alltag?",
+      "antwort": "Wasser"
+    },
+    {
+      "punkte": 500,
+      "frage": "Wie heißt die Hauptstadt von Frankreich?",
+      "antwort": "Paris"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
+      "antwort": "Primzahl"
+    }
   ]
 }
