@@ -3,81 +3,96 @@
     {
       "punkte": 100,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
+      "used": false
     }
   ],
   "Back to School": [
     {
       "punkte": 100,
       "frage": "Wie viele Tage hat eine Woche?",
-      "antwort": "7"
+      "antwort": "7",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Wie viele Ecken hat ein Quadrat?",
-      "antwort": "4"
+      "antwort": "4",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Wie nennt man H₂O im Alltag?",
-      "antwort": "Wasser"
+      "antwort": "Wasser",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Wie heißt die Hauptstadt von Frankreich?",
-      "antwort": "Paris"
+      "antwort": "Paris",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
-      "antwort": "Primzahl"
+      "antwort": "Primzahl",
+      "used": false
     }
   ],
   "Was bin ich?": [
     {
       "punkte": 100,
       "frage": "Ich habe vier Beine, bin aber kein Tier. Auf mir kann man sitzen.",
-      "antwort": "Stuhl"
+      "antwort": "Stuhl",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Ich habe Zähne, kann aber nicht beißen. Man benutzt mich morgens oft im Badezimmer.",
-      "antwort": "Zahnbürste"
+      "antwort": "Zahnbürste",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Ich habe viele Seiten, aber keine Tür. Man kann mich lesen.",
-      "antwort": "Buch"
+      "antwort": "Buch",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Ich kann dir den Weg zeigen, obwohl ich keinen Schritt mache. Oft bin ich auf Papier oder im Handy.",
-      "antwort": "Karte"
+      "antwort": "Karte",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Ich habe Städte ohne Häuser, Flüsse ohne Wasser und Straßen ohne Autos. Was bin ich?",
-      "antwort": "Landkarte"
+      "antwort": "Landkarte",
+      "used": false
     }
   ],
   "Filme & Serien": [
@@ -90,81 +105,96 @@
         "Hogwarts",
         "Durmstrang",
         "Ilvermorny"
-      ]
+      ],
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Wie heißt die Familie im Zentrum der Serie „The Simpsons“?",
-      "antwort": "Simpson"
+      "antwort": "Simpson",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Wie heißt der König der Löwen, der Simbas Vater ist?",
-      "antwort": "Mufasa"
+      "antwort": "Mufasa",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "In welcher Filmreihe gibt es die Figuren Frodo, Gandalf und Aragorn?",
-      "antwort": "Der Herr der Ringe"
+      "antwort": "Der Herr der Ringe",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Welche Serie spielt größtenteils in der fiktiven Kleinstadt Hawkins und enthält das Upside Down?",
-      "antwort": "Stranger Things"
+      "antwort": "Stranger Things",
+      "used": false
     }
   ],
   "Musik": [
     {
       "punkte": 100,
       "frage": "Wie viele Saiten hat eine klassische Gitarre?",
-      "antwort": "6"
+      "antwort": "6",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Welches Instrument hat schwarze und weiße Tasten und wird häufig mit Pedalen gespielt?",
-      "antwort": "Klavier"
+      "antwort": "Klavier",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Wie nennt man den Teil eines Songs, der sich meist zwischen den Strophen wiederholt?",
-      "antwort": "Refrain"
+      "antwort": "Refrain",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Welche Band veröffentlichte den Song „Bohemian Rhapsody“?",
-      "antwort": "Queen"
+      "antwort": "Queen",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Wie nennt man in der Musik die Geschwindigkeit eines Stücks?",
-      "antwort": "Tempo"
+      "antwort": "Tempo",
+      "used": false
     }
   ],
   "Flaggen": [
     {
       "punkte": 100,
       "frage": "Welche Farben hat die deutsche Flagge?",
-      "antwort": "Schwarz, Rot, Gold"
+      "antwort": "Schwarz, Rot, Gold",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
-      "antwort": "Japan"
+      "antwort": "Japan",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Welche beiden Farben dominieren die Flagge der Ukraine?",
-      "antwort": "Blau und Gelb"
+      "antwort": "Blau und Gelb",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
-      "antwort": "Schweiz"
+      "antwort": "Schweiz",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
-      "antwort": "Nepal"
+      "antwort": "Nepal",
+      "used": false
     }
   ],
   "Sonderrunden": {
