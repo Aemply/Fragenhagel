@@ -171,13 +171,16 @@
     "Face Morph": [
       {
         "id": 1,
-        "bild": "",
-        "original1": "",
-        "original2": "",
-        "person1": "",
-        "person2": "",
+        "bild": "/media/special_1790427876133_z38mtn.png",
+        "original1": "/media/special_1790427877237_aldl90.png",
+        "original2": "/media/special_1790427878313_we77j8.png",
+        "person1": "lalala",
+        "person2": "mimimi",
         "punkteEinePerson": 100,
-        "punkteBeide": 300
+        "punkteBeide": 300,
+        "bildName": "05.png",
+        "original1Name": "03.png",
+        "original2Name": "10.png"
       },
       {
         "id": 2,
@@ -699,122 +702,150 @@
         "id": 1,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 2,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 3,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 4,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 5,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 6,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 7,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 8,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 9,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 10,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 11,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 12,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 13,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 14,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 15,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 16,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 17,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 18,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 19,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       },
       {
         "id": 20,
         "youtube": "",
         "antwort": "",
-        "punkte": 300
+        "punkte": 300,
+        "spotify": ""
       }
     ]
-  }
+  },
+  "__categories": [
+    "YouTube-Titel",
+    "Back to School",
+    "Was bin ich?",
+    "Filme & Serien",
+    "Musik",
+    "Flaggen"
+  ]
 }
