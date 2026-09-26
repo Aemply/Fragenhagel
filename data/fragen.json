@@ -59,60 +59,6 @@
       "antwort": "Stranger Things"
     }
   ],
-  "Musik": [
-    {
-      "punkte": 100,
-      "frage": "Wie viele Saiten hat eine klassische Gitarre?",
-      "antwort": "6"
-    },
-    {
-      "punkte": 200,
-      "frage": "Welches Instrument hat schwarze und weiße Tasten und wird häufig mit Pedalen gespielt?",
-      "antwort": "Klavier"
-    },
-    {
-      "punkte": 300,
-      "frage": "Wie nennt man den Teil eines Songs, der sich meist zwischen den Strophen wiederholt?",
-      "antwort": "Refrain"
-    },
-    {
-      "punkte": 500,
-      "frage": "Welche Band veröffentlichte den Song „Bohemian Rhapsody“?",
-      "antwort": "Queen"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Wie nennt man in der Musik die Geschwindigkeit eines Stücks?",
-      "antwort": "Tempo"
-    }
-  ],
-  "Flaggen": [
-    {
-      "punkte": 100,
-      "frage": "Welche Farben hat die deutsche Flagge?",
-      "antwort": "Schwarz, Rot, Gold"
-    },
-    {
-      "punkte": 200,
-      "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
-      "antwort": "Japan"
-    },
-    {
-      "punkte": 300,
-      "frage": "Welche beiden Farben dominieren die Flagge der Ukraine?",
-      "antwort": "Blau und Gelb"
-    },
-    {
-      "punkte": 500,
-      "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
-      "antwort": "Schweiz"
-    },
-    {
-      "punkte": 1000,
-      "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
-      "antwort": "Nepal"
-    }
-  ],
   "Sonderrunden": {
     "Face Morph": [
       {
@@ -791,8 +737,8 @@
     "Blubb Blubb",
     "Was bin ich?",
     "Filme & Serien",
-    "Musik",
-    "Flaggen"
+    "LALALA",
+    "LELELE"
   ],
   "Blah Blah": [
     {
@@ -808,7 +754,8 @@
     {
       "punkte": 300,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
+      "used": true
     },
     {
       "punkte": 500,
@@ -846,6 +793,60 @@
       "punkte": 1000,
       "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
       "antwort": "Primzahl"
+    }
+  ],
+  "LALALA": [
+    {
+      "punkte": 100,
+      "frage": "Wer stinkt?",
+      "antwort": "Du."
+    },
+    {
+      "punkte": 200,
+      "frage": "Welches Instrument hat schwarze und weiße Tasten und wird häufig mit Pedalen gespielt?",
+      "antwort": "Klavier"
+    },
+    {
+      "punkte": 300,
+      "frage": "Wie nennt man den Teil eines Songs, der sich meist zwischen den Strophen wiederholt?",
+      "antwort": "Refrain"
+    },
+    {
+      "punkte": 500,
+      "frage": "Welche Band veröffentlichte den Song „Bohemian Rhapsody“?",
+      "antwort": "Queen"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Wie nennt man in der Musik die Geschwindigkeit eines Stücks?",
+      "antwort": "Tempo"
+    }
+  ],
+  "LELELE": [
+    {
+      "punkte": 100,
+      "frage": "Welche Farben hat die deutsche Flagge?",
+      "antwort": "Schwarz, Rot, Gold"
+    },
+    {
+      "punkte": 200,
+      "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
+      "antwort": "Japan"
+    },
+    {
+      "punkte": 300,
+      "frage": "Was riecht gut?",
+      "antwort": "Nicht du..."
+    },
+    {
+      "punkte": 500,
+      "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
+      "antwort": "Schweiz"
+    },
+    {
+      "punkte": 1000,
+      "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
+      "antwort": "Nepal"
     }
   ]
 }
