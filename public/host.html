@@ -519,6 +519,7 @@ function renderJudge(points){
    }else{
      addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100));
      addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
+     addBtn('❌ Falsch – '+String(p.name),'bad',()=>faceMorphWrong(p.name));
    }
  }else{
    addBtn('✅ Richtig – '+String(p.name),'good',()=>correct(p.name,val));
@@ -577,16 +578,17 @@ function faceMorphSecondCorrect(p){
    catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
  },250);
 }
-function faceMorphSecondWrong(p){
+function faceMorphWrong(p){
  if(judgedPlayers[String(p)])return;
  lockPlayerButtons(p);
  try{sWrong()}catch(e){}
- // No points are deducted on this Face Morph "Falsch" result.
+ // Falsch: keine Punkte ändern, Spieler für diese Runde sperren
+ // und den Buzzer für die übrigen Spieler wieder freigeben.
  socket.emit('wrong',{player:String(p),points:0});
- setTimeout(()=>{
-   try{ if(typeof reveal === 'function') reveal(); }
-   catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
- },250);
+}
+
+function faceMorphSecondWrong(p){
+ return faceMorphWrong(p);
 }
 function award(p,v){
  if(judgedPlayers[String(p)])return;

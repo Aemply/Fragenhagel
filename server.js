@@ -587,8 +587,9 @@ io.on('connection', socket => {
     if(!game||!socket.data.host)return;
     const p=game.players.find(x=>x.name===player);
     if(!p)return;
-    const n=Number(points)||0;
-    p.score-=n;
+    // A "Falsch" answer does not change the player's score.
+    // It only locks this player for the current round/question and
+    // reopens the buzzer for the remaining players.
     io.to(`game:${game.code}`).emit('gameSound', { type: 'wrong' });
 
     // The player who had the first buzzer is locked out for the rest of this question.
