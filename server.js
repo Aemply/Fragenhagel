@@ -630,6 +630,45 @@ io.on('connection', socket => {
     resetBuzz(game, true);
     emit(game);
   });
+  socket.on('kickPlayer', ({ playerId }, ack) => {
+    const game = games.get(socket.data.code);
+    if (!game || !socket.data.host) {
+      if (typeof ack === 'function') ack({ ok: false, error: 'Host-Berechtigung fehlt' });
+      return;
+    }
+
+    const id = String(playerId || '');
+    const index = game.players.findIndex(p => String(p.id) === id);
+    if (index === -1) {
+      if (typeof ack === 'function') ack({ ok: false, error: 'Spieler nicht gefunden' });
+      return;
+    }
+
+    const kicked = game.players[index];
+
+    // Inform all sockets belonging to this player before disconnecting them.
+    for (const [, client] of io.sockets.sockets) {
+      if (String(client.data.code) === String(game.code) && String(client.data.playerId) === id) {
+        client.emit('playerKicked', {
+          name: kicked.name,
+          message: 'Du wurdest vom Host aus der Lobby entfernt.'
+        });
+      }
+    }
+
+    game.players.splice(index, 1);
+
+    // Disconnect every active connection of the kicked player.
+    for (const [, client] of io.sockets.sockets) {
+      if (String(client.data.code) === String(game.code) && String(client.data.playerId) === id) {
+        client.disconnect(true);
+      }
+    }
+
+    emit(game);
+    if (typeof ack === 'function') ack({ ok: true, player: kicked.name });
+  });
+
   socket.on('addPoints', ({ player, amount }, ack) => {
     const game=games.get(socket.data.code);
     if(!game || !socket.data.host){ if(typeof ack==='function') ack({ok:false,error:'Host-Berechtigung fehlt'}); return; }

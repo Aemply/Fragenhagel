@@ -331,7 +331,14 @@ function renderHostBuzz(){
 function renderScores(){
  const el=document.getElementById('scores');
  const ps=state.players||[];
- el.innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong><div><button type="button" class="btn" data-score-player="${esc(p.name)}" data-score-amount="100">+100</button><button type="button" class="btn" data-score-player="${esc(p.name)}" data-score-amount="-100">-100</button></div></div>`).join('');
+ el.innerHTML=ps.map(p=>`<div class="score">
+   <strong>${esc(p.name)}: ${p.score??0}</strong>
+   <div class="row" style="margin-top:8px;gap:8px">
+     <button type="button" class="btn" data-score-player="${esc(p.name)}" data-score-amount="100">+100</button>
+     <button type="button" class="btn" data-score-player="${esc(p.name)}" data-score-amount="-100">-100</button>
+     <button type="button" class="btn bad" data-kick-player-id="${esc(p.id)}" data-kick-player-name="${esc(p.name)}">🚫 Spieler kicken</button>
+   </div>
+ </div>`).join('');
 }
 
 function renderBuzz(){
@@ -365,11 +372,28 @@ async function pts(p,a){
 }
 
 document.addEventListener('click',(event)=>{
-  const btn=event.target.closest('#scores button[data-score-player]');
-  if(!btn) return;
-  event.preventDefault();
-  event.stopPropagation();
-  pts(btn.dataset.scorePlayer,Number(btn.dataset.scoreAmount));
+  const scoreBtn=event.target.closest('#scores button[data-score-player]');
+  if(scoreBtn){
+    event.preventDefault();
+    event.stopPropagation();
+    pts(scoreBtn.dataset.scorePlayer,Number(scoreBtn.dataset.scoreAmount));
+    return;
+  }
+
+  const kickBtn=event.target.closest('#scores button[data-kick-player-id]');
+  if(kickBtn){
+    event.preventDefault();
+    event.stopPropagation();
+
+    const playerName=kickBtn.dataset.kickPlayerName || 'diesen Spieler';
+    if(!confirm(`Möchtest du ${playerName} wirklich aus der Lobby kicken?`)) return;
+
+    socket.emit('kickPlayer',{playerId:kickBtn.dataset.kickPlayerId},(result)=>{
+      if(!result || !result.ok){
+        alert((result&&result.error)||'Spieler konnte nicht gekickt werden.');
+      }
+    });
+  }
 });
 function resetScores(){socket.emit('resetScores')}function openBuzzer(){
  socket.emit('openBuzzer');

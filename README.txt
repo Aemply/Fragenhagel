@@ -21,3 +21,6 @@ Sonderrunden:
 - Geo: Bild + Lösung.
 - Fragenhagel: Frage + Antwort.
 - Musik: YouTube-Player nur Host; Show zeigt keine URL.
+
+
+v98: Host kann Spieler über '🚫 Spieler kicken' aus der aktuellen Lobby entfernen. Der betroffene Spieler erhält eine Meldung und wird getrennt.
