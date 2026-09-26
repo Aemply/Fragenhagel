@@ -754,55 +754,64 @@
     {
       "punkte": 100,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
       "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
-      "used": true
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Welcher YouTuber hat dieses Video veröffentlicht?",
-      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen"
+      "antwort": "Beispiel – hier deinen echten Videotitel einsetzen",
+      "used": false
     }
   ],
   "Blubb Blubb": [
     {
       "punkte": 100,
       "frage": "Wie viele Tage hat eine Woche?",
-      "antwort": "7"
+      "antwort": "7",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Wie viele Ecken hat ein Quadrat?",
-      "antwort": "4"
+      "antwort": "4",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Wie nennt man H₂O im Alltag?",
-      "antwort": "Wasser"
+      "antwort": "Wasser",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Wie heißt die Hauptstadt von Frankreich?",
-      "antwort": "Paris"
+      "antwort": "Paris",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Wie lautet die mathematische Bezeichnung für eine Zahl, die nur durch 1 und sich selbst ohne Rest teilbar ist?",
-      "antwort": "Primzahl"
+      "antwort": "Primzahl",
+      "used": false
     }
   ],
   "LALALA": [
@@ -810,55 +819,63 @@
       "punkte": 100,
       "frage": "Wer stinkt?",
       "antwort": "Du.",
-      "used": true
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Welches Instrument hat schwarze und weiße Tasten und wird häufig mit Pedalen gespielt?",
-      "antwort": "Klavier"
+      "antwort": "Klavier",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Wie nennt man den Teil eines Songs, der sich meist zwischen den Strophen wiederholt?",
-      "antwort": "Refrain"
+      "antwort": "Refrain",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Welche Band veröffentlichte den Song „Bohemian Rhapsody“?",
-      "antwort": "Queen"
+      "antwort": "Queen",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Wie nennt man in der Musik die Geschwindigkeit eines Stücks?",
-      "antwort": "Tempo"
+      "antwort": "Tempo",
+      "used": false
     }
   ],
   "LELELE": [
     {
       "punkte": 100,
       "frage": "Welche Farben hat die deutsche Flagge?",
-      "antwort": "Schwarz, Rot, Gold"
+      "antwort": "Schwarz, Rot, Gold",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Welche Flagge besteht aus einem roten Kreis auf weißem Hintergrund?",
-      "antwort": "Japan"
+      "antwort": "Japan",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Was riecht gut?",
       "antwort": "Nicht du...",
-      "used": true
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Welches Land hat eine Flagge mit einem weißen Kreuz auf rotem Grund?",
-      "antwort": "Schweiz"
+      "antwort": "Schweiz",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Welche Nationalflagge ist nicht rechteckig, sondern besteht aus zwei übereinanderliegenden Dreiecken?",
-      "antwort": "Nepal"
+      "antwort": "Nepal",
+      "used": false
     }
   ]
 }
