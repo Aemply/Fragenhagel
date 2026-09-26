@@ -24,3 +24,5 @@ Sonderrunden:
 
 
 v98: Host kann Spieler über '🚫 Spieler kicken' aus der aktuellen Lobby entfernen. Der betroffene Spieler erhält eine Meldung und wird getrennt.
+
+Version 99: Face-Morph Falsch-Button und rundenbasierte Buzzer-Sperren.

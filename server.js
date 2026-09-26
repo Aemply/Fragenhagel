@@ -334,7 +334,7 @@ function newGame() {
     players: [],
     state: {
       mode: 'board', question: null, special: null,
-      buzzerOpen: false, buzzedBy: null, firstBuzzedBy: null, lockedPlayers: [], music: null
+      buzzerOpen: false, buzzedBy: null, firstBuzzedBy: null, lockedPlayers: [], faceMorphLastPartial: false, music: null
     }
   };
   games.set(code, game);
@@ -344,7 +344,7 @@ function gameState(game) {
   return { code: game.code, players: game.players.map(({ id, name, score, connected }) => ({ id, name, score, connected })), ...game.state };
 }
 function emit(game) { io.to(`game:${game.code}`).emit('state', gameState(game)); }
-function resetBuzz(game, clearFirst = true) { game.state.buzzerOpen = false; game.state.buzzedBy = null; game.state.lockedPlayers = []; if (clearFirst) game.state.firstBuzzedBy = null; }
+function resetBuzz(game, clearFirst = true) { game.state.buzzerOpen = false; game.state.buzzedBy = null; game.state.lockedPlayers = []; game.state.faceMorphLastPartial = false; if (clearFirst) game.state.firstBuzzedBy = null; }
 function hostAuthorized(req) {
   const code = String(req.headers['x-game-code'] || '').toUpperCase();
   const hostToken = String(req.headers['x-host-token'] || '');
@@ -595,7 +595,8 @@ io.on('connection', socket => {
     if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
 
     // Hide the current buzzer indication and reopen the buzzer for everyone else.
-    // firstBuzzedBy stays untouched so the original first buzzer remains excluded.
+    // For Face Morph, a plain "Falsch" keeps +300 available to the next player.
+    if(game.state.special?.type === 'Face Morph') game.state.faceMorphLastPartial=false;
     game.state.buzzedBy=null;
     game.state.buzzerOpen=true;
     emit(game);
@@ -609,35 +610,13 @@ io.on('connection', socket => {
     p.score+=n;
     io.to(`game:${game.code}`).emit('gameSound', { type: 'wrong' });
 
-    // Face Morph +100: award the points, lock this player for the
-    // current round, and reopen the buzzer for all other eligible players.
+    // Face Morph +100: keep the points, lock this player out, and reopen the buzzer.
+    // The next player may only receive +100 or Falsch until somebody is marked Falsch.
     if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
+    game.state.faceMorphLastPartial=true;
     game.state.buzzedBy=null;
     game.state.buzzerOpen=true;
     emit(game);
-  });
-
-  socket.on('faceMorphWrong', ({ player }, ack) => {
-    const game=games.get(socket.data.code);
-    if(!game || !socket.data.host){
-      if(typeof ack==='function') ack({ok:false,error:'Host-Berechtigung fehlt'});
-      return;
-    }
-    const p=game.players.find(x=>x.name===player);
-    if(!p){
-      if(typeof ack==='function') ack({ok:false,error:'Spieler nicht gefunden'});
-      return;
-    }
-
-    // "Falsch" never changes the score. It only locks the current
-    // player for this round and gives the remaining eligible players
-    // another chance to buzz.
-    if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
-    io.to(`game:${game.code}`).emit('gameSound', { type: 'wrong' });
-    game.state.buzzedBy=null;
-    game.state.buzzerOpen=true;
-    emit(game);
-    if(typeof ack==='function') ack({ok:true});
   });
 
   socket.on('correct', ({ player, points }) => {

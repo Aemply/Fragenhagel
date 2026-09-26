@@ -512,12 +512,13 @@ function renderJudge(points){
  };
 
  if(active?.type==='Face Morph'){
-   // Every eligible buzzer gets the same three choices. After +100
-   // or "Falsch", the server reopens the buzzer for the remaining
-   // players; +300 ends the round.
+   // Face Morph follows the same round logic for every buzzer:
+   // +100 keeps the points, locks this player for the round and reopens the buzzer.
+   // Falsch locks the player without changing their score and reopens the buzzer.
+   // +300 ends the round. After a +100, +300 is intentionally hidden for the next buzzer.
    addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100));
-   addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
-   addBtn('❌ Falsch','bad',()=>faceMorphWrong(p.name));
+   if(!state?.faceMorphLastPartial) addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
+   addBtn('❌ Falsch – '+String(p.name),'bad',()=>faceMorphSecondWrong(p.name));
  }else{
    addBtn('✅ Richtig – '+String(p.name),'good',()=>correct(p.name,val));
    addBtn('❌ Falsch – '+String(p.name),'bad',()=>wrong(p.name,val));
@@ -565,15 +566,6 @@ function wrong(p,v){
    },250);
  }
 }
-function faceMorphWrong(p){
- if(judgedPlayers[String(p)])return;
- lockPlayerButtons(p);
- try{sWrong()}catch(e){}
- socket.emit('faceMorphWrong',{player:String(p)},(result)=>{
-   if(result && result.ok===false) console.error('Falsch konnte nicht verarbeitet werden:',result.error);
- });
-}
-
 function faceMorphSecondCorrect(p){
  if(judgedPlayers[String(p)])return;
  lockPlayerButtons(p);
