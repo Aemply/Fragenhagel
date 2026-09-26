@@ -348,13 +348,12 @@ function renderBuzz(){
  }
 }
 async function pts(p,a){
-  try{
-    const r=await fetch('/api/player-score',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({player:p,amount:a})});
-    const result=await r.json().catch(()=>({}));
-    if(!r.ok) console.error('Punkte konnten nicht geändert werden:',result.error||r.status);
-  }catch(e){console.error('Punkte konnten nicht geändert werden:',e);}
-}
-function resetScores(){socket.emit('resetScores')}function openBuzzer(){
+ try{
+   const r=await fetch('/api/player-score',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({player:p,amount:a})});
+   const result=await r.json().catch(()=>({}));
+   if(!r.ok) alert(result.error||'Punkte konnten nicht geändert werden.');
+ }catch(e){ alert('Punkte konnten nicht geändert werden.'); }
+}function resetScores(){socket.emit('resetScores')}function openBuzzer(){
  socket.emit('openBuzzer');
  state.buzzedBy=null;
  renderBuzz();
@@ -735,9 +734,6 @@ async function uploadImg(section,index,field,input){
 
 function yt(url){let s=String(url||'');let m=s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/);return m?m[1]:''}
 socket.on('connect',()=>{
-  // Nach einem Socket.IO-Reconnect die Host-Berechtigung auf dem neuen
-  // Socket wiederherstellen. Dadurch funktionieren auch die manuellen
-  // Punktebuttons nach einer kurzen Verbindungsunterbrechung zuverlässig.
   if(gameCode&&hostToken) socket.emit('hostJoin',{code:gameCode,hostToken});
 });
 ensureEditorSession();load();createOrJoin();

@@ -352,6 +352,21 @@ function hostAuthorized(req) {
   return game && hostToken && game.hostToken === hostToken ? game : null;
 }
 
+// Manuelle Punktevergabe über HTTP. Dadurch hängt +100/-100 nicht davon ab,
+// ob der aktuelle Socket nach einem Reconnect noch als Host markiert ist.
+app.post('/api/player-score', (req, res) => {
+  const game = hostAuthorized(req);
+  if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
+  const playerName = String(req.body?.player || '');
+  const amount = Number(req.body?.amount);
+  if (!playerName || !Number.isFinite(amount)) return res.status(400).json({ ok: false, error: 'Ungültige Punkteangabe' });
+  const player = game.players.find(p => p.name === playerName);
+  if (!player) return res.status(404).json({ ok: false, error: 'Spieler nicht gefunden' });
+  player.score = Number(player.score || 0) + amount;
+  emit(game);
+  res.json({ ok: true, player: player.name, score: player.score });
+});
+
 // Editor-Zugriff darf nicht an die flüchtige Lobby im RAM gebunden sein.
 // Nach einem Render-Neustart existiert die Lobby-Map nicht mehr, während
 // die dauerhaft gespeicherten Quizdaten in GitHub weiter vorhanden sind.
@@ -440,20 +455,6 @@ app.post('/api/reset-used', async (req, res) => {
     const q = readQ();
     for (const c of ['YouTube-Titel', 'Back to School', 'Was bin ich?', 'Filme & Serien', 'Musik', 'Flaggen']) if (Array.isArray(q[c])) q[c].forEach(x => x.used = false);
     await persistQuestions(q, 'Fragenhagel: Felder zurücksetzen'); io.to(`game:${game.code}`).emit('questionsUpdated', q); res.json({ ok: true, persistent: githubEnabled() });
-  } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
-});
-app.post('/api/player-score', (req, res) => {
-  try {
-    const game = hostAuthorized(req);
-    if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
-    const playerName = String(req.body?.player || '');
-    const amount = Number(req.body?.amount);
-    if (!playerName || !Number.isFinite(amount)) return res.status(400).json({ ok: false, error: 'Ungültige Punkteangabe' });
-    const player = game.players.find(p => p.name === playerName);
-    if (!player) return res.status(404).json({ ok: false, error: 'Spieler nicht gefunden' });
-    player.score = Number(player.score || 0) + amount;
-    emit(game);
-    res.json({ ok: true, player: player.name, score: player.score });
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
 });
 app.post('/api/special-image', async (req, res) => {
