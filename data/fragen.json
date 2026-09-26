@@ -3,27 +3,32 @@
     {
       "punkte": 100,
       "frage": "Ich habe vier Beine, bin aber kein Tier. Auf mir kann man sitzen.",
-      "antwort": "Stuhl"
+      "antwort": "Stuhl",
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Ich habe Zähne, kann aber nicht beißen. Man benutzt mich morgens oft im Badezimmer.",
-      "antwort": "Zahnbürste"
+      "antwort": "Zahnbürste",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Ich habe viele Seiten, aber keine Tür. Man kann mich lesen.",
-      "antwort": "Buch"
+      "antwort": "Buch",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "Ich kann dir den Weg zeigen, obwohl ich keinen Schritt mache. Oft bin ich auf Papier oder im Handy.",
-      "antwort": "Karte"
+      "antwort": "Karte",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Ich habe Städte ohne Häuser, Flüsse ohne Wasser und Straßen ohne Autos. Was bin ich?",
-      "antwort": "Landkarte"
+      "antwort": "Landkarte",
+      "used": false
     }
   ],
   "Filme & Serien": [
@@ -36,27 +41,32 @@
         "Hogwarts",
         "Durmstrang",
         "Ilvermorny"
-      ]
+      ],
+      "used": false
     },
     {
       "punkte": 200,
       "frage": "Wie heißt die Familie im Zentrum der Serie „The Simpsons“?",
-      "antwort": "Simpson"
+      "antwort": "Simpson",
+      "used": false
     },
     {
       "punkte": 300,
       "frage": "Wie heißt der König der Löwen, der Simbas Vater ist?",
-      "antwort": "Mufasa"
+      "antwort": "Mufasa",
+      "used": false
     },
     {
       "punkte": 500,
       "frage": "In welcher Filmreihe gibt es die Figuren Frodo, Gandalf und Aragorn?",
-      "antwort": "Der Herr der Ringe"
+      "antwort": "Der Herr der Ringe",
+      "used": false
     },
     {
       "punkte": 1000,
       "frage": "Welche Serie spielt größtenteils in der fiktiven Kleinstadt Hawkins und enthält das Upside Down?",
-      "antwort": "Stranger Things"
+      "antwort": "Stranger Things",
+      "used": false
     }
   ],
   "Sonderrunden": {
@@ -799,7 +809,8 @@
     {
       "punkte": 100,
       "frage": "Wer stinkt?",
-      "antwort": "Du."
+      "antwort": "Du.",
+      "used": true
     },
     {
       "punkte": 200,
@@ -836,7 +847,8 @@
     {
       "punkte": 300,
       "frage": "Was riecht gut?",
-      "antwort": "Nicht du..."
+      "antwort": "Nicht du...",
+      "used": true
     },
     {
       "punkte": 500,
