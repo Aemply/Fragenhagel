@@ -328,7 +328,7 @@ function renderHostBuzz(){
   metaEl.textContent = 'Hat gerade gebuzzert';
 }
 
-function renderScores(){const el=document.getElementById('scores');const ps=state.players||[];el.innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong><div><button class="btn" onclick="pts(${JSON.stringify(p.name)},100)">+100</button><button class="btn" onclick="pts(${JSON.stringify(p.name)},-100)">-100</button></div></div>`).join('')}
+function renderScores(){const el=document.getElementById('scores');const ps=state.players||[];el.innerHTML=ps.map(p=>`<div class="score"><strong>${esc(p.name)}: ${p.score??0}</strong><div><button type="button" class="btn" onclick="window.pts(${JSON.stringify(p.name)},100)">+100</button><button type="button" class="btn" onclick="window.pts(${JSON.stringify(p.name)},-100)">-100</button></div></div>`).join('')}
 function renderBuzz(){
  const b=document.getElementById('buzz');
  const hb=document.getElementById('hostBuzzed');
@@ -347,30 +347,31 @@ function renderBuzz(){
    if(hb){hb.style.display='none';hb.textContent='';}
  }
 }
-function pts(p,a){
-  let finished=false;
-  const done=(ok,error)=>{
-    if(finished)return;
-    finished=true;
-    if(!ok) alert(error||'Punkte konnten nicht geändert werden.');
-  };
+window.pts=async function pts(p,a){
+  const status=document.getElementById('saveStatus');
   try{
-    socket.emit('addPoints',{player:p,amount:a},result=>{
-      if(result?.ok) done(true); else done(false,result?.error);
+    const r=await fetch('/api/player-score',{
+      method:'POST',
+      credentials:'same-origin',
+      headers:gameHeaders(),
+      body:JSON.stringify({player:String(p),amount:Number(a)})
     });
-    setTimeout(()=>{
-      if(finished)return;
-      fetch('/api/player-score',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({player:p,amount:a})})
-        .then(async r=>({ok:r.ok,data:await r.json().catch(()=>({}))}))
-        .then(x=>done(x.ok,x.data?.error))
-        .catch(()=>done(false,'Punkte konnten nicht geändert werden.'));
-    },500);
+    const result=await r.json().catch(()=>({}));
+    if(!r.ok || !result.ok){
+      alert(result.error || 'Punkte konnten nicht geändert werden.');
+      return;
+    }
+    // Die Serverantwort löst bereits ein state-Event für Host und Show aus.
+    // Falls der Socket gerade neu verbindet, aktualisieren wir die Hostansicht
+    // zusätzlich lokal, damit der Klick unmittelbar sichtbar ist.
+    const player=state.players?.find(x=>String(x.name).toLowerCase()===String(p).toLowerCase());
+    if(player) player.score=Number(result.score);
+    renderScores();
   }catch(e){
-    fetch('/api/player-score',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({player:p,amount:a})})
-      .then(async r=>({ok:r.ok,data:await r.json().catch(()=>({}))}))
-      .then(x=>done(x.ok,x.data?.error)).catch(()=>done(false,'Punkte konnten nicht geändert werden.'));
+    alert('Punkte konnten nicht geändert werden. Bitte Verbindung prüfen.');
   }
-}function resetScores(){socket.emit('resetScores')}function openBuzzer(){
+}
+function resetScores(){socket.emit('resetScores')}function openBuzzer(){
  socket.emit('openBuzzer');
  state.buzzedBy=null;
  renderBuzz();

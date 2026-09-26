@@ -384,6 +384,22 @@ function setEditorSessionCookie(res, code) {
   const secure = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
   res.setHeader('Set-Cookie', `${EDITOR_SESSION_COOKIE}=${encodeURIComponent(editorSessionValue(code))}; Path=/; HttpOnly; SameSite=Lax${secure ? '; Secure' : ''}; Max-Age=2592000`);
 }
+app.post('/api/player-score', (req, res) => {
+  try {
+    const game = hostAuthorized(req);
+    if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
+    const playerName = String(req.body?.player || '').trim();
+    const amount = Number(req.body?.amount);
+    if (!playerName || !Number.isFinite(amount)) return res.status(400).json({ ok: false, error: 'Ungültige Punkteangabe' });
+    const player = game.players.find(p => String(p.name).toLowerCase() === playerName.toLowerCase());
+    if (!player) return res.status(404).json({ ok: false, error: 'Spieler nicht gefunden' });
+    player.score = Number(player.score || 0) + amount;
+    emit(game);
+    res.json({ ok: true, player: player.name, score: player.score });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message || 'Serverfehler' });
+  }
+});
 app.get('/api/editor-session', (req, res) => {
   const code = String(req.query.code || req.headers['x-game-code'] || '').toUpperCase();
   if (!code) return res.status(400).json({ ok: false, error: 'Spielcode fehlt' });
