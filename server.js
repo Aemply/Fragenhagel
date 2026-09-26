@@ -454,7 +454,16 @@ app.post('/api/reset-used', async (req, res) => {
     const game = hostAuthorized(req);
     if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
     const q = readQ();
-    for (const c of ['YouTube-Titel', 'Back to School', 'Was bin ich?', 'Filme & Serien', 'Musik', 'Flaggen']) if (Array.isArray(q[c])) q[c].forEach(x => x.used = false);
+    // Die Hauptbrett-Kategorien können im Editor umbenannt werden.
+    // Deshalb niemals feste Standardnamen verwenden: zuerst die gespeicherte
+    // Reihenfolge aus __categories nehmen, ansonsten alle normalen
+    // Hauptbrett-Arrays (Sonderrunden ausgenommen).
+    const mainCategories = Array.isArray(q.__categories) && q.__categories.length
+      ? q.__categories
+      : Object.keys(q).filter(c => c !== 'Sonderrunden' && c !== '__categories' && Array.isArray(q[c]));
+    for (const c of mainCategories) {
+      if (Array.isArray(q[c])) q[c].forEach(x => { x.used = false; });
+    }
     await persistQuestions(q, 'Fragenhagel: Felder zurücksetzen'); io.to(`game:${game.code}`).emit('questionsUpdated', q); res.json({ ok: true, persistent: githubEnabled() });
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
 });
