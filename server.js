@@ -554,6 +554,36 @@ io.on('connection', socket => {
 
   socket.on('showBoard', () => { const game = games.get(socket.data.code); if (!game || !socket.data.host) return; game.state.mode='board'; game.state.question=null; game.state.special=null; game.state.music=null; resetBuzz(game); emit(game); });
   socket.on('showQuestion', q => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.mode='question'; game.state.question={...q,revealed:false}; game.state.special=null; game.state.music=null; resetBuzz(game); emit(game); });
+  socket.on('showQuestionForPlayer', (q, ack) => {
+    const game = games.get(socket.data.code);
+    if (!game || !socket.data.host) {
+      if (typeof ack === 'function') ack({ ok:false, error:'Host-Berechtigung fehlt' });
+      return;
+    }
+    const name = String(q?.player || '').trim();
+    const player = game.players.find(p => String(p.name) === name && p.connected);
+    if (!player) {
+      if (typeof ack === 'function') ack({ ok:false, error:'Der ausgewählte Spieler ist nicht verbunden.' });
+      return;
+    }
+    game.state.mode = 'question';
+    game.state.question = {
+      kategorie: q.kategorie,
+      punkte: q.punkte,
+      frage: q.frage,
+      antwort: q.antwort,
+      revealed: false
+    };
+    game.state.special = null;
+    game.state.music = null;
+    resetBuzz(game);
+    game.state.buzzedBy = player.name;
+    game.state.firstBuzzedBy = player.name;
+    game.state.buzzerOpen = false;
+    emit(game);
+    io.to(`game:${game.code}`).emit('buzzAccepted', { player: player.name, hostSelected: true });
+    if (typeof ack === 'function') ack({ ok:true, player:player.name });
+  });
   socket.on('revealQuestion', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; if(game.state.mode==='question'&&game.state.question){game.state.question.revealed=true;emit(game);} });
   socket.on('showSpecial', x => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.state.mode='special'; game.state.special={...x,revealed:false}; game.state.question=null; game.state.music=(x&&x.type==='Musik'&&x.spotifyUrl)?{id:String(x.spotifyUrl),playing:false,time:0,volume:100,updatedAt:Date.now()}:null; resetBuzz(game); emit(game); });
   socket.on('revealSpecial', payload => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; if(game.state.mode==='special'&&game.state.special){if(payload&&typeof payload==='object')game.state.special={...game.state.special,...payload};game.state.special.revealed=true;emit(game);} });

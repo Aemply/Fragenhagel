@@ -111,7 +111,9 @@
 
 <div class="panel"><h2>Spieler & Lobby</h2><div id="lobby" class="row"></div><div class="small" id="joinHint"></div><div class="row" style="margin-top:10px"><button class="btn bad" onclick="resetScores()">Punkte auf 0</button></div><div id="buzz" class="buzz" style="display:none"></div><div id="scores"></div></div>
 
-<div class="panel"><div class="row"><h2 style="flex:1">Fragentafel</h2><button class="btn" onclick="resetUsed()">♻️ Felder zurücksetzen</button></div><div id="board" class="grid"></div></div>
+<div class="panel"><div class="row"><h2 style="flex:1">Fragentafel</h2><button class="btn" onclick="resetUsed()">♻️ Felder zurücksetzen</button></div>
+<div id="turnPlayers" class="row" style="margin:10px 0 14px;align-items:center;gap:8px;flex-wrap:wrap"></div>
+<div id="board" class="grid"></div></div>
 
 <div class="panel"><h2>Sonderrunden</h2><div class="row">
 <button class="btn accent" onclick="pickSpecial('Face Morph')">🧑‍🤝‍🧑 Face Morph</button>
@@ -223,6 +225,7 @@ function newLobby(){
 const defaultCats=['YouTube-Titel','Back to School','Was bin ich?','Filme & Serien','Musik','Flaggen'];
 function mainCats(){const saved=Array.isArray(Q.__categories)?Q.__categories.filter(Boolean):[];return saved.length===defaultCats.length?saved:defaultCats.filter(c=>Array.isArray(Q[c]));}
 let cats=mainCats();
+let selectedTurnPlayer=null;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const img=u=>u?u+'?v='+Date.now():'';
 socket.on('state',s=>{
@@ -310,7 +313,24 @@ socket.on('errorMessage',m=>{
   createOrJoin();
 });
 function updateGameInfo(){const el=document.getElementById('gameInfo');if(el)el.textContent=gameCode?'SPIELCODE: '+gameCode:'Spiel wird erstellt …';const h=document.getElementById('joinHint');if(h&&gameCode)h.textContent='Freunde öffnen '+playerLink()+' und geben den Spielcode '+gameCode+' ein.'}
-function renderLobby(){const el=document.getElementById('lobby');if(!el)return;const ps=state.players||[];el.innerHTML=ps.length?ps.map(p=>`<span class="score"><strong>${esc(p.name)}</strong> ${p.connected?'🟢':'⚪'}</span>`).join(''):'<span class="small">Noch niemand beigetreten.</span>';updateGameInfo()}
+function renderLobby(){const el=document.getElementById('lobby');if(!el)return;const ps=state.players||[];el.innerHTML=ps.length?ps.map(p=>`<span class="score"><strong>${esc(p.name)}</strong> ${p.connected?'🟢':'⚪'}</span>`).join(''):'<span class="small">Noch niemand beigetreten.</span>';updateGameInfo();renderTurnPlayers()}
+function renderTurnPlayers(){
+ const el=document.getElementById('turnPlayers');
+ if(!el)return;
+ const ps=state.players||[];
+ if(!ps.length){el.innerHTML='<span class="small">Noch keine Spieler in der Lobby.</span>';return;}
+ el.innerHTML='<strong style="margin-right:4px">🎯 Spieler an der Reihe:</strong>'+ps.map(p=>{
+   const selected=String(selectedTurnPlayer||'')===String(p.name);
+   const disabled=!p.connected || !!state?.buzzedBy || state?.mode!=='board';
+   return `<button type="button" class="btn ${selected?'good':''}" data-turn-player="${esc(p.name)}" ${disabled?'disabled':''}>${selected?'✓ ':''}${esc(p.name)}${p.connected?'':' (offline)'}</button>`;
+ }).join('');
+}
+function selectTurnPlayer(name){
+ const p=(state.players||[]).find(x=>String(x.name)===String(name));
+ if(!p || !p.connected || state?.mode!=='board' || state?.buzzedBy)return;
+ selectedTurnPlayer=selectedTurnPlayer===p.name?null:p.name;
+ renderTurnPlayers();
+}
 
 socket.on('questionsUpdated',q=>{Q=q;renderAll();});
 async function load(){Q=await fetch('/api/questions?x='+Date.now(),{cache:'no-store',credentials:'same-origin'}).then(r=>r.json());renderAll();updateGameInfo();if(active)renderPlay();}
@@ -379,6 +399,14 @@ async function pts(p,a){
 }
 
 document.addEventListener('click',(event)=>{
+  const turnBtn=event.target.closest('#turnPlayers button[data-turn-player]');
+  if(turnBtn){
+    event.preventDefault();
+    event.stopPropagation();
+    selectTurnPlayer(turnBtn.dataset.turnPlayer);
+    return;
+  }
+
   const scoreBtn=event.target.closest('#scores button[data-score-player]');
   if(scoreBtn){
     event.preventDefault();
@@ -411,14 +439,34 @@ function resetScores(){socket.emit('resetScores')}function openBuzzer(){
  if(j)j.innerHTML='';
 }function closeBuzzer(){socket.emit('closeBuzzer')}
 function renderAll(){ cats=mainCats(); renderHostBuzz();
-renderBoard();renderMainEditor();renderFace();renderGeo();renderFH();renderMusic()}
+renderTurnPlayers();renderBoard();renderMainEditor();renderFace();renderGeo();renderFH();renderMusic()}
 async function resetUsed(){if(!confirm('Alle benutzten Felder wieder freigeben?'))return;await fetch('/api/reset-used',{method:'POST',headers:gameHeaders()});await load()}
 function renderBoard(){document.getElementById('board').innerHTML=cats.map(c=>`<div class="cat"><h3>${esc(c)}</h3>${(Q[c]||[]).map((x,i)=>`<button class="tile ${x.used?'used':''}" onclick="startQuestion('${c.replaceAll("'","\\'")}',${i})">${x.used?'✓':esc(x.punkte)}</button>`).join('')}</div>`).join('')}
 async function startQuestion(c,i){
  judgedPlayers={};
- const x=Q[c][i];if(x.used)return;x.used=true;renderBoard();fetch('/api/question-used',{method:'POST',headers:gameHeaders(),body:JSON.stringify({category:c,index:i,used:true})}).catch(()=>{});active={kind:'question',category:c,index:i,...x,revealed:false};socket.emit('showQuestion',{kategorie:c,punkte:x.punkte,frage:x.frage,antwort:x.antwort});showPlay()}
+ const x=Q[c][i];if(x.used)return;
+ const chosenPlayer=selectedTurnPlayer;
+ if(chosenPlayer){
+   const p=(state.players||[]).find(x=>String(x.name)===String(chosenPlayer));
+   if(!p || !p.connected){selectedTurnPlayer=null;renderTurnPlayers();return alert('Der ausgewählte Spieler ist nicht verbunden.');}
+ }
+ x.used=true;renderBoard();fetch('/api/question-used',{method:'POST',headers:gameHeaders(),body:JSON.stringify({category:c,index:i,used:true})}).catch(()=>{});
+ active={kind:'question',category:c,index:i,...x,revealed:false};
+ const payload={kategorie:c,punkte:x.punkte,frage:x.frage,antwort:x.antwort};
+ if(chosenPlayer){
+   socket.emit('showQuestionForPlayer',{...payload,player:chosenPlayer},(result)=>{
+     if(result && !result.ok){alert(result.error||'Spieler konnte nicht automatisch buzzen.');}
+   });
+ }else{
+   socket.emit('showQuestion',payload);
+ }
+ selectedTurnPlayer=null;
+ renderTurnPlayers();
+ showPlay()}
 function showPlay(){document.getElementById('play').classList.add('open');renderPlay()}
 function toBoard(){
+ selectedTurnPlayer=null;
+ renderTurnPlayers();
  judgedPlayers={};
  judgingLocked=false;
  if(active?.type==='Musik'&&musicPlayerReady&&musicPlayer){try{socket.emit('musicControl',{action:'pause',time:musicPlayer.getCurrentTime()});}catch(e){}}
