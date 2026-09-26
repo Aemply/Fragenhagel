@@ -512,15 +512,12 @@ function renderJudge(points){
  };
 
  if(active?.type==='Face Morph'){
-   const hasPreviousWrong=Array.isArray(state?.lockedPlayers) && state.lockedPlayers.length>0;
-   if(hasPreviousWrong){
-     addBtn('👤 '+String(p.name)+' +100','good',()=>faceMorphSecondCorrect(p.name));
-     addBtn('❌ Falsch – '+String(p.name),'bad',()=>faceMorphSecondWrong(p.name));
-   }else{
-     addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100));
-     addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
-     addBtn('❌ Falsch – '+String(p.name),'bad',()=>faceMorphWrong(p.name));
-   }
+   // Every eligible buzzer gets the same three choices. After +100
+   // or "Falsch", the server reopens the buzzer for the remaining
+   // players; +300 ends the round.
+   addBtn('👤 '+String(p.name)+' +100','good',()=>award(p.name,100));
+   addBtn('👥 '+String(p.name)+' +300','good',()=>award(p.name,300));
+   addBtn('❌ Falsch','bad',()=>faceMorphWrong(p.name));
  }else{
    addBtn('✅ Richtig – '+String(p.name),'good',()=>correct(p.name,val));
    addBtn('❌ Falsch – '+String(p.name),'bad',()=>wrong(p.name,val));
@@ -568,6 +565,15 @@ function wrong(p,v){
    },250);
  }
 }
+function faceMorphWrong(p){
+ if(judgedPlayers[String(p)])return;
+ lockPlayerButtons(p);
+ try{sWrong()}catch(e){}
+ socket.emit('faceMorphWrong',{player:String(p)},(result)=>{
+   if(result && result.ok===false) console.error('Falsch konnte nicht verarbeitet werden:',result.error);
+ });
+}
+
 function faceMorphSecondCorrect(p){
  if(judgedPlayers[String(p)])return;
  lockPlayerButtons(p);
@@ -578,17 +584,16 @@ function faceMorphSecondCorrect(p){
    catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
  },250);
 }
-function faceMorphWrong(p){
+function faceMorphSecondWrong(p){
  if(judgedPlayers[String(p)])return;
  lockPlayerButtons(p);
  try{sWrong()}catch(e){}
- // Falsch: keine Punkte ändern, Spieler für diese Runde sperren
- // und den Buzzer für die übrigen Spieler wieder freigeben.
+ // No points are deducted on this Face Morph "Falsch" result.
  socket.emit('wrong',{player:String(p),points:0});
-}
-
-function faceMorphSecondWrong(p){
- return faceMorphWrong(p);
+ setTimeout(()=>{
+   try{ if(typeof reveal === 'function') reveal(); }
+   catch(e){ console.error('Automatisches Anzeigen der Lösung fehlgeschlagen:',e); }
+ },250);
 }
 function award(p,v){
  if(judgedPlayers[String(p)])return;

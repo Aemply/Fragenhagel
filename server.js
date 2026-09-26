@@ -587,9 +587,8 @@ io.on('connection', socket => {
     if(!game||!socket.data.host)return;
     const p=game.players.find(x=>x.name===player);
     if(!p)return;
-    // A "Falsch" answer does not change the player's score.
-    // It only locks this player for the current round/question and
-    // reopens the buzzer for the remaining players.
+    const n=Number(points)||0;
+    p.score-=n;
     io.to(`game:${game.code}`).emit('gameSound', { type: 'wrong' });
 
     // The player who had the first buzzer is locked out for the rest of this question.
@@ -610,12 +609,35 @@ io.on('connection', socket => {
     p.score+=n;
     io.to(`game:${game.code}`).emit('gameSound', { type: 'wrong' });
 
-    // For Face Morph +100 the answer counts as wrong:
-    // keep the points, lock this player out, and reopen the buzzer for everyone else.
+    // Face Morph +100: award the points, lock this player for the
+    // current round, and reopen the buzzer for all other eligible players.
     if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
     game.state.buzzedBy=null;
     game.state.buzzerOpen=true;
     emit(game);
+  });
+
+  socket.on('faceMorphWrong', ({ player }, ack) => {
+    const game=games.get(socket.data.code);
+    if(!game || !socket.data.host){
+      if(typeof ack==='function') ack({ok:false,error:'Host-Berechtigung fehlt'});
+      return;
+    }
+    const p=game.players.find(x=>x.name===player);
+    if(!p){
+      if(typeof ack==='function') ack({ok:false,error:'Spieler nicht gefunden'});
+      return;
+    }
+
+    // "Falsch" never changes the score. It only locks the current
+    // player for this round and gives the remaining eligible players
+    // another chance to buzz.
+    if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
+    io.to(`game:${game.code}`).emit('gameSound', { type: 'wrong' });
+    game.state.buzzedBy=null;
+    game.state.buzzerOpen=true;
+    emit(game);
+    if(typeof ack==='function') ack({ok:true});
   });
 
   socket.on('correct', ({ player, points }) => {
