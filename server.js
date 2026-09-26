@@ -352,21 +352,6 @@ function hostAuthorized(req) {
   return game && hostToken && game.hostToken === hostToken ? game : null;
 }
 
-// Manuelle Punktevergabe über HTTP. Dadurch hängt +100/-100 nicht davon ab,
-// ob der aktuelle Socket nach einem Reconnect noch als Host markiert ist.
-app.post('/api/player-score', (req, res) => {
-  const game = hostAuthorized(req);
-  if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
-  const playerName = String(req.body?.player || '');
-  const amount = Number(req.body?.amount);
-  if (!playerName || !Number.isFinite(amount)) return res.status(400).json({ ok: false, error: 'Ungültige Punkteangabe' });
-  const player = game.players.find(p => p.name === playerName);
-  if (!player) return res.status(404).json({ ok: false, error: 'Spieler nicht gefunden' });
-  player.score = Number(player.score || 0) + amount;
-  emit(game);
-  res.json({ ok: true, player: player.name, score: player.score });
-});
-
 // Editor-Zugriff darf nicht an die flüchtige Lobby im RAM gebunden sein.
 // Nach einem Render-Neustart existiert die Lobby-Map nicht mehr, während
 // die dauerhaft gespeicherten Quizdaten in GitHub weiter vorhanden sind.
@@ -629,7 +614,17 @@ io.on('connection', socket => {
     resetBuzz(game, true);
     emit(game);
   });
-  socket.on('addPoints', ({ player, amount }) => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; const p=game.players.find(x=>x.name===player); if(!p)return;p.score+=Number(amount)||0;emit(game); });
+  socket.on('addPoints', ({ player, amount }, ack) => {
+    const game=games.get(socket.data.code);
+    if(!game || !socket.data.host){ if(typeof ack==='function') ack({ok:false,error:'Host-Berechtigung fehlt'}); return; }
+    const p=game.players.find(x=>x.name===player);
+    if(!p){ if(typeof ack==='function') ack({ok:false,error:'Spieler nicht gefunden'}); return; }
+    const n=Number(amount);
+    if(!Number.isFinite(n)){ if(typeof ack==='function') ack({ok:false,error:'Ungültige Punkte'}); return; }
+    p.score+=n;
+    emit(game);
+    if(typeof ack==='function') ack({ok:true,player:p.name,score:p.score});
+  });
   socket.on('setScore', ({ player, value }) => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; const p=game.players.find(x=>x.name===player); if(!p)return;p.score=Number(value)||0;emit(game); });
   socket.on('resetScores', () => { const game=games.get(socket.data.code); if(!game||!socket.data.host)return; game.players.forEach(p=>p.score=0);emit(game); });
 

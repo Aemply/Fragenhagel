@@ -347,12 +347,29 @@ function renderBuzz(){
    if(hb){hb.style.display='none';hb.textContent='';}
  }
 }
-async function pts(p,a){
- try{
-   const r=await fetch('/api/player-score',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({player:p,amount:a})});
-   const result=await r.json().catch(()=>({}));
-   if(!r.ok) alert(result.error||'Punkte konnten nicht geändert werden.');
- }catch(e){ alert('Punkte konnten nicht geändert werden.'); }
+function pts(p,a){
+  let finished=false;
+  const done=(ok,error)=>{
+    if(finished)return;
+    finished=true;
+    if(!ok) alert(error||'Punkte konnten nicht geändert werden.');
+  };
+  try{
+    socket.emit('addPoints',{player:p,amount:a},result=>{
+      if(result?.ok) done(true); else done(false,result?.error);
+    });
+    setTimeout(()=>{
+      if(finished)return;
+      fetch('/api/player-score',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({player:p,amount:a})})
+        .then(async r=>({ok:r.ok,data:await r.json().catch(()=>({}))}))
+        .then(x=>done(x.ok,x.data?.error))
+        .catch(()=>done(false,'Punkte konnten nicht geändert werden.'));
+    },500);
+  }catch(e){
+    fetch('/api/player-score',{method:'POST',credentials:'same-origin',headers:gameHeaders(),body:JSON.stringify({player:p,amount:a})})
+      .then(async r=>({ok:r.ok,data:await r.json().catch(()=>({}))}))
+      .then(x=>done(x.ok,x.data?.error)).catch(()=>done(false,'Punkte konnten nicht geändert werden.'));
+  }
 }function resetScores(){socket.emit('resetScores')}function openBuzzer(){
  socket.emit('openBuzzer');
  state.buzzedBy=null;
@@ -733,9 +750,7 @@ async function uploadImg(section,index,field,input){
 }
 
 function yt(url){let s=String(url||'');let m=s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,})/);return m?m[1]:''}
-socket.on('connect',()=>{
-  if(gameCode&&hostToken) socket.emit('hostJoin',{code:gameCode,hostToken});
-});
+socket.on('connect',()=>{if(gameCode&&hostToken) socket.emit('hostJoin',{code:gameCode,hostToken});});
 ensureEditorSession();load();createOrJoin();
 </script>
 
