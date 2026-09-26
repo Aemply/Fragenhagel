@@ -12,17 +12,18 @@ function tone(freq,dur=.12,type='sine',vol=.08,delay=0){if(!soundOn)return;try{c
 function sBuzz(){tone(180,.09,'square',.10);tone(120,.16,'square',.08,.08)}function sOpen(){tone(520,.09,'sine',.07);tone(760,.13,'sine',.07,.09)}
 function toggleSound(){soundOn=!soundOn;localStorage.setItem('fragenhagelSound',soundOn?'on':'off');document.getElementById('soundToggle').textContent=soundOn?'🔊':'🔇';if(soundOn)sOpen()}
 document.addEventListener('pointerdown',()=>{if(soundOn)ac()},{once:true});
-const socket=io();let code=new URLSearchParams(location.search).get('code')||'';let name=new URLSearchParams(location.search).get('name')||localStorage.getItem('fragenhagelPlayerName')||'';let prev={buzzerOpen:false,buzzedBy:null};
+const socket=io();let code=new URLSearchParams(location.search).get('code')||'';let name=new URLSearchParams(location.search).get('name')||localStorage.getItem('fragenhagelPlayerName')||'';let playerId=localStorage.getItem('fragenhagelPlayerId')||'';let prev={buzzerOpen:false,buzzedBy:null};
 if(code)document.getElementById('code').value=code;if(name)document.getElementById('playerName').value=name;
 function joinGame(){code=document.getElementById('code').value.trim().toUpperCase();name=document.getElementById('playerName').value.trim();if(!code||!name)return document.getElementById('joinStatus').textContent='Bitte Spielcode und Namen eingeben.';socket.emit('joinGame',{code,name})}
-socket.on('joined',x=>{code=x.code;name=x.name;localStorage.setItem('fragenhagelPlayerCode',code);localStorage.setItem('fragenhagelPlayerName',name);const u=new URL(location.href);u.searchParams.set('code',code);u.searchParams.delete('name');history.replaceState(null,'',u.pathname+u.search+u.hash);document.getElementById('join').classList.add('hidden');document.getElementById('game').classList.remove('hidden');document.getElementById('name').textContent=name;document.getElementById('gameCode').textContent='Spielcode: '+code});
+socket.on('joined',x=>{code=x.code;name=x.name;playerId=x.playerId||playerId;localStorage.setItem('fragenhagelPlayerCode',code);localStorage.setItem('fragenhagelPlayerName',name);if(playerId)localStorage.setItem('fragenhagelPlayerId',playerId);const u=new URL(location.href);u.searchParams.set('code',code);u.searchParams.delete('name');history.replaceState(null,'',u.pathname+u.search+u.hash);document.getElementById('join').classList.add('hidden');document.getElementById('game').classList.remove('hidden');document.getElementById('name').textContent=name;document.getElementById('gameCode').textContent='Spielcode: '+code});
 socket.on('joinError',m=>document.getElementById('joinStatus').textContent=m);
 socket.on('playerKicked',x=>{
   alert(x?.message || 'Du wurdest vom Host aus der Lobby entfernt.');
   localStorage.removeItem('fragenhagelPlayerCode');
   localStorage.removeItem('fragenhagelPlayerName');
+  localStorage.removeItem('fragenhagelPlayerId');
   location.href='player.html';
 });
-socket.on('state',x=>{if(!name)return;if(x.buzzerOpen&&!prev.buzzerOpen)sOpen();if(x.buzzedBy&&x.buzzedBy!==prev.buzzedBy)sBuzz();prev={buzzerOpen:!!x.buzzerOpen,buzzedBy:x.buzzedBy||null};let mine=x.buzzedBy===name;let open=x.buzzerOpen&&!x.buzzedBy;document.getElementById('b').disabled=!open;document.getElementById('s').textContent=mine?'⚡ DU WARST SCHNELLSTER!':x.buzzedBy?x.buzzedBy+' hat gebuzzert':open?'🟢 Buzzer offen':'🔴 Buzzer geschlossen'});
+socket.on('state',x=>{if(!name)return;if(x.buzzerOpen&&!prev.buzzerOpen)sOpen();if(x.buzzedBy&&x.buzzedBy!==prev.buzzedBy)sBuzz();prev={buzzerOpen:!!x.buzzerOpen,buzzedBy:x.buzzedBy||null};let mine=x.buzzedBy===name;let locked=Array.isArray(x.lockedPlayers)&&playerId&&x.lockedPlayers.includes(playerId);let open=x.buzzerOpen&&!x.buzzedBy&&!locked;document.getElementById('b').disabled=!open;document.getElementById('s').textContent=locked?'⛔ Du bist für diese Runde gesperrt':mine?'⚡ DU WARST SCHNELLSTER!':x.buzzedBy?x.buzzedBy+' hat gebuzzert':open?'🟢 Buzzer offen':'🔴 Buzzer geschlossen'});
 document.getElementById('b').onclick=()=>socket.emit('buzz');
 </script></body></html>

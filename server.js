@@ -334,7 +334,7 @@ function newGame() {
     players: [],
     state: {
       mode: 'board', question: null, special: null,
-      buzzerOpen: false, buzzedBy: null, firstBuzzedBy: null, lockedPlayers: [], faceMorphLastPartial: false, music: null
+      buzzerOpen: false, buzzedBy: null, firstBuzzedBy: null, lockedPlayers: [], faceMorphPlus100Count: 0, music: null
     }
   };
   games.set(code, game);
@@ -344,7 +344,7 @@ function gameState(game) {
   return { code: game.code, players: game.players.map(({ id, name, score, connected }) => ({ id, name, score, connected })), ...game.state };
 }
 function emit(game) { io.to(`game:${game.code}`).emit('state', gameState(game)); }
-function resetBuzz(game, clearFirst = true) { game.state.buzzerOpen = false; game.state.buzzedBy = null; game.state.lockedPlayers = []; game.state.faceMorphLastPartial = false; if (clearFirst) game.state.firstBuzzedBy = null; }
+function resetBuzz(game, clearFirst = true) { game.state.buzzerOpen = false; game.state.buzzedBy = null; game.state.lockedPlayers = []; game.state.faceMorphPlus100Count = 0; if (clearFirst) game.state.firstBuzzedBy = null; }
 function hostAuthorized(req) {
   const code = String(req.headers['x-game-code'] || '').toUpperCase();
   const hostToken = String(req.headers['x-host-token'] || '');
@@ -539,7 +539,7 @@ io.on('connection', socket => {
       game.players.push(player);
     } else player.connected = true;
     socket.join(`game:${game.code}`); socket.data.code = game.code; socket.data.playerId = player.id; socket.data.playerName = player.name;
-    socket.emit('joined', { code: game.code, name: player.name }); emit(game);
+    socket.emit('joined', { code: game.code, name: player.name, playerId: player.id }); emit(game);
   });
   socket.on('requestState', () => { const game = games.get(socket.data.code); if (game) socket.emit('state', gameState(game)); });
 
@@ -595,8 +595,7 @@ io.on('connection', socket => {
     if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
 
     // Hide the current buzzer indication and reopen the buzzer for everyone else.
-    // For Face Morph, a plain "Falsch" keeps +300 available to the next player.
-    if(game.state.special?.type === 'Face Morph') game.state.faceMorphLastPartial=false;
+    // firstBuzzedBy stays untouched so the original first buzzer remains excluded.
     game.state.buzzedBy=null;
     game.state.buzzerOpen=true;
     emit(game);
@@ -606,14 +605,43 @@ io.on('connection', socket => {
     if(!game||!socket.data.host)return;
     const p=game.players.find(x=>x.name===player);
     if(!p)return;
-    const n=Number(points)||100;
+
+    // +100 may be awarded at most twice during one Face-Morph round.
+    // The second +100 ends the round automatically.
+    const count=Number(game.state.faceMorphPlus100Count)||0;
+    if(count>=2)return;
+
+    const n=100;
     p.score+=n;
+    game.state.faceMorphPlus100Count=count+1;
     io.to(`game:${game.code}`).emit('gameSound', { type: 'wrong' });
 
-    // Face Morph +100: keep the points, lock this player out, and reopen the buzzer.
-    // The next player may only receive +100 or Falsch until somebody is marked Falsch.
     if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
-    game.state.faceMorphLastPartial=true;
+
+    if(game.state.faceMorphPlus100Count>=2){
+      // Second +100: score is awarded, then the Face-Morph round is over.
+      // Reset the buzzer-round locks/count and show the solution.
+      if(game.state.special?.type==='Face Morph') game.state.special.revealed=true;
+      resetBuzz(game, true);
+      emit(game);
+    }else{
+      // First +100: keep the points, lock this player out, and reopen the buzzer.
+      game.state.buzzedBy=null;
+      game.state.buzzerOpen=true;
+      emit(game);
+    }
+  });
+
+  socket.on('faceMorphWrong', ({ player }) => {
+    const game=games.get(socket.data.code);
+    if(!game||!socket.data.host)return;
+    const p=game.players.find(x=>x.name===player);
+    if(!p)return;
+
+    // Face Morph "Falsch" never removes points. It only locks the player
+    // for the current round and gives the buzzer to the remaining players.
+    if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
+    io.to(`game:${game.code}`).emit('gameSound', { type: 'wrong' });
     game.state.buzzedBy=null;
     game.state.buzzerOpen=true;
     emit(game);
