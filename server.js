@@ -438,49 +438,9 @@ app.post('/api/reset-used', async (req, res) => {
     const game = hostAuthorized(req);
     if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
     const q = readQ();
-    // Nicht mehr auf feste Kategorienamen verlassen: Kategorien können im Editor
-    // umbenannt werden. Deshalb alle Hauptbrett-Kategorien zurücksetzen.
-    // Sonderrunden bleiben bewusst unangetastet.
-    const mainCategories = Array.isArray(q.__categories) && q.__categories.length
-      ? q.__categories
-      : Object.keys(q).filter(c => c !== 'Sonderrunden' && Array.isArray(q[c]));
-    for (const c of mainCategories) {
-      if (Array.isArray(q[c])) q[c].forEach(x => { if (x && typeof x === 'object') x.used = false; });
-    }
+    for (const c of ['YouTube-Titel', 'Back to School', 'Was bin ich?', 'Filme & Serien', 'Musik', 'Flaggen']) if (Array.isArray(q[c])) q[c].forEach(x => x.used = false);
     await persistQuestions(q, 'Fragenhagel: Felder zurücksetzen'); io.to(`game:${game.code}`).emit('questionsUpdated', q); res.json({ ok: true, persistent: githubEnabled() });
   } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
-});
-app.post('/api/kick-player', (req, res) => {
-  try {
-    const game = hostAuthorized(req);
-    if (!game) return res.status(403).json({ ok: false, error: 'Host-Berechtigung fehlt' });
-    const playerId = String(req.body?.playerId || '');
-    if (!playerId) return res.status(400).json({ ok: false, error: 'Spieler fehlt' });
-    const index = game.players.findIndex(p => p.id === playerId);
-    if (index < 0) return res.status(404).json({ ok: false, error: 'Spieler nicht gefunden' });
-    const [player] = game.players.splice(index, 1);
-
-    // Falls der Spieler gerade gebuzzert hat, wird der Buzzer sauber für die
-    // übrigen Spieler freigegeben, damit das Spiel nicht hängen bleibt.
-    if (game.state.buzzedBy === player.name) {
-      game.state.buzzedBy = null;
-      game.state.buzzerOpen = true;
-    }
-    if (game.state.firstBuzzedBy === player.name) game.state.firstBuzzedBy = null;
-    game.state.lockedPlayers = (game.state.lockedPlayers || []).filter(id => id !== player.id);
-
-    // Die zugehörige Player-Socket-Verbindung wird sofort getrennt.
-    for (const s of io.sockets.sockets.values()) {
-      if (s.data?.code === game.code && s.data?.playerId === player.id) {
-        s.emit('kicked', { reason: 'Du wurdest vom Host aus dem Spiel gekickt.' });
-        s.disconnect(true);
-      }
-    }
-    emit(game);
-    res.json({ ok: true, player: player.name });
-  } catch (e) {
-    res.status(400).json({ ok: false, error: e.message });
-  }
 });
 app.post('/api/player-score', (req, res) => {
   try {
@@ -652,21 +612,6 @@ io.on('connection', socket => {
     if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
     game.state.buzzedBy=null;
     game.state.buzzerOpen=true;
-    emit(game);
-  });
-
-  socket.on('faceMorphWrong', ({ player }) => {
-    const game=games.get(socket.data.code);
-    if(!game||!socket.data.host)return;
-    const p=game.players.find(x=>x.name===player);
-    if(!p)return;
-
-    // Face Morph: "Falsch" gives no points and deducts no points.
-    // The player is locked for the current question and the buzzer reopens for everyone else.
-    if(!game.state.lockedPlayers.includes(p.id)) game.state.lockedPlayers.push(p.id);
-    game.state.buzzedBy=null;
-    game.state.buzzerOpen=true;
-    io.to(`game:${game.code}`).emit('gameSound', { type: 'wrong' });
     emit(game);
   });
 
